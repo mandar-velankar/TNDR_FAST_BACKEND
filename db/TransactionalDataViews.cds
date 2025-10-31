@@ -2429,6 +2429,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             AttentionTo: String;
             QuotationDate: Date;
             InternalBidDueDate     : Date;
+            COUNTRY_REGION         : String;
             Tender_Custom_Integer_1: Integer;
             Tender_Custom_Integer_2: Integer;
             Tender_Custom_Integer_3: Integer;
