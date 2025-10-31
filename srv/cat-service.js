@@ -2636,7 +2636,8 @@ module.exports = (srv) => {
             ContractLenghtUnit: tender.Custom_String_5,
 			AttentionTo: quotation?.Custom_String_6,
             QuotationDate: quotation?.Custom_Date_3,
-			TenderChannel: offer.TENDER_CHANNEL
+			TenderChannel: offer.TENDER_CHANNEL,
+			COUNTRY_REGION: offer.Region
 		};
 		return results;
 		
