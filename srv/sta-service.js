@@ -3973,6 +3973,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             NLHospitalManagerContactNumber : NLHospitalManagerContactNumber,
 			TotalPNM_Value				: totalPnmValue,
 			COUNTRY_NAME: offer.COUNTRY_NAME.replace(/Hematology|Consumer Health/g, "").trim(),
+			COUNTRY_REGION: offer.Region
 		};
 		return results;
 	
