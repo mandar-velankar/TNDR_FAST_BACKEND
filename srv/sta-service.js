@@ -6891,6 +6891,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		newTender.TenderID = newTenderInformation.newTenderID;
 		newTender.TenderNo = newTenderInformation.newTenderNo
 		newTender.SubmittedOn = todaysDate;
+		newTender.FoldersCreated = null;
 
 		// mapping new offers
 		const newOffers = offers.map(offer => {
@@ -6904,6 +6905,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			newOffer.NewOfferDueDate = todaysDate;	
 			newOffer.TenderOfferNo = NEW_OFFER_ID.newTenderOfferNo;
 			newOffer.SubmittedOn = todaysDate;
+			newOffer.APPROVALS_SENT = 0;
 
 			return newOffer;
 		});
@@ -6930,6 +6932,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			newOfferProduct.OfferID = NEW_OFFER_ID.newOfferID;
 			newOfferProduct.SubmittedOn = todaysDate;
 			newOfferProduct.Active = 1;
+			newOfferProduct.SUPPLY_UPDATE = 0;
+			newOfferProduct.PAYMENT_UPDATE = 0;
+			newOfferProduct.VOLUME_UOM_UPDATE = 0;
 
 			return newOfferProduct;
 		});
@@ -6942,6 +6947,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			newProductPricing.TenderID = newTenderInformation.newTenderID;
 			newProductPricing.OfferID = NEW_OFFER_ID.newOfferID;
 			newProductPricing.SubmittedOn = todaysDate;
+			newProductPricing.PRICE_UPDATE = 0;
 
 			return newProductPricing;
 		});
