@@ -1647,6 +1647,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PriceConditionRentalView                     as projection on TransactionalDataViews.StandardTenderPriceConditionView;
 
     entity FastConditionContractsView as select from TransactionalData.PT_TMTEND as tender
+        inner join AdminData.PT_TMUSER as USR
+            on tender.SubmittedBy = USR.CWID
         inner join TransactionalData.PT_TMOFRS as offer 
             on offer.TenderID = tender.TenderID
             and offer.Active = 1
@@ -1667,6 +1669,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         offer.DistributorID,
         institute.CustomerID,
         tender.SubmittedBy as Owner:String,
+        USR.UserName as OwnerName:String,
+        USR.UserEmail as OwnerEmail:String,
         tender.TenderName as Reference:String,
         tender.Classification as ContractType:String,
         tender.SAPID,
