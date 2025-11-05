@@ -1384,14 +1384,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             on os.OFFER_ID = o.OfferID {
         o.OfferID,
         o.CountryCode,
-        a.ApprovalStatus,
         max(a.Statustime) as STATUSTIME: DateTime,
-        a.ApproverType,
-        a.REQUIRED_ACTION,
 
         count( distinct case
             when a.ApprovalStatus in ('Processing','Waiting') 
-            and a.REQUIRED_ACTION = 'Approval' 
             then a.ApproverType 
         end ) as PendingApproverTypes: Integer,
 
@@ -1412,18 +1408,12 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         and os.STATUS = 'Awaiting Approval'
     group by 
         o.OfferID,
-        o.CountryCode,
-        a.ApprovalStatus,
-        a.ApproverType,
-        a.REQUIRED_ACTION;
+        o.CountryCode;
 
     entity PolandOffersWithOnlyTMPending as select from PolandPendingTMApprovals {
         OfferID,
         CountryCode,
-        ApprovalStatus,
-        STATUSTIME,
-        ApproverType,
-        REQUIRED_ACTION
+        STATUSTIME
     }
     where 
         PendingApproverTypes = 1
