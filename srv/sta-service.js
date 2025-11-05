@@ -4274,6 +4274,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
 		let instituteTerritory = await tx.run(SELECT.one.from(InstituteTerritory).where(whereInstituteId));
 		let userInfo = await tx.run(SELECT.one.from(PT_TMUSER).where({CWID: tx?.context?.req?.user?.id}));
+		let tender = await tx.run(SELECT.one.from(PT_TMTEND).where({TenderID: offer.TENDERID}));
 
 		//where statement
 		let whereApproverType = {
@@ -4366,7 +4367,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }));
 				}
 				productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
-				productCondition.NLPriceConditions = await tx.run(SELECT.from(NLPriceConditions).where({ PriceCondition_ID: productCondition.ID}));
+				productCondition.NLPriceConditions = await tx.run(SELECT.from(NLPriceConditions).where({ PriceCondition_ID: productCondition.ID, ContractDuration: {in: [tender.Custom_Integer_1, tender.Custom_Integer_2, tender.Custom_Integer_3]}}));
 				return productCondition;		
 			}));
 			/*end of ProductCondition information */
@@ -8124,6 +8125,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		newTender.TenderID = newTenderInformation.newTenderID;
 		newTender.TenderNo = newTenderInformation.newTenderNo
 		newTender.SubmittedOn = todaysDate;
+		newTender.FoldersCreated = null;
 
 		// mapping new offers
 		const newOffers = offers.map(offer => {
@@ -8137,6 +8139,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			newOffer.NewOfferDueDate = todaysDate;	
 			newOffer.TenderOfferNo = NEW_OFFER_ID.newTenderOfferNo;
 			newOffer.SubmittedOn = todaysDate;
+			newOffer.APPROVALS_SENT = 0;
 
 			return newOffer;
 		});
@@ -8163,6 +8166,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			newOfferProduct.OfferID = NEW_OFFER_ID.newOfferID;
 			newOfferProduct.SubmittedOn = todaysDate;
 			newOfferProduct.Active = 1;
+			newOfferProduct.SUPPLY_UPDATE = 0;
+			newOfferProduct.PAYMENT_UPDATE = 0;
+			newOfferProduct.VOLUME_UOM_UPDATE = 0;
 
 			return newOfferProduct;
 		});
@@ -8175,6 +8181,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			newProductPricing.TenderID = newTenderInformation.newTenderID;
 			newProductPricing.OfferID = NEW_OFFER_ID.newOfferID;
 			newProductPricing.SubmittedOn = todaysDate;
+			newProductPricing.PRICE_UPDATE = 0;
 
 			return newProductPricing;
 		});
