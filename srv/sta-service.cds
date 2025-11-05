@@ -1376,4 +1376,58 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         inst.InstituteType,
         cd.ProductPackID,
         cd.BrandId;
+
+    entity PolandPendingTMApprovals as select from TransactionalData.PT_TMOFRS as o
+        inner join TransactionalData.PT_TMAPPRST as a
+            on o.OfferID = a.OfferId
+        inner join TransactionalDataViews.OfferStatus as os
+            on os.OFFER_ID = o.OfferID {
+        o.OfferID,
+        o.CountryCode,
+        a.ApprovalStatus,
+        max(a.Statustime) as STATUSTIME: DateTime,
+        a.ApproverType,
+        a.REQUIRED_ACTION,
+
+        count( distinct case
+            when a.ApprovalStatus in ('Processing','Waiting') 
+            and a.REQUIRED_ACTION = 'Approval' 
+            then a.ApproverType 
+        end ) as PendingApproverTypes: Integer,
+
+        max( case
+            when a.ApprovalStatus in ('Processing','Waiting') 
+            and a.REQUIRED_ACTION = 'Approval' 
+            then a.ApproverType 
+        end ) as PendingApproverType: String,
+
+        sum( case
+            when a.ApprovalStatus in ('Processing','Waiting') 
+            and a.REQUIRED_ACTION = 'Approval' 
+            and a.ApproverType = 'TM' 
+            then 1 else 0 end ) as PendingTMCount: Integer
+    }
+    where 
+        o.CountryCode = 'PL'
+        and os.STATUS = 'Awaiting Approval'
+    group by 
+        o.OfferID,
+        o.CountryCode,
+        a.ApprovalStatus,
+        a.ApproverType,
+        a.REQUIRED_ACTION;
+
+    entity PolandOffersWithOnlyTMPending as select from PolandPendingTMApprovals {
+        OfferID,
+        CountryCode,
+        ApprovalStatus,
+        STATUSTIME,
+        ApproverType,
+        REQUIRED_ACTION
+    }
+    where 
+        PendingApproverTypes = 1
+        and PendingApproverType = 'TM'
+        and PendingTMCount > 0
+    order by OfferID desc;
 }
