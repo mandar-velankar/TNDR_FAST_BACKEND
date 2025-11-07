@@ -681,7 +681,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Currency,
         Price3 as NetPrice,
         Level3Discount1 as Deductions,
-        NetOfferPrice
+        NetOfferPrice,
+        PricingPolicyValue
     };
     entity PriceConditionDiscountView as projection on TransactionalDataViews.StandardTenderPriceConditionView{
         CountryCode,
@@ -705,7 +706,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Currency,
         Price3 as NetPrice,
         Level3Discount1 as Deductions,
-        NetOfferPrice
+        NetOfferPrice,
+        PricingPolicyValue
     };
     entity PriceConditionTaiwanPriceView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
     entity PriceConditionTaiwanDiscountView as projection on TransactionalDataViews.StandardTenderPriceConditionView;
@@ -733,7 +735,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             Currency,
             Price3 as NetPrice,
             Level3Discount1 as Deductions,
-            NetPrice as NetOfferPrice
+            NetPrice as NetOfferPrice,
+            PricingPolicyValue
     }where ConditionType = 'PriceWithFOC';
 
     entity PriceConditionDiscountWithFOCView as projection on TransactionalDataViews.StandardTenderPriceConditionView {
@@ -758,7 +761,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             Currency,
             Price3 as NetPrice,
             Level3Discount1 as Deductions,
-            NetPrice as NetOfferPrice
+            NetPrice as NetOfferPrice,
+            PricingPolicyValue
     };
 
     entity PriceConditionClassification as select from TransactionalData.PriceConditionClassification;
