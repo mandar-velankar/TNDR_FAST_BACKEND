@@ -854,6 +854,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         result.UoM,
         result.Reason,
         result.Comment,
+        result.Appeal,
         product.Active,
         key result.LotID,
         freegoods.FreeGoodsOther,
