@@ -149,7 +149,8 @@ module.exports = async (srv) => {
 		ZagisUploadFile,
 		ExtractNLHistoricalInformation,
 		NLExtractOffers,
-		SalesReportsView
+		SalesReportsView,
+		PolandOffersWithOnlyTMPending
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -518,9 +519,13 @@ module.exports = async (srv) => {
         }
 		let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode') || []; 
 		let instituteID =  req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'InstituteID');
+		let offerStatus =  req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'STATUS');
+		let isStatusAwaitingTMApproval = offerStatus?.toLowerCase()?.split(" ")?.join("")?.trim() === "awaitingtmapproval";
 		
 		// Deleting Institute filter in order to create custom filter logic
 		instituteID && ServiceHelper.deleteFilter(req, "InstituteID");
+		// Filter to show offers with only pending TM approval from the Awaiting Approval list.
+		countryCode?.[0] === 'PL' && isStatusAwaitingTMApproval && ServiceHelper.setWhereValue(req, "STATUS", "Awaiting Approval");
 
         req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
         //req.query.SELECT.limit && countryCode[0] !== 'TW' && (tmvQuery.limit(req.query.SELECT.limit));
@@ -598,6 +603,19 @@ module.exports = async (srv) => {
 		const cwid = req.user.id;
 		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
 		const instituteTerritory = await SELECT.from(InstituteTerritory);
+
+		if (
+			Array.isArray(countryCode) && 
+			countryCode.length > 0 && countryCode[0] === 'PL' && 
+			isStatusAwaitingTMApproval
+		) {
+			const polandOnlyTMApprTypePendingOffers = await SELECT.from(PolandOffersWithOnlyTMPending);
+			result = result.filter(item => {
+				const polandOnlyTMApprTypePendingOfferIndex = polandOnlyTMApprTypePendingOffers.findIndex(el => el.OfferID === item.OfferID);
+				return polandOnlyTMApprTypePendingOfferIndex >= 0;
+			})
+
+		}
 
 		// Taiwan doesn't have standart limit method tmvQuery.limit(req.query.SELECT.limit); instead of that returning empty array if offset and result lengts are same
 		if (
@@ -6891,6 +6909,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		newTender.TenderID = newTenderInformation.newTenderID;
 		newTender.TenderNo = newTenderInformation.newTenderNo
 		newTender.SubmittedOn = todaysDate;
+		newTender.FoldersCreated = null;
 
 		// mapping new offers
 		const newOffers = offers.map(offer => {
@@ -6904,6 +6923,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			newOffer.NewOfferDueDate = todaysDate;	
 			newOffer.TenderOfferNo = NEW_OFFER_ID.newTenderOfferNo;
 			newOffer.SubmittedOn = todaysDate;
+			newOffer.APPROVALS_SENT = 0;
 
 			return newOffer;
 		});
@@ -6930,6 +6950,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			newOfferProduct.OfferID = NEW_OFFER_ID.newOfferID;
 			newOfferProduct.SubmittedOn = todaysDate;
 			newOfferProduct.Active = 1;
+			newOfferProduct.SUPPLY_UPDATE = 0;
+			newOfferProduct.PAYMENT_UPDATE = 0;
+			newOfferProduct.VOLUME_UOM_UPDATE = 0;
 
 			return newOfferProduct;
 		});
@@ -6942,6 +6965,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			newProductPricing.TenderID = newTenderInformation.newTenderID;
 			newProductPricing.OfferID = NEW_OFFER_ID.newOfferID;
 			newProductPricing.SubmittedOn = todaysDate;
+			newProductPricing.PRICE_UPDATE = 0;
 
 			return newProductPricing;
 		});
