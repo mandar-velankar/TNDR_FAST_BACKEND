@@ -1504,43 +1504,12 @@ module.exports = async (srv) => {
 		if (data?.[0]?.CountryCode === "ES") {
 			if (Array.isArray(data) && data.every(el => el.ContractStartDate && el.ContractEndDate)) return data;
 
-			const tender = await SELECT.one.from(PT_TMTEND).where({TenderID: data?.[0]?.TenderID});
-			const priceConditions = await SELECT.from(PriceCondition).columns("*", "PriceConditionClassification.isMain").where({OfferID: data?.[0]?.OfferID});
+			const qutoation = await SELECT.one.from(PT_TMQUTO).where({OfferID: data?.[0]?.OfferID});
 
-
-			const productPackIds = data.map(item => item.ProductCode);
-
-			if (productPackIds.length > 0 && tender.InstituteID) {
-				const existingContract = await ConditionContract.run(
-					SELECT.one.from(ExistingContractInvoicePrices)
-					.where({
-						ProductCode: {in: productPackIds}, 
-						InstituteID: tender.InstituteID
-					})
-					.orderBy({ ConditionValidityEndDate: "desc" }));
-
-				const priceCondition = priceConditions.find(pc => pc.ProductCode == existingContract?.ProductCode && !!pc.isMain);
-
-				if (existingContract && priceCondition) {
-					data.forEach(item => {
-						if (existingContract.ContractType === "Tender" && 
-							(
-								tender.Classification === "Tender" ||
-								(
-									parseFloat(priceCondition.NetPriceWithoutTaxBeforeDeductionRD) !== parseFloat(existingContract.YP10) ||
-									parseFloat(priceCondition.NetPriceWithoutTaxAfterDeductionRD) !== parseFloat(existingContract.NetPriceWithoutTaxAfterDeductionRD) ||
-									parseFloat(priceCondition.NetPriceWithTaxAfterDeductionRD) !== parseFloat(existingContract.NetPriceWithTaxAfterDeductionRD) ||
-									parseFloat(priceCondition.NetPriceWithoutTax) !== parseFloat(existingContract.NetPriceWithoutTax) ||
-									parseFloat(priceCondition.NetPriceWithTax) !== parseFloat(existingContract.NetPriceWithTax)
-								)
-							) && existingContract?.ConditionValidityEndDate) {
-							const nextDay = new Date(existingContract.ConditionValidityEndDate);
-							nextDay.setDate(nextDay.getDate() + 1);
-							item.ContractStartDate = nextDay.toISOString().split('T')[0];
-						}
-					});
-				}
-			}
+			data.forEach(item => {
+				item.ContractStartDate = qutoation.EffectiveDate;
+				item.ContractEndDate = qutoation.ExpiryDate;
+			});
 		}
 	});
 
@@ -8235,4 +8204,50 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			OfferID: newOffers.length > 0 ? newOffers[0].OfferID : "NA"
 		};
 	};
+
+	srv.on("getContractMngtDateConstraints", async (req) => {
+		const {TenderID, OfferID, CountryCode, ProductPackIDs} = req.data
+		if (CountryCode === "ES") {
+			const tender = await SELECT.one.from(PT_TMTEND).where({TenderID});
+			const priceConditions = await SELECT.from(PriceCondition).columns("*", "PriceConditionClassification.isMain").where({OfferID});
+
+
+			const productPackIds = ProductPackIDs.split(',');
+
+			if (productPackIds.length > 0 && tender.InstituteID) {
+				const existingContract = await ConditionContract.run(
+					SELECT.one.from(ExistingContractInvoicePrices)
+					.where({
+						ProductCode: {in: productPackIds}, 
+						InstituteID: tender.InstituteID
+					})
+					.orderBy({ ConditionValidityEndDate: "desc" }));
+
+				const priceCondition = priceConditions.find(pc => pc.ProductCode == existingContract?.ProductCode && !!pc.isMain);
+
+				if (existingContract && priceCondition) {
+					if (existingContract.ContractType === "Tender" && 
+						(
+							tender.Classification === "Tender" ||
+							(
+								parseFloat(priceCondition.NetPriceWithoutTaxBeforeDeductionRD) !== parseFloat(existingContract.YP10) ||
+								parseFloat(priceCondition.NetPriceWithoutTaxAfterDeductionRD) !== parseFloat(existingContract.NetPriceWithoutTaxAfterDeductionRD) ||
+								parseFloat(priceCondition.NetPriceWithTaxAfterDeductionRD) !== parseFloat(existingContract.NetPriceWithTaxAfterDeductionRD) ||
+								parseFloat(priceCondition.NetPriceWithoutTax) !== parseFloat(existingContract.NetPriceWithoutTax) ||
+								parseFloat(priceCondition.NetPriceWithTax) !== parseFloat(existingContract.NetPriceWithTax)
+							)
+						) && existingContract?.ConditionValidityEndDate) {
+						const nextDay = new Date(existingContract.ConditionValidityEndDate);
+						nextDay.setDate(nextDay.getDate() + 1);
+						return {
+							minDate: nextDay.toISOString().split('T')[0]
+						}
+					}
+				}
+			}
+		}
+		return {
+			minDate: ""
+		}
+	});
 }

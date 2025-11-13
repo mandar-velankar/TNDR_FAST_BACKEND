@@ -996,7 +996,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
             then ifnull(offer.Quotation.EffectiveDate, offer.Tender.PublicationDate)
         when offer.CountryCode NOT IN ('ES')
             then ifnull(offer.Quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1))
-        else ifnull(offer.Tender.EffectiveDate,ifnull(offer.Quotation.EffectiveDate,ADD_DAYS(CURRENT_DATE,1)))
+        else ifnull(offer.Tender.EffectiveDate,ifnull(offer.Quotation.EffectiveDate, CURRENT_DATE))
     end as EffectiveDate,
 
 	 case when offer.CountryCode NOT IN ('ES')
@@ -1004,7 +1004,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
 
         then ifnull(offer.Quotation.ExpiryDate, ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1))
 
-        else ifnull(offer.Tender.ExpiryDate,ifnull(offer.Quotation.ExpiryDate,ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1)))
+        else ifnull(offer.Tender.ExpiryDate,ifnull(offer.Quotation.ExpiryDate,ADD_YEARS(CURRENT_DATE, 1)))
 
     end as ExpiryDate,
 
