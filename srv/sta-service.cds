@@ -2094,9 +2094,14 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
         baseInst.InstituteName,
         'SELF' as RelationType : String
     };
+
+    type ContractMngtDateConstraintsResponse {
+        minDate: String;
+    }
     
     action getSAPSalesOrderSimulation(offerID: String, tenderID: String, productCode: Integer, instituteID: Integer, customerID: String, materialNumber: String, countryCode: String, packFactor: Double, UoM: String) returns String;
     action updateFinalContractStartEndDate(OfferID: String, ContractStartDate: Date, ContractEndDate: Date) returns String;
     action createAllFastConditionContracts(OfferID: String) returns String;
     function getFastContractForOffer(offerID: String, tenderID: String) returns String;
+    function getContractMngtDateConstraints(TenderID: String, OfferID: String, CountryCode: String, ProductPackIDs: String) returns ContractMngtDateConstraintsResponse;
 }
