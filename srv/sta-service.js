@@ -704,8 +704,8 @@ module.exports = async (srv) => {
 				);
 			} else if (req.data.Classification === 'Tender') {
 				mandatoryFielddata = mandatoryFielddata.filter(item => 
-					item.Label !== 'Effective Date' &&
-					item.Label !== 'Expiry Date'
+					item.Label !== 'Contract Start Date' &&
+					item.Label !== 'Contract End Date'
 				);
 			}
 		}
