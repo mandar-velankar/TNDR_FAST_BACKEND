@@ -16,6 +16,12 @@ module.exports = {
         return req.query.SELECT.where[idx + 2].val;
     },
 
+    setWhereValue: function(req, fieldName, newValue) {
+        let idx = this._getWhereId(req, fieldName);
+        req.query.SELECT.where[idx + 2].val = newValue;
+    },
+
+
     getWhereValues: function(req, fieldName) {
         let results = [];
 
