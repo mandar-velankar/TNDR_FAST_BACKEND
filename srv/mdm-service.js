@@ -998,7 +998,7 @@ module.exports = (srv) => {
 				ed.StartDate = ed.StartDate && ServiceHelper.forceExcelText(ServiceHelper.formatDate(ed.StartDate, '', 'DD-MM-YYYY'));
 				ed.EndDate = ed.EndDate && ServiceHelper.forceExcelText(ServiceHelper.formatDate(ed.EndDate, '', 'DD-MM-YYYY'));
 				ed.MaterialNumbers = ServiceHelper.forceExcelText(productValidSKUs.join(","));
-				ed.GOV_CODE = ServiceHelper.forceExcelText(ed.GOV_CODE);
+				ed.GOV_CODE = Number(ed.GOV_CODE) || "";
 
 				if (ed.ACTIVERECORD === "No" && ed.RegistrationValidUntil && validDate <= ed.RegistrationValidUntil) { // display product if sku is valid or no skus found from db
 					return ed;
@@ -1052,7 +1052,7 @@ module.exports = (srv) => {
 			// Assuming 'Type' and 'Currency' fields are part of the item
 			item.Value = ServiceHelper.forceExcelText(formatterDistributonArrangement(item.Value, item.Type));
 			item.MaterialNumbers = ServiceHelper.forceExcelText(item.MaterialNumbers);
-			item.GOV_CODE = ServiceHelper.forceExcelText(item.GOV_CODE);
+			item.GOV_CODE = Number(item.GOV_CODE) || "";
 		});
 
 		let excelStreamValue = XLSXHelper.generateXLSXByFile(template.content,{ excelData },1);
@@ -1116,7 +1116,7 @@ module.exports = (srv) => {
 			item.StartDate = item.StartDate && ServiceHelper.formatDate(item.StartDate, '', 'DD/MM/YYYY');
 			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'DD/MM/YYYY');
 			item.MaterialNumbers = ServiceHelper.forceExcelText(productValidSKUs.join(","));
-			item.GOV_CODE = ServiceHelper.forceExcelText(item.GOV_CODE);
+			item.GOV_CODE = Number(item.GOV_CODE) || "";
 
 			if (item.ACTIVERECORD === "No" && item.RegistrationValidUntil && validDate <= item.RegistrationValidUntil) { // display product if sku is valid or no skus found from db
 				return item;
