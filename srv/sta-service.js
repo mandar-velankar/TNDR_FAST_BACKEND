@@ -1399,7 +1399,7 @@ module.exports = async (srv) => {
 			// if (product?.Custom_String_1 && product?.Custom_String_2) return data;
 
 			if (product?.ProductCode && tender?.InstituteID) {
-				const existingContracts = await ConditionContract.run(SELECT.from(IdentifyExistingContract).where({ProductCode: product?.ProductCode, InstituteID: tender?.InstituteID}));
+				const existingContracts = await ConditionContract.run(SELECT.from(IdentifyExistingContract).where({ProductCode: product?.ProductCode.toString(), InstituteID: tender?.InstituteID.toString()}));
 				product.Custom_String_1 = `${existingContracts?.[0].FastConditionContractID}:${existingContracts?.map(contract => `${contract.OfferID};${contract.CCMContractID};${contract.ProductCode}`).join(',')}` || null
 				product.Custom_String_2 = existingContracts?.map(contract => contract.ContractType).join(',') || null;
 			}
@@ -8219,7 +8219,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					SELECT.one.from(ExistingContractInvoicePrices)
 					.where({
 						ProductCode: {in: productPackIds}, 
-						InstituteID: tender.InstituteID
+						InstituteID: tender.InstituteID.toString()
 					})
 					.orderBy({ ConditionValidityEndDate: "desc" }));
 
