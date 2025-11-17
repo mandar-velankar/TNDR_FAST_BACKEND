@@ -1400,7 +1400,7 @@ module.exports = async (srv) => {
 
 			if (product?.ProductCode && tender?.InstituteID) {
 				const existingContracts = await ConditionContract.run(SELECT.from(IdentifyExistingContract).where({ProductCode: product?.ProductCode, InstituteID: tender?.InstituteID}));
-				product.Custom_String_1 = existingContracts?.map(contract => contract.ContractNumber).join(',') || null
+				product.Custom_String_1 = `${existingContracts?.[0].FastConditionContractID}:${existingContracts?.map(contract => `${contract.OfferID};${contract.CCMContractID};${contract.ProductCode}`).join(',')}` || null
 				product.Custom_String_2 = existingContracts?.map(contract => contract.ContractType).join(',') || null;
 			}
 		}
