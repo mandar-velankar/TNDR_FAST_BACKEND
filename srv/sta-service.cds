@@ -1649,7 +1649,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
 
     entity FastConditionContractsView as select from TransactionalData.PT_TMTEND as tender
         inner join AdminData.PT_TMUSER as USR
-            on tender.SubmittedBy = USR.CWID
+            on tender.SubmittedBy = USR.UserName
         inner join TransactionalData.PT_TMOFRS as offer 
             on offer.TenderID = tender.TenderID
             and offer.Active = 1
