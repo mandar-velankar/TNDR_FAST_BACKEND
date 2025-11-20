@@ -7728,7 +7728,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	  
 	srv.on("createAllFastConditionContracts", async (req) => {
 		const tx = cds.tx(req);
-		const offerID = req.data.OfferID;
+		const {OfferID: offerID, ContractStartDate, ContractEndDate } = req.data;
 		const toStr = (v) => v != null ? String(v) : null;
 		const toInt = (v) => v === "Yes" ? 1 : v === "No" ? 0 : parseInt(v) || 0;
 		const toDecimal = (v) => v != null ? Number(v) : null;
@@ -7752,6 +7752,10 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		const filteredWonProducts = wonProducts.filter(wonProduct => {
 			return !(existingConditionContracts?.some(existing => existing.ProductCode == wonProduct.ProductCode));
+		}).map(wp => {
+			wp.ContractStartDate = wp.ContractStartDate ? wp.ContractStartDate : ContractStartDate;
+			wp.ContractEndDate = wp.ContractEndDate ? wp.ContractEndDate : ContractEndDate;
+			return wp;
 		});
 
 		if (filteredWonProducts.length === 0) {
@@ -8209,13 +8213,14 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	};
 
 	srv.on("getContractMngtDateConstraints", async (req) => {
-		const {TenderID, OfferID, CountryCode, ProductPackIDs} = req.data
+		const {TenderID, OfferID, CountryCode} = req.data;
+		const defaultMinDate = new Date().toISOString().split('T')[0];
 		if (CountryCode === "ES") {
 			const tender = await SELECT.one.from(PT_TMTEND).where({TenderID});
+			const offerProducts  = await SELECT.from(PT_TMOFPR).where({OfferID});
 			const priceConditions = await SELECT.from(PriceCondition).columns("*", "PriceConditionClassification.isMain").where({OfferID});
 
-
-			const productPackIds = ProductPackIDs.split(',');
+			const productPackIds = offerProducts.map(pr => pr.ProductCode);
 
 			if (productPackIds.length > 0 && tender.InstituteID) {
 				const existingContract = await ConditionContract.run(
@@ -8250,7 +8255,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			}
 		}
 		return {
-			minDate: ""
+			minDate: defaultMinDate
 		}
 	});
 }
