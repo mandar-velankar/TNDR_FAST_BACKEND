@@ -481,9 +481,17 @@ module.exports = async (srv) => {
 		}
 		
 		const cwid = req.user.id;
+		let [countryCode] =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode') || [];
 		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
 	  
 		if (!userTerritories || userTerritories.length === 0 || userTerritories.some(ut => ut.TERRITORY === null)) {
+		  
+		  /* Institute name displaying twice on master screen and basic information page in InstituteName dropdown for Spain
+				Hierarchy table has multiple parents insitute for single child institute	*/
+		  if (countryCode === 'ES') {
+			let uniqueResult = [...new Map(result.map(r => [`${r.InstituteName}||${r.CustomerID}`, r])).values()]; 
+			return uniqueResult;  
+		  }
 		  // If no user territories found, return all items
 		  return result;
 		}
