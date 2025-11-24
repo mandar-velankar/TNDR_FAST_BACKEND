@@ -1648,6 +1648,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PriceConditionRentalView                     as projection on TransactionalDataViews.StandardTenderPriceConditionView;
 
     entity FastConditionContractsView as select from TransactionalData.PT_TMTEND as tender
+        inner join AdminData.PT_TMUSER as USR
+            on tender.SubmittedBy = USR.UserName
         inner join TransactionalData.PT_TMOFRS as offer 
             on offer.TenderID = tender.TenderID
             and offer.Active = 1
@@ -1668,12 +1670,14 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         offer.DistributorID,
         institute.CustomerID,
         tender.SubmittedBy as Owner:String,
+        USR.UserName as OwnerName:String,
+        USR.UserEmail as OwnerEmail:String,
         tender.TenderName as Reference:String,
         tender.Classification as ContractType:String,
         tender.SAPID,
         tender.ExternalID
     }where tender.CountryCode = 'ES' 
-    group by tender.TenderID, offer.OfferID, product.CountryCode, institute.InstituteID, institute.InstituteName, institute.External_InstituteId, offer.Division, offer.DistributorID, institute.CustomerID, tender.SubmittedBy, tender.TenderName, tender.Classification, tender.SAPID, tender.ExternalID;
+    group by tender.TenderID, offer.OfferID, product.CountryCode, institute.InstituteID, institute.InstituteName, institute.External_InstituteId, offer.Division, offer.DistributorID, institute.CustomerID, tender.SubmittedBy, USR.UserName, USR.UserEmail, tender.TenderName, tender.Classification, tender.SAPID, tender.ExternalID;
 
     entity ConditionContractsView as select from TransactionalData.PT_TMTEND as tender
         inner join TransactionalData.PT_TMOFRS as offer 
@@ -2090,10 +2094,14 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
         baseInst.InstituteName,
         'SELF' as RelationType : String
     };
+
+    type ContractMngtDateConstraintsResponse {
+        minDate: String;
+    }
     
     action getSAPSalesOrderSimulation(offerID: String, tenderID: String, productCode: Integer, instituteID: Integer, customerID: String, materialNumber: String, countryCode: String, packFactor: Double, UoM: String) returns String;
     action updateFinalContractStartEndDate(OfferID: String, ContractStartDate: Date, ContractEndDate: Date) returns String;
-    action createAllFastConditionContracts(OfferID: String) returns String;
+    action createAllFastConditionContracts(OfferID: String, ContractStartDate: Date, ContractEndDate: Date) returns String;
     function getFastContractForOffer(offerID: String, tenderID: String) returns String;
     entity PolandPendingTMApprovals as select from TransactionalData.PT_TMOFRS as o
         inner join TransactionalData.PT_TMAPPRST as a
@@ -2138,4 +2146,6 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
         and PendingApproverType = 'TM'
         and PendingTMCount > 0
     order by OfferID desc;
+    
+    function getContractMngtDateConstraints(TenderID: String, OfferID: String, CountryCode: String) returns ContractMngtDateConstraintsResponse;
 }
