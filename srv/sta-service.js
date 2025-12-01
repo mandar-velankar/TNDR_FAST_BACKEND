@@ -7796,20 +7796,20 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		if (rootRow.ContractType === "Commercial Agreement") {
 			extension = true;
+			extensionPeriod = 12;
+			// const start = new Date(filteredWonProducts[0].ContractStartDate);
+			// const end = new Date(filteredWonProducts[0].ContractEndDate);
 
-			const start = new Date(filteredWonProducts[0].ContractStartDate);
-			const end = new Date(filteredWonProducts[0].ContractEndDate);
+			// let years = end.getFullYear() - start.getFullYear();
+			// let months = end.getMonth() - start.getMonth();
+			// let days = end.getDate() - start.getDate();
 
-			let years = end.getFullYear() - start.getFullYear();
-			let months = end.getMonth() - start.getMonth();
-			let days = end.getDate() - start.getDate();
+			// extensionPeriod = years * 12 + months;
 
-			extensionPeriod = years * 12 + months;
-
-			// If the end day is greater than or equal to the start day, count it as a full month
-			if (days >= 0) {
-				extensionPeriod += 1;
-			}
+			// // If the end day is greater than or equal to the start day, count it as a full month
+			// if (days >= 0) {
+			// 	extensionPeriod += 1;
+			// }
 		}
 
 		let payload = {
