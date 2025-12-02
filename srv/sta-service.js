@@ -5911,6 +5911,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		let userSignatureImageBuffer = await getUserSignatureBuffer(tx, offerValidation);
 		let commaSeparatedBrandName = [...new Set(productValidation?.map(prd => prd.BRANDNAME))]?.join(', ');
+
+		//Build final products for PACA countries with multiple distributors
+		if (["CO"].includes(offerValidation.COUNTRYCODE) || offerValidation.COUNTRY_REGION?.toLowerCase()?.split(' ')?.join('')?.trim()?.includes('pacawi')) {
+			const countryDistributors = await SELECT.from('StandardAppService.MasterDistributors').where({ CountryCode: offerValidation.COUNTRYCODE });
+			productValidation = buildPACAOfferProducts(productValidation, countryDistributors);
+		}
 		//format prices
 		productValidation.forEach(prd => {
 			prd.PAID_VOLUME = ServiceHelper.formatNumber(prd.PAID_VOLUME, 0, 0);
@@ -8266,4 +8272,24 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			minDate: defaultMinDate
 		}
 	});
+
+	function buildPACAOfferProducts (OfferProductValidation, countryDistributors) {
+		const products = OfferProductValidation.reduce((acc, prod) => {
+			const distributors = prod.Product_Custom_String_6 ? prod.Product_Custom_String_6.split(',').map(d => d.trim()) : []; 
+			if (distributors.length > 0) {
+				distributors.forEach(distributor => {
+					const countryDistributor = countryDistributors.find(d => d.DistributorID == distributor);
+					acc.push({
+						...prod,
+						Product_Custom_String_6: countryDistributor ? countryDistributor.DistributorName : ""
+					});
+				});
+			}else {
+				acc.push(prod);
+			}
+			return acc;
+		}, []);
+
+		return products;
+	}
 }
