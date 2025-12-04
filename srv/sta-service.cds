@@ -2104,4 +2104,5 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
     action createAllFastConditionContracts(OfferID: String, ContractStartDate: Date, ContractEndDate: Date) returns String;
     function getFastContractForOffer(offerID: String, tenderID: String) returns String;
     function getContractMngtDateConstraints(TenderID: String, OfferID: String, CountryCode: String) returns ContractMngtDateConstraintsResponse;
+    function getQuotationData(OfferID : String) returns String;
 }
