@@ -1414,10 +1414,9 @@ module.exports = async (srv) => {
 				// 	product.Custom_String_2 = existingContracts?.map(contract => contract.ContractType).join(',') || null;
 				// }
 				if (classified && classified.length > 0) {
-					const entry = classified[0];
 
 					// Merge ALL contracts from ALL classification cases
-					const allContracts = classified.flatMap(entry => entry.contracts || []);
+					const allContracts = classified.flatMap(entry => entry.contracts || []).filter(contract => contract.OfferID !== product.OfferID);
 
 					if (allContracts.length > 0) {
 						product.Custom_String_1 =
