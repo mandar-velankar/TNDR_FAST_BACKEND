@@ -5930,11 +5930,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		let userSignatureImageBuffer = await getUserSignatureBuffer(tx, offerValidation);
 		let commaSeparatedBrandName = [...new Set(productValidation?.map(prd => prd.BRANDNAME))]?.join(', ');
+		let groupedProductsByDistributorName = [];
 
 		//Build final products for PACA countries with multiple distributors
 		if (["CO"].includes(offerValidation.COUNTRYCODE) || offerValidation.COUNTRY_REGION?.toLowerCase()?.split(' ')?.join('')?.trim()?.includes('pacawi')) {
 			const countryDistributors = await SELECT.from('StandardAppService.MasterDistributors').where({ CountryCode: offerValidation.COUNTRYCODE });
-			productValidation = buildPACAOfferProducts(productValidation, countryDistributors);
+			groupedProductsByDistributorName = buildPACAOfferProducts(productValidation, countryDistributors);
 		}
 		//format prices
 		productValidation.forEach(prd => {
@@ -6024,7 +6025,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			offerValidation: offerValidation,
 			offerProductValidation: productValidation,
 			groupedOfferProductValidation: groupedOfferProductValidation,
-			commaSeparatedBrandName: commaSeparatedBrandName
+			commaSeparatedBrandName: commaSeparatedBrandName,
+			groupedProductsByDistributorName: groupedProductsByDistributorName
 			// flatOfferProductValidation.reduce((group, product) => {
 			// 	const { PriceConditionClassification } = product;
 			// 	group[PriceConditionClassification.ConditionType.replace(/\s/g, '')] ??= {items:[]};
@@ -8289,6 +8291,18 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}
 		return {
 			minDate: defaultMinDate
+		}
+	});
+
+	srv.on("getQuotationData", async (req) => {
+		try {
+			const {OfferID} = req.data;
+			const tx = cds.tx(req);
+			const data = await getOfferData(tx, OfferID);
+			return data;
+		} catch (err) {
+			console.error("Error reading getQuotationData:", err)
+      		return {};
 		}
 	});
 
