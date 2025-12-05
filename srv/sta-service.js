@@ -1416,7 +1416,8 @@ module.exports = async (srv) => {
 				if (classified && classified.length > 0) {
 
 					// Merge ALL contracts from ALL classification cases
-					const allContracts = classified.flatMap(entry => entry.contracts || []).filter(contract => contract.OfferID !== product.OfferID);
+					let allContracts = classified.flatMap(entry => entry.contracts || []).filter(contract => contract.OfferID !== product.OfferID);
+					allContracts = Array.from(new Map(allContracts.map(c => [c.CCMContractID, c])).values());
 
 					if (allContracts.length > 0) {
 						product.Custom_String_1 =
