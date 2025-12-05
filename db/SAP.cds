@@ -2240,7 +2240,7 @@ entity CustDoc: cuid{
 }
 
 entity ProptyList: cuid{
-    ID: String;
+    ProptyListID: String;
     TypeCode: String;
     DefaultIndicator: Boolean;
     AssignmentStatusCode: String;
@@ -2899,7 +2899,7 @@ entity AddrIndepndntCommInfo: cuid{
 }
 
 entity BankDetails: cuid{
-    ID: String;
+    BankDetailID: String;
     BankAccountHolderName: String;
     Name: String;
     BankAccountID: String;
@@ -2924,7 +2924,7 @@ entity BankDirectoryReference: cuid{
 }
 
 entity PaymentCardDetails: cuid{
-    ID: String;
+    PaymentCardDetailID: String;
     DefaultIndicator: Boolean;
     PaymentCard: Composition of many PaymentCard on PaymentCard.parentPaymentCardDetails = $self;
     Block: Composition of many Block on Block.parentPaymentCardDetails = $self;
@@ -2932,7 +2932,7 @@ entity PaymentCardDetails: cuid{
 }
 
 entity PaymentCard: cuid{
-    ID: String;
+    PaymentCardID: String;
     CategoryCode: String;
     TypeCode: String;
     ReferenceID: String;
@@ -3312,7 +3312,7 @@ entity InsuranceGermany: cuid {
 }
 
 entity TaxCompliance: cuid {
-    ID: String;
+    TaxComplianceID: String;
     UUID: String;
     RelevanceStatusCode: String;
     RelevanceReasonCode: String;
