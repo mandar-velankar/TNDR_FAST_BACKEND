@@ -1421,8 +1421,8 @@ module.exports = async (srv) => {
 
 					if (allContracts.length > 0) {
 						product.Custom_String_1 =
-							`${allContracts[0].FastConditionContractID}:${allContracts
-								.map(c => `${c.OfferID};${c.CCMContractID};${c.ProductCode}`)
+							`${allContracts
+								.map(c => `${c.FastConditionContractID};${c.OfferID};${c.CCMContractID};${c.ProductCode}`)
 								.join(",")}`;
 
 						product.Custom_String_2 =
