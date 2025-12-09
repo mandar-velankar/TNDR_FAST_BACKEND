@@ -8323,7 +8323,20 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			return acc;
 		}, []);
 
-		return products;
+		const groupedProducts = Object.values(
+			products.reduce((acc, prod) => {
+				const distributor = prod.Product_Custom_String_6 || "";
+
+				if (!acc[distributor]) {
+					acc[distributor] = { distributor, rows: [] };
+				}
+
+				acc[distributor].rows.push(prod);
+				return acc;
+			}, {})
+		);
+
+		return groupedProducts;
 	}
 
 	async function classifyExistingContractsForRead(sourceData) {
