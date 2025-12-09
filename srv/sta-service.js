@@ -55,7 +55,8 @@ module.exports = async (srv) => {
 		FastConditionContracts,
 		CCMContract,
 		IdentifyExistingContract,
-		ExistingContractInvoicePrices
+		ExistingContractInvoicePrices,
+		CustomerHierarchy
 	} = ConditionContract.entities;
 
 	// Use reflection to get the csn definition
@@ -1421,14 +1422,32 @@ module.exports = async (srv) => {
 
 			const product = Array.isArray(data) ? data?.[0] : data;
 			const tender = await SELECT.one.from(PT_TMTEND).where({TenderID: product?.TenderID});
+			const institute = await SELECT.one.from(PT_TMINST).where({InstituteID: tender?.InstituteID, CountryCode: 'ES'});
 
 			if (tender?.CountryCode === 'ES' && product?.ProductCode && tender?.InstituteID) {
-				const existingContracts = await ConditionContract.run(SELECT.from(IdentifyExistingContract).where({ProductCode: product?.ProductCode.toString(), InstituteID: tender?.InstituteID.toString()}));
-				if (Array.isArray(existingContracts) && existingContracts.length > 0) {
-					product.Custom_String_1 = `${existingContracts?.[0].FastConditionContractID}:${existingContracts?.map(contract => `${contract.OfferID};${contract.CCMContractID};${contract.ProductCode}`).join(',')}` || null
-					product.Custom_String_2 = existingContracts?.map(contract => contract.ContractType).join(',') || null;
-				}
-			}
+				const classified = await classifyExistingContractsForRead({ProductCode: product?.ProductCode, InstituteID: institute?.InstituteID, AssortmentReference: institute?.External_InstituteId});
+				// const existingContracts = await ConditionContract.run(SELECT.from(IdentifyExistingContract).where({ProductCode: product?.ProductCode.toString(), InstituteID: tender?.InstituteID.toString()}));
+				// if (Array.isArray(existingContracts) && existingContracts.length > 0) {
+				// 	product.Custom_String_1 = `${existingContracts?.[0].FastConditionContractID}:${existingContracts?.map(contract => `${contract.OfferID};${contract.CCMContractID};${contract.ProductCode}`).join(',')}` || null
+				// 	product.Custom_String_2 = existingContracts?.map(contract => contract.ContractType).join(',') || null;
+				// }
+				if (classified && classified.length > 0) {
+
+					// Merge ALL contracts from ALL classification cases
+					let allContracts = classified.flatMap(entry => entry.contracts || []).filter(contract => contract.OfferID !== product.OfferID);
+					allContracts = Array.from(new Map(allContracts.map(c => [c.CCMContractID, c])).values());
+
+					if (allContracts.length > 0) {
+						product.Custom_String_1 =
+							`${allContracts
+								.map(c => `${c.FastConditionContractID};${c.OfferID};${c.CCMContractID};${c.ProductCode}`)
+								.join(",")}`;
+
+						product.Custom_String_2 =
+							allContracts.map(c => c.ContractType).join(",") || null;
+					}
+            	}
+        	}
 		} catch (error) {
 			console.error('Error in OfferProductsDetailView After READ');
             return req.reject(403, error?.message||"Error in OfferProductsDetailView");
@@ -5930,6 +5949,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		let userSignatureImageBuffer = await getUserSignatureBuffer(tx, offerValidation);
 		let commaSeparatedBrandName = [...new Set(productValidation?.map(prd => prd.BRANDNAME))]?.join(', ');
+		let groupedProductsByDistributorName = [];
+
+		//Build final products for PACA countries with multiple distributors
+		if (["CO"].includes(offerValidation.COUNTRYCODE) || offerValidation.COUNTRY_REGION?.toLowerCase()?.split(' ')?.join('')?.trim()?.includes('pacawi')) {
+			const countryDistributors = await SELECT.from('StandardAppService.MasterDistributors').where({ CountryCode: offerValidation.COUNTRYCODE });
+			groupedProductsByDistributorName = buildPACAOfferProducts(productValidation, countryDistributors);
+		}
 		//format prices
 		productValidation.forEach(prd => {
 			prd.PAID_VOLUME = ServiceHelper.formatNumber(prd.PAID_VOLUME, 0, 0);
@@ -6018,7 +6044,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			offerValidation: offerValidation,
 			offerProductValidation: productValidation,
 			groupedOfferProductValidation: groupedOfferProductValidation,
-			commaSeparatedBrandName: commaSeparatedBrandName
+			commaSeparatedBrandName: commaSeparatedBrandName,
+			groupedProductsByDistributorName: groupedProductsByDistributorName
 			// flatOfferProductValidation.reduce((group, product) => {
 			// 	const { PriceConditionClassification } = product;
 			// 	group[PriceConditionClassification.ConditionType.replace(/\s/g, '')] ??= {items:[]};
@@ -8291,4 +8318,153 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			minDate: defaultMinDate
 		}
 	});
+
+	srv.on("getQuotationData", async (req) => {
+		try {
+			const {OfferID} = req.data;
+			const tx = cds.tx(req);
+			const data = await getOfferData(tx, OfferID);
+			return data;
+		} catch (err) {
+			console.error("Error reading getQuotationData:", err)
+      		return {};
+		}
+	});
+
+	function buildPACAOfferProducts (OfferProductValidation, countryDistributors) {
+		const products = OfferProductValidation.reduce((acc, prod) => {
+			const distributors = prod.Product_Custom_String_6 ? prod.Product_Custom_String_6.split(',').map(d => d.trim()) : []; 
+			if (distributors.length > 0) {
+				distributors.forEach(distributor => {
+					const countryDistributor = countryDistributors.find(d => d.DistributorID == distributor);
+					acc.push({
+						...prod,
+						Product_Custom_String_6: countryDistributor ? countryDistributor.DistributorName : ""
+					});
+				});
+			}else {
+				acc.push(prod);
+			}
+			return acc;
+		}, []);
+
+		return products;
+	}
+
+	async function classifyExistingContractsForRead(sourceData) {
+		// Step 1: Fetch all IdentifyExistingContract
+		const contracts = await ConditionContract.run(SELECT.from(IdentifyExistingContract));
+
+		if (!Array.isArray(contracts) || contracts.length === 0) return [];
+
+		// Step 2: Fetch institute hierarchy candidates
+		const candidates = await SELECT.from(CandidateInstitutes);
+
+		// Step 3: Fetch CustomerHierarchy
+		const customerHierarchy = await ConditionContract.run(SELECT.from(CustomerHierarchy));
+
+		// Step 4: Enrich contracts
+		const enrichedContracts = contracts.flatMap(contract => {
+			return candidates
+				.filter(c =>
+					String(c.CandidateInstituteID).trim() === String(contract.InstituteID).trim() ||
+					String(c.BaseInstituteID).trim() === String(contract.InstituteID).trim()
+				)
+				.map(match => ({
+					...contract,
+					candidateType: match.RelationType,
+					baseInstitute: match.BaseInstituteID,
+					candidateInstitute: match.CandidateInstituteID
+				}));
+		});
+
+		// Step 5: Make unique
+		const uniqueContracts = Array.from(
+			new Map(enrichedContracts.map(c => [
+				[
+					c.CCMContractID,
+					c.ContractNumber,
+					c.Product,
+					c.InstituteID,
+					c.baseInstitute,
+					c.candidateInstitute
+				].join('|'), c
+			])).values()
+		);
+
+		const classified = classifyContracts(sourceData, uniqueContracts, customerHierarchy);
+
+		return classified;
+	}
+
+	function classifyContracts(sourceData, enrichedContracts, customerHierarchy) {
+
+        const { ProductCode, InstituteID, AssortmentReference } = sourceData;
+        const results = [];
+
+        // filter contracts only on same ProductCode
+        let relevantContracts = enrichedContracts.filter(
+            c => c.ProductCode == ProductCode
+        );
+
+        if (relevantContracts.length === 0) {
+            return [{ sourceData, case: "NO_MATCH" }];
+        }
+
+        // ---- CASE 1 ----
+        //contract is single-customer with candidate + base = newOffer.InstituteID
+        const case1Contracts = relevantContracts.filter(
+            c =>
+                c.candidateInstitute == InstituteID &&
+                c.baseInstitute == InstituteID
+        );
+        if (case1Contracts.length > 0) {
+            results.push({ sourceData, case: "CASE_1", contracts: case1Contracts });
+        }
+
+        // CASE 2 — Child with its Existing Parent Contract
+        const matchedHierarchyCase2  = customerHierarchy.filter(h => (h.InstituteID && h.InstituteID == InstituteID));
+
+        if (matchedHierarchyCase2.length > 0) {
+            const childIDs = new Set(matchedHierarchyCase2.map(h => h.InstituteID));
+
+            relevantContracts = relevantContracts.filter(c => c.AssortmentReference != null && c.candidateType == 'CHILD');
+
+            const case2Contracts = relevantContracts.filter(c => childIDs.has(String(c.candidateInstitute)));
+
+            if (case2Contracts.length > 0) {
+                results.push({ sourceData, case: "CASE_2", contracts: case2Contracts });
+            }
+        }
+
+
+        if (AssortmentReference) {
+            // ---- CASE 3 ----
+            // assortment reference matches on both new offer and contract
+            const case3Contracts = relevantContracts.filter(c => c.AssortmentReference == AssortmentReference);
+            if (case3Contracts.length > 0) {
+                results.push({ sourceData, case: "CASE_3", contracts: case3Contracts });
+            }
+
+
+            // ---- CASE 5 ----
+            const matchedHierarchyCase5 = customerHierarchy.filter(h => (h.ParentInstituteID && h.ParentInstituteID == InstituteID));
+
+            if (matchedHierarchyCase5.length > 0) {
+                const childIDs = new Set(matchedHierarchyCase5.map(h => h.InstituteID));
+
+                const case5Contracts = relevantContracts.filter(c => childIDs.has(String(c.InstituteID)));
+
+                if (case5Contracts.length > 0) {
+                    results.push({ sourceData, case: "CASE_5", contracts: case5Contracts });
+                }
+            }
+        }
+
+        if (results.length === 0) {
+            results.push({ sourceData, case: "UNCLASSIFIED", contracts: relevantContracts });
+        }
+
+        return results;
+    }
 }
