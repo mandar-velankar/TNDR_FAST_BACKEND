@@ -2148,4 +2148,5 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
     order by OfferID desc;
     
     function getContractMngtDateConstraints(TenderID: String, OfferID: String, CountryCode: String) returns ContractMngtDateConstraintsResponse;
+    function getQuotationData(OfferID : String) returns String;
 }
