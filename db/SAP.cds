@@ -1706,7 +1706,7 @@ entity PlnteSPPLocPrd: cuid {
 }
 
 entity FASTCoreCustomerMaster: cuid, managed{
-    UUID: UUID;
+    UUID: String;
 	InternalID: String; 
     ReceiverUUID: String;
     ReceiverInternalID: String;
@@ -1756,20 +1756,20 @@ entity CustData: cuid{
     ReceiverCustomerPartyWithFiscalAddressInternalID: String;
     AlternativePayeePartyInternalID: String;
     ReceiverAlternativePayeePartyInternalID: String;
-    AlternativePayeeAllowedIndicator: Boolean;
+    AlternativePayeeAllowedIndicator: String;
     CorporateGroupName: String;
     StandardPointLocationCode: String;
-    DeletionBlockedIndicator: Boolean;
-    DeletedIndicator: Boolean;
+    DeletionBlockedIndicator: String;
+    DeletedIndicator: String;
     CountyCode: String;
     CityCode: String;
-    PostingBlockedIndicator: Boolean;
-    EqualizationTaxRelevanceIndicator: Boolean;
-    ValueAddedTaxRelevanceIndicator: Boolean;
+    PostingBlockedIndicator: String;
+    EqualizationTaxRelevanceIndicator: String;
+    ValueAddedTaxRelevanceIndicator: String;
     TradingPartnerCompanyID: String;
     TaxGroupCode: String;
-    ICMSExemptionIndicator: Boolean;
-    IPIExemptionIndicator: Boolean;
+    ICMSExemptionIndicator: String;
+    IPIExemptionIndicator: String;
     TaxSubstitutionGroupCode: String;
     CFOPCategoryCode: String;
     CustomerExtensionCode: String;
@@ -1784,8 +1784,8 @@ entity CustData: cuid{
     NinthAdditionalCustomerExtensionCode: String;
     DataMediumExchangeReportCode: String;
     DataMediumExchangeInstructionCode: String;
-    CivilUseIndicator: Boolean;
-    MilitaryUseIndicator: Boolean;
+    CivilUseIndicator: String;
+    MilitaryUseIndicator: String;
     RepresentativeName: String;
     BusinessTypeName: String;
     IndustryTypeName: String;
@@ -1819,7 +1819,7 @@ entity CustSalesDistrbtnBlocks: cuid{
     OrderBlockingReasonCode                        : String; 
     BillingBlockingReasonCode                      : String; 
     DeliveryBlockingReasonCode                     : String; 
-    SalesSupportBlockedIndicator                   : Boolean;
+    SalesSupportBlockedIndicator                   : String;
     parentCustData: Association to CustData;
 }
 
@@ -1836,18 +1836,18 @@ entity CustMktgAttrs: cuid{
     CustomerGroupCode                              : String; 
     CustomerNielsenRegionCode                      : String; 
     FiscalYearVariantCode                          : String;  
-    AnnualSalesVolumeAmount                        : Decimal; 
+    AnnualSalesVolumeAmount                        : String; 
     AnnualSalesVolumeAmountReportedYear            : String;   
-    EmployeeNumberValue                            : Integer;   
+    EmployeeNumberValue                            : String;   
     EmployeeNumberValueReportedYear                : String; 
     parentCustData: Association to CustData;
 }
 
 entity CustLegalCtrlIndicator: cuid{
-    BiochemicalWarfareIndicator                    : Boolean;
-    NuclearNonproliferationIndicator               : Boolean;
-    NationalSecurityIndicator                      : Boolean;
-    MissileTechnologyIndicator                     : Boolean;
+    BiochemicalWarfareIndicator                    : String;
+    NuclearNonproliferationIndicator               : String;
+    NationalSecurityIndicator                      : String;
+    MissileTechnologyIndicator                     : String;
     parentCustData: Association to CustData;
 }
 
@@ -1863,8 +1863,8 @@ entity CustPriceSpecs: cuid{
 entity CustAcctInfo: cuid{
     CompanyID                              : String;
     EmployeeID                                 : String;
-    BlockedIndicator                           : Boolean;
-    DeletedIndicator                           : Boolean;
+    BlockedIndicator                           : String;
+    DeletedIndicator                           : String;
     SortCode                                   : String;
     AccountingClerkInitialsCode                : String;
     GeneralLedgerAccountReferenceID             : String;
@@ -1873,13 +1873,13 @@ entity CustAcctInfo: cuid{
     ReceiverHeadOfficeAccountInternalID        : String;
     AlternativePayeePartyInternalID            : String;
     ReceiverAlternativePayeePartyInternalID    : String;
-    PaymentNoticeCustomerClearedItemsIndicator : Boolean;
-    PaymentNoticeSalesDepartmentIndicator      : Boolean;
-    PaymentNoticeLegalDepartmentIndicator      : Boolean;
-    PaymentNoticeAccountingIndicator           : Boolean;
-    PaymentNoticeCustomerWithoutClearedItemsIndicator : Boolean;
+    PaymentNoticeCustomerClearedItemsIndicator : String;
+    PaymentNoticeSalesDepartmentIndicator      : String;
+    PaymentNoticeLegalDepartmentIndicator      : String;
+    PaymentNoticeAccountingIndicator           : String;
+    PaymentNoticeCustomerWithoutClearedItemsIndicator : String;
     PaymentMethodsCode                         : String;
-    CustomerSupplierClearingIndicator          : Boolean;
+    CustomerSupplierClearingIndicator          : String;
     PaymentBlockCode                           : String;
     CashDiscountTermsCode                      : String;
     BillOfExchangeChargesCashDiscountTermsCode : String;
@@ -1891,23 +1891,23 @@ entity CustAcctInfo: cuid{
     Note                                       : String;
     PlanningGroupCode                          : String;
     ExportCreditInsuranceInstitutionID         : String;
-    InsuredAmount                              : Double;
+    InsuredAmount                              : String;
     InsuranceLeadDuration                      : String;
-    DeductiblePercent                          : Double;
+    DeductiblePercent                          : String;
     InsuranceID                                : String;
     InsuranceValidityDate                      : String;
     CollectiveInvoiceVariantID                 : String;
-    LocalProcessingIndicator                   : Boolean;
+    LocalProcessingIndicator                   : String;
     PeriodicAccountStatementsCode              : String;
-    BillOfExchangeLimitAmount                  : Double;
+    BillOfExchangeLimitAmount                  : String;
     NextPayeeInternalID                        : String;
     ReceiverNextPayeeInternalID                : String;
     LastInterestCalculationRunDate             : String;
-    RecordPaymentHistoryIndicator              : Boolean;
+    RecordPaymentHistoryIndicator              : String;
     BusinessPartnerToleranceGroupCode          : String;
     ProbableCheckPaidDuration                  : String;
     HouseBankInternalID                        : String;
-    PayItemsSeparatelyIndicator                : Boolean;
+    PayItemsSeparatelyIndicator                : String;
     ReductionRatesDeterminationCode            : String;
     PreviousCustomerInternalID                 : String;
     PaymentGroupingCode                        : String;
@@ -1918,7 +1918,7 @@ entity CustAcctInfo: cuid{
     BuyingGroupInternalID                      : String;
     ReceiverBuyingGroupInternalID              : String;
     PaymentAdvicesSelectionRuleCode            : String;
-    PaymentAdvicesByEDIIndicator               : Boolean;
+    PaymentAdvicesByEDIIndicator               : String;
     ReleaseApprovalGroupCode                   : String;
     ConversionVersionReasonCode                : String;
     EmployeeResponsiblePartyTelephoneFormattedNumberDescription : String;
@@ -1926,7 +1926,7 @@ entity CustAcctInfo: cuid{
     EmployeeResponsiblePartyWebAddress         : String;
     CreditMemosPaymentTermsCode                : String;
     ValueAdjustmentCode                        : String;
-    DeletionBlockedIndicator                   : Boolean;
+    DeletionBlockedIndicator                   : String;
     AccountsReceivablePledgingCode             : String;
     PaymentReasonCode                          : String;
     DunnInfo: Composition of many DunnInfo on DunnInfo.parentCustAcctInfo = $self;
@@ -1939,11 +1939,11 @@ entity DunnInfo: cuid{
     DunningAreaID: String;
     DunningProcedureCode: String;
     DunningBlockCode: String;
-    LastDunningNoticeDate: Date;
+    LastDunningNoticeDate: String;
     DunningLevelCode: String;
     DunningRecipientID: String;
     ReceiverDunningRecipientID: String;
-    LegalDunningProceedingsDate: Date;
+    LegalDunningProceedingsDate: String;
     DunningClerkInitialsCode: String;
     parentCustAcctInfo: Association to CustAcctInfo;
     parentAcctInfo: Association to AcctInfo;
@@ -1956,15 +1956,15 @@ entity CustWithTax: cuid{
     WithholdingTaxAgentIndicator: String;
     WithholdingTaxObligationPeriod: String;
     WithholdingTaxExemptionCertificateID       : String;
-    WithholdingTaxExemptionRate                : Double;
+    WithholdingTaxExemptionRate                : String;
     WithholdingTaxExemptionReasonCode           : String;
     CustWithTaxExmValPeriod : Composition of many CustWithTaxExmValPeriod on CustWithTaxExmValPeriod.parentCustWithTax = $self;
     parentCustAcctInfo: Association to CustAcctInfo;
 }
 
 entity CustWithTaxExmValPeriod: cuid{
-    StartDate                                 : Date;
-    EndDate                                   : Date;
+    StartDate                                 : String;
+    EndDate                                   : String;
     parentCustWithTax: Association to CustWithTax;
 }
 
@@ -1992,7 +1992,7 @@ entity CustSalesArrgmnt: cuid{
     DistributionChannelCode                   : String;
     DivisionCode                              : String;
     AuthorisationGroupCode                    : String;
-    DeletedIndicator                          : Boolean;
+    DeletedIndicator                          : String;
     StatisticsGroupCode                       : String;
     OrderBlockingReasonCode                   : String;
     PricingProcedureDeterminationCode         : String;
@@ -2001,13 +2001,13 @@ entity CustSalesArrgmnt: cuid{
     SalesDistrictCode                         : String;
     PriceGroupCode                            : String;
     PriceListTypeCode                         : String;
-    ItemOrderProbabilityNumberValue           : Double;
+    ItemOrderProbabilityNumberValue           : String;
     DeliveryBlockingReasonCode                : String;
-    BatchSplitAllowedIndicator                : Boolean;
+    BatchSplitAllowedIndicator                : String;
     SellerPartyBuyerID                        : String;
     TransportServiceLevelCode                 : String;
     BillingBlockingReasonCode                 : String;
-    ManualInvoiceMaintenanceIndicator         : Boolean;
+    ManualInvoiceMaintenanceIndicator         : String;
     InvoiceDatesCalendarCode                  : String;
     IncoiceListScheduleCalendarCode           : String;
     CurrencyCode                              : String;
@@ -2023,19 +2023,19 @@ entity CustSalesArrgmnt: cuid{
     SecondAdditionalCustomerDefinedGroupCode  : String;
     ThirdAdditionalCustomerDefinedGroupCode   : String;
     FourthAdditionalCustomerDefinedGroupCode  : String;
-    RebateRelevantIndicator                   : Boolean;
+    RebateRelevantIndicator                   : String;
     ExchangeRateTypeCode                      : String;
-    PricingRelevanceIndicator                 : Boolean;
+    PricingRelevanceIndicator                 : String;
     PaymentGuaranteeProcedureCode             : String;
     CreditControlAreaCode                     : String;
-    SalesSupportBlockedIndicator              : Boolean;
-    RoundingSwitchOffIndicator                : Boolean;
-    AgencyBusinessRelevanceIndicator          : Boolean;
+    SalesSupportBlockedIndicator              : String;
+    RoundingSwitchOffIndicator                : String;
+    AgencyBusinessRelevanceIndicator          : String;
     MeasureUnitGroupCode                      : String;
     ProductProposalCustomerProcedureCode      : String;
-    PODRelevanceIndicator                     : Boolean;
+    PODRelevanceIndicator                     : String;
     PODConfirmationTimeframeDuration          : String;
-    DocumentIndexAllowedIndicator             : Boolean;
+    DocumentIndexAllowedIndicator             : String;
     FifthAdditionalCustomerDefinedGroupCode   : String;
     SixthAdditionalCustomerDefinedGroupCode   : String;
     SeventhAdditionalCustomerDefinedGroupCode : String;
@@ -2045,12 +2045,12 @@ entity CustSalesArrgmnt: cuid{
     ValueAddedServiceCustomerGroupCode        : String;
     CharacteristicValueConversionCode         : String;
     OrderSchedulingStrategyCode               : String;
-    OrderSchedulingStrategyFillRatePercent    : Double;
+    OrderSchedulingStrategyFillRatePercent    : String;
     OrderSchedulingStratgeyAggregationLevelCode : String;
     MultiShiptoOrderCustomerDistributionCenterID : String;
     MultiShiptoOrderCustomerName              : String;
     PSSTGroupingRuleCode                      : String;
-    PSSTGroupingRuleExcludeIndicator          : Boolean;
+    PSSTGroupingRuleExcludeIndicator          : String;
     CustDelvryTerms: Composition of many CustDelvryTerms on CustDelvryTerms.parentCustSalesArrgmnt = $self;
     CustPartnrFuncs : Composition of many CustPartnrFuncs on CustPartnrFuncs.parentCustSalesArrgmnt = $self;
     SalesArrgmntTxt: Composition of many SalesArrgmntTxt on SalesArrgmntTxt.parentCustSalesArrgmnt = $self;
@@ -2060,10 +2060,10 @@ entity CustSalesArrgmnt: cuid{
 
 entity CustDelvryTerms: cuid{
     DeliveryPriorityCode                      : String;
-    SalesOrderCompleteDeliveryIndicator       : Boolean;
-    OrderCombinationAllowedIndicator          : Boolean;
+    SalesOrderCompleteDeliveryIndicator       : String;
+    OrderCombinationAllowedIndicator          : String;
     PartialDeliveryControlCode                : String;
-    PartialDeliveryMaximumNumberValue         : Integer;
+    PartialDeliveryMaximumNumberValue         : String;
     CusIncoTerm: Composition of many CusIncoTerm on CusIncoTerm.parentCustDelvryTerms = $self;
     CustQtyTolerance: Composition of many CustQtyTolerance on CustQtyTolerance.parentCustDelvryTerms = $self;
     parentCustSalesArrgmnt: Association to CustSalesArrgmnt;
@@ -2083,9 +2083,9 @@ entity CusIncoTerm: cuid{
 }
 
 entity CustQtyTolerance: cuid{
-    OverPercent                              : Double;
-    OverPercentUnlimitedIndicator            : Boolean;
-    UnderPercent                             : Double;
+    OverPercent                              : String;
+    OverPercentUnlimitedIndicator            : String;
+    UnderPercent                             : String;
     parentCustDelvryTerms: Association to CustDelvryTerms;
 }
 
@@ -2093,15 +2093,15 @@ entity CustPartnrFuncs: cuid{
     PartyRoleCode                        : String;
     PartyInternalID                          : String;
     ReceiverPartyInternalID                  : String;
-    DefaultIndicator                         : Boolean;
+    DefaultIndicator                         : String;
     PartnerDescription: String;
     AddrKey : Composition of many AddrKey on AddrKey.parentCustPartnrFuncs = $self;
     parentCustSalesArrgmnt: Association to CustSalesArrgmnt;
 } 
 
 entity AddrKey: cuid{
-    ReceiverUUID: UUID;
-    UUID: UUID;
+    ReceiverUUID: String;
+    UUID: String;
     ExternalAddressID: String;
     parentCustPartnrFuncs: Association to CustPartnrFuncs;
     parentAddrDepdntSalesArrgmnt: Association to AddrDepdntSalesArrgmnt;
@@ -2138,7 +2138,7 @@ entity AddrDepdntDeliveryTerms: cuid{
 entity UnldgPoints: cuid{
     UnloadingPointName: String;
     GoodsReceivingHoursID: String;
-    DefaultIndicator: Boolean;
+    DefaultIndicator: String;
     BizHours: Composition of many BizHours on BizHours.parentUnldgPoints = $self;
     parentCustData: Association to CustData;
 } 
@@ -2203,7 +2203,7 @@ entity AddrDepdntTaxClass: cuid{
 }
 
 entity TaxGroupng: cuid{
-    TaxCodeCategoryIndicator: Boolean;
+    TaxCodeCategoryIndicator: String;
     CusValdtyPeriod: Composition of many CusValdtyPeriod on CusValdtyPeriod.parentTaxGroupng = $self;
     TaxExmptn: Composition of many TaxExmptn on TaxExmptn.parentTaxGroupng = $self;
     parentCustData: Association to CustData;
@@ -2212,14 +2212,14 @@ entity TaxGroupng: cuid{
 
 entity TaxExmptn: cuid{
     CertificateID: String;
-    Percent: Double;
+    Percent: String;
     CusValdtyPeriod: Composition of many CusValdtyPeriod on CusValdtyPeriod.parentTaxExmptn = $self;
     parentTaxGroupng: Association to TaxGroupng;
 }
 
 entity CusValdtyPeriod: cuid{
-    StartDate                                 : Date;
-    EndDate                                   : Date;
+    StartDate                                 : String;
+    EndDate                                   : String;
     parentTaxGroupng: Association to TaxGroupng;
     parentTaxExmptn: Association to TaxExmptn;
 }
@@ -2242,7 +2242,7 @@ entity CustDoc: cuid{
 entity ProptyList: cuid{
     ProptyListID: String;
     TypeCode: String;
-    DefaultIndicator: Boolean;
+    DefaultIndicator: String;
     AssignmentStatusCode: String;
     parentCustData: Association to CustData;
     parentSupplierData: Association to SupplierData;
@@ -2264,40 +2264,40 @@ entity PropVal: cuid{
 }
 
 entity LowrBoundryObjPropertyVal: cuid{
-    Amount: Double;
-    Quantity: Double;
-    DecimalValue: Decimal;
-    FloatValue: Double;
-    IntegerValue: Integer;
-    Date: Date;
+    Amount: String;
+    Quantity: String;
+    DecimalValue: String;
+    FloatValue: String;
+    IntegerValue: String;
+    Date: String;
     Time: String;
-    DateTime: DateTime;
+    DateTime: String;
     Name: String;
-    Indicator: Boolean;
+    Indicator: String;
     Measure: String;
     Code: String;
     Identifier: String;
     URI: String;
     BinaryObject: String;
     Duration: String;
-    Percent: Double;
+    Percent: String;
     Ratio: String;
     Text: String;
     parentPropVal:  Association to PropVal;
 }
 
 entity UpprBoundryObjPropertyVal: cuid{
-    Amount: Double; 
-    Quantity: Double;  
-    DecimalValue: Decimal;  
-    FloatValue: Double;  
-    IntegerValue: Integer;  
-    Date: Date;
+    Amount: String; 
+    Quantity: String;  
+    DecimalValue: String;  
+    FloatValue: String;  
+    IntegerValue: String;  
+    Date: String;
     Time: String;  
-    DateTime: DateTime;  
+    DateTime: String;  
     Measure: String;  
     Duration: String;  
-    Percent: Double;  
+    Percent: String;  
     Ratio: String;
     parentPropVal:  Association to PropVal;
 }
@@ -2323,10 +2323,10 @@ entity SupplierData: cuid {
     CreditorInformationNumber                   : String;
     MaintenanceProfileCode                      : String;
     ProcurementTransactionBlockingCode          : String;
-    DeletionBlockedIndicator                    : Boolean;
-    DeletedIndicator                            : Boolean;
-    PostingBlockedIndicator                     : Boolean;
-    PurchasingBlockedIndicator                  : Boolean;
+    DeletionBlockedIndicator                    : String;
+    DeletedIndicator                            : String;
+    PostingBlockedIndicator                     : String;
+    PurchasingBlockedIndicator                  : String;
     TradingPartnerCompanyID                     : String;
     ManufacturerPartyID                         : String;
     AuthorisationGroupCode                      : String;
@@ -2339,13 +2339,13 @@ entity SupplierData: cuid {
     InpaymentSlipWithReferenceNumberSubscriberID: String;
     AlternativePayeePartyInternalID             : String;
     ReceiverAlternativePayeePartyInternalID             : String;
-    AlternativePayeeAllowedIndicator            : Boolean;
-    EqualizationTaxRelevanceIndicator           : Boolean;
-    ValueAddedTaxRelevanceIndicator             : Boolean;
+    AlternativePayeeAllowedIndicator            : String;
+    EqualizationTaxRelevanceIndicator           : String;
+    ValueAddedTaxRelevanceIndicator             : String;
     FiscalAddressPartyInternalID                : String;
     SupplyingPlantID                            : String;
-    SellerAssortmentProductGroupLevelRelevanceIndicator : Boolean;
-    PlantLevelRelevanceIndicator                : Boolean;
+    SellerAssortmentProductGroupLevelRelevanceIndicator : String;
+    PlantLevelRelevanceIndicator                : String;
     WorkingDayCalendarCode                      : String;
     CarrierPartyStandardID                      : String;
     CarrierPartyFreightGroupCode                : String;
@@ -2354,19 +2354,19 @@ entity SupplierData: cuid {
     TaxAuthorityPartyID                         : String;
     TaxGroupCode                                : String;
     SocialInsuranceActivityCode                 : String;
-    ForSocialInsuranceRegisteredIndicator       : Boolean;
-    TaxSplitIndicator                           : Boolean;
+    ForSocialInsuranceRegisteredIndicator       : String;
+    TaxSplitIndicator                           : String;
     TaxBasePercentageCode                       : String;
     ResponsibleTaxOfficePartyInternalID         : String;
     RepresentativeName                          : String;
     BusinessTypeName                            : String;
     IndustryTypeName                            : String;
     RelatedCustomerInternalID                   : String;
-    CollectiveNumberingRelevancyIndicator       : Boolean;
+    CollectiveNumberingRelevancyIndicator       : String;
     StagingDuration                             : String;
     SchedulingProcedureCode                     : String;
     TransportationChainCode                     : String;
-    AcceptanceAtOriginIndicator                 : Boolean;
+    AcceptanceAtOriginIndicator                 : String;
     PaymentReasonCode                           : String;
     PermittedPayer :Composition of many PermittedPayer on PermittedPayer.parentSupplierData = $self;
     AcctInfo : Composition of many AcctInfo on AcctInfo.parentSupplierData = $self;
@@ -2388,7 +2388,7 @@ entity MultipleAssignment: cuid{
     AssignmentCategoryCode: String;
     ObjectID: String;
     AssignmentReasonCode: String;
-    DefaultIndicator: Boolean;
+    DefaultIndicator: String;
     AddressReceiverUUID: String;
     AddressUUID: String;
     CustData: Composition of many CustData on CustData.parentMultipleAssignment = $self;
@@ -2417,7 +2417,7 @@ entity SubRange: cuid{
 }
 entity QultyMgmt: cuid{
     SystemStandardCode: String;
-    SystemStandardCodeExpirationDate: Date;
+    SystemStandardCodeExpirationDate: String;
     DefaultIndicator: String;
     parentSupplierData: Association to SupplierData;
 }
@@ -2428,9 +2428,9 @@ entity ProcurementCardIssuingInstitutes: cuid{
 }
 entity BiddingCharacteristic: cuid{
     MinorityOwnedIndicator: String;
-    MinorityOwnedCertificateExpirationDate: Date;
+    MinorityOwnedCertificateExpirationDate: String;
     WomenOwnedIndicator: String;
-    WomenOwnedCertificateExpirationDate: Date;
+    WomenOwnedCertificateExpirationDate: String;
     SurrogateBiddingAllowedIndicator: String;
     OfflineBiddingIndicator: String;
     parentSupplierData: Association to SupplierData;
@@ -2452,7 +2452,7 @@ entity ProcuremntArrgmnt: cuid {
     VendorSubrangeCode: String;
     SupplyingPlantID: String;
     PurchasingGroupID                           : String;
-    DeletedIndicator                            : Boolean;
+    DeletedIndicator                            : String;
     MRPControllerCode: String;
     SupplierABCClassificationCode               : String;
     SellerPartyContactPersonName                : String;
@@ -2461,8 +2461,8 @@ entity ProcuremntArrgmnt: cuid {
     StagingDuration                             : String;
     ValueAddedServiceDeterminationModeCode      : String;
     CharacteristicValueConversionCode           : String;
-    AcceptanceAtOriginIndicator: Boolean;
-    ReturnsSupplierIndicator                    : Boolean;
+    AcceptanceAtOriginIndicator: String;
+    ReturnsSupplierIndicator                    : String;
     PurchsngTerm : Composition of many PurchsngTerm on PurchsngTerm.parentProcuremntArrgmnt = $self;
     PartnrFuncs : Composition of many PartnrFuncs on PartnrFuncs.parentProcuremntArrgmnt = $self;
     PurchasingText: Composition of many PurchasingText on PurchasingText.parentProcuremntArrgmnt = $self;
@@ -2481,7 +2481,7 @@ entity PurchsngTerm: cuid {
     BuyerPartySellerID                          : String;
     PurchaseOrderCurrencyCode                   : String;
     CashDiscountTermsCode                       : String;
-    ReturnItemsEvaluatedReceiptSettlementIndicator : Boolean;
+    ReturnItemsEvaluatedReceiptSettlementIndicator : String;
     TransportModeCode                           : String;
     TransportServiceLevelCode                   : String;
     PriceSpecificationSupplierGroupCode         : String;
@@ -2494,25 +2494,25 @@ entity PurchsngTerm: cuid {
     GoodsMovementItemSortCriterionCode          : String;
     LoadBuildingRestrictionProfileCode          : String;
     DataTransferProfileCode                     : String;
-    PurchasingBlockedIndicator                  : Boolean;
-    DeliveryBasedInvoiceVerificationIndicator   : Boolean;
-    EvaluatedReceiptSettlementIndicator         : Boolean;
-    AutomaticPurchaseOrderGenerationAllowedIndicator : Boolean;
-    PurchaseOrderBySupplierProvidedIndicator    : Boolean;
-    DiscountInKindAllowedIndicator              : Boolean;
-    IndexCompilationForSubsequentSettlementAllowedIndicator : Boolean;
-    DocumentIndexAllowedIndicator               : Boolean;
-    AgencyBusinessRelevanceIndicator            : Boolean;
-    RevaluationAllowedIndicator                 : Boolean;
-    ServiceBasedInvoiceVerificationIndicator    : Boolean;
-    SubsequentSettlementApplyIndicator          : Boolean;
-    BusinessVolumeComparisonRequiredIndicator   : Boolean;
-    PricingRelevanceIndicator                   : Boolean;
-    RackJobbingIncludedIndicator                : Boolean;
+    PurchasingBlockedIndicator                  : String;
+    DeliveryBasedInvoiceVerificationIndicator   : String;
+    EvaluatedReceiptSettlementIndicator         : String;
+    AutomaticPurchaseOrderGenerationAllowedIndicator : String;
+    PurchaseOrderBySupplierProvidedIndicator    : String;
+    DiscountInKindAllowedIndicator              : String;
+    IndexCompilationForSubsequentSettlementAllowedIndicator : String;
+    DocumentIndexAllowedIndicator               : String;
+    AgencyBusinessRelevanceIndicator            : String;
+    RevaluationAllowedIndicator                 : String;
+    ServiceBasedInvoiceVerificationIndicator    : String;
+    SubsequentSettlementApplyIndicator          : String;
+    BusinessVolumeComparisonRequiredIndicator   : String;
+    PricingRelevanceIndicator                   : String;
+    RackJobbingIncludedIndicator                : String;
     PriceMakingAgreementTypeCode                : String;
-    OrderMinimumAmount                          : Double;
+    OrderMinimumAmount                          : String;
     PlannedDeliveryDuration                     : String;
-    SalesVolumeFulfillmentPercent               : Double;
+    SalesVolumeFulfillmentPercent               : String;
     PurchaseOrderConfirmationRequirementCode    : String;
     Inncoterms: Composition of many Inncoterms on Inncoterms.parentPurchsngTerm = $self;
     parentProcuremntArrgmnt: Association to ProcuremntArrgmnt;
@@ -2521,8 +2521,8 @@ entity PurchsngTerm: cuid {
 entity AcctInfo: cuid {
     CompanyID                              : String;
     EmployeeID                                 : String;
-    BlockedIndicator                           : Boolean;
-    DeletedIndicator                           : Boolean;
+    BlockedIndicator                           : String;
+    DeletedIndicator                           : String;
     SortCode                                   : String;
     AccountingClerkInitialsCode                : String;
     GeneralLedgerAccountReferenceID             : String;
@@ -2531,13 +2531,13 @@ entity AcctInfo: cuid {
     ReceiverHeadOfficeAccountInternalID        : String;
     AlternativePayeePartyInternalID            : String;
     ReceiverAlternativePayeePartyInternalID    : String;
-    PaymentNoticeCustomerClearedItemsIndicator : Boolean;
-    PaymentNoticeSalesDepartmentIndicator      : Boolean;
-    PaymentNoticeLegalDepartmentIndicator      : Boolean;
-    PaymentNoticeAccountingIndicator           : Boolean;
-    PaymentNoticeCustomerWithoutClearedItemsIndicator : Boolean;
+    PaymentNoticeCustomerClearedItemsIndicator : String;
+    PaymentNoticeSalesDepartmentIndicator      : String;
+    PaymentNoticeLegalDepartmentIndicator      : String;
+    PaymentNoticeAccountingIndicator           : String;
+    PaymentNoticeCustomerWithoutClearedItemsIndicator : String;
     PaymentMethodsCode                         : String;
-    CustomerSupplierClearingIndicator          : Boolean;
+    CustomerSupplierClearingIndicator          : String;
     PaymentBlockCode                           : String;
     CashDiscountTermsCode                      : String;
     BillOfExchangeChargesCashDiscountTermsCode : String;
@@ -2549,23 +2549,23 @@ entity AcctInfo: cuid {
     Note                                       : String;
     PlanningGroupCode                          : String;
     ExportCreditInsuranceInstitutionID         : String;
-    InsuredAmount                              : Double;
+    InsuredAmount                              : String;
     InsuranceLeadDuration                      : String;
-    DeductiblePercent                          : Double;
+    DeductiblePercent                          : String;
     InsuranceID                                : String;
     InsuranceValidityDate                      : String;
     CollectiveInvoiceVariantID                 : String;
-    LocalProcessingIndicator                   : Boolean;
+    LocalProcessingIndicator                   : String;
     PeriodicAccountStatementsCode              : String;
-    BillOfExchangeLimitAmount                  : Double;
+    BillOfExchangeLimitAmount                  : String;
     NextPayeeInternalID                        : String;
     ReceiverNextPayeeInternalID                : String;
     LastInterestCalculationRunDate             : String;
-    RecordPaymentHistoryIndicator              : Boolean;
+    RecordPaymentHistoryIndicator              : String;
     BusinessPartnerToleranceGroupCode          : String;
     ProbableCheckPaidDuration                  : String;
     HouseBankInternalID                        : String;
-    PayItemsSeparatelyIndicator                : Boolean;
+    PayItemsSeparatelyIndicator                : String;
     ReductionRatesDeterminationCode            : String;
     PreviousCustomerInternalID                 : String;
     PaymentGroupingCode                        : String;
@@ -2576,7 +2576,7 @@ entity AcctInfo: cuid {
     BuyingGroupInternalID                      : String;
     ReceiverBuyingGroupInternalID              : String;
     PaymentAdvicesSelectionRuleCode            : String;
-    PaymentAdvicesByEDIIndicator               : Boolean;
+    PaymentAdvicesByEDIIndicator               : String;
     ReleaseApprovalGroupCode                   : String;
     ConversionVersionReasonCode                : String;
     EmployeeResponsiblePartyTelephoneFormattedNumberDescription : String;
@@ -2584,10 +2584,10 @@ entity AcctInfo: cuid {
     EmployeeResponsiblePartyWebAddress         : String;
     CreditMemosPaymentTermsCode                : String;
     ValueAdjustmentCode                        : String;
-    DeletionBlockedIndicator                   : Boolean;
+    DeletionBlockedIndicator                   : String;
     AccountsReceivablePledgingCode             : String;
     PaymentReasonCode                          : String;
-    DoubleEntriesCheckIndicator                : Boolean;
+    DoubleEntriesCheckIndicator                : String;
     WithholdingTaxExemptionCertificateID       : String;
     WithholdingTaxExemptionCertificateValidityDate : String;
     WithholdingTaxTypeCode                     : String;
@@ -2609,19 +2609,19 @@ entity AcctInfo: cuid {
 
 entity WithTax: cuid {
     WithholdingTaxTypeCode                     : String;
-    SubjectToWithholdingTaxIndicator           : Boolean;
+    SubjectToWithholdingTaxIndicator           : String;
     VendorRecipientTypeCode                    : String;
     WithholdingTaxIdentificationNumber         : String;
     WithholdingTaxCode                         : String;
     WithholdingTaxExemptionCertificateID       : String;
-    WithholdingTaxExemptionRate                : Double;
+    WithholdingTaxExemptionRate                : String;
     WithTaxExmValPeriod : Composition of many WithTaxExmValPeriod on WithTaxExmValPeriod.parentWithTax = $self;
     parentAcctInfo: Association to AcctInfo;
 }
 
 entity WithTaxExmValPeriod: cuid{
-    StartDate                                 : Date;
-    EndDate                                   : Date;
+    StartDate                                 : String;
+    EndDate                                   : String;
     parentWithTax: Association to WithTax;
 }
 
@@ -2629,7 +2629,7 @@ entity PartnrFuncs: cuid {
     PartyRoleCode                        : String;
     PartyInternalID                          : String;
     ReceiverPartyInternalID                  : String;
-    DefaultIndicator                         : Boolean;
+    DefaultIndicator                         : String;
     parentProcuremntArrgmnt: Association to ProcuremntArrgmnt;
 }
 
@@ -2651,7 +2651,7 @@ entity AddrnfoData: cuid {
     ExternalAddressID: String;
     MoveDestinationAddressReceiverUUID  : String;
     MoveDestinationAddressUUID                     : String;
-    MoveDate                                       : Date;
+    MoveDate                                       : String;
     ValdtyPerd: Composition of many ValdtyPerd on ValdtyPerd.parentAddrnfoData = $self;
     AddrUsg : Composition of many AddrUsg on AddrUsg.parentAddrnfoData = $self;
     Addr: Composition of many Addr on Addr.parentAddrnfoData = $self;
@@ -2659,8 +2659,8 @@ entity AddrnfoData: cuid {
 }
 
 entity ValdtyPerd : cuid {
-    StartDate                                  : Date;
-    EndDate                                    : Date;
+    StartDate                                  : String;
+    EndDate                                    : String;
     parentAddrnfoData: Association to AddrnfoData;
     parentAddrUsg: Association to AddrUsg;
     parentRoleInfo: Association to RoleInfo;
@@ -2681,7 +2681,7 @@ entity ValdtyPerd : cuid {
 
 entity AddrUsg : cuid {
     AddressUsageCode: String;
-    DefaultIndicator: Boolean;
+    DefaultIndicator: String;
     ValdtyPerd : Composition of many ValdtyPerd on ValdtyPerd.parentAddrUsg = $self;
     parentAddrnfoData: Association to AddrnfoData;
 }
@@ -2703,7 +2703,7 @@ entity Addr : cuid {
 entity Web: cuid{
     URI: String;
     URITypeCode: String;
-    UsageDeniedIndicator: Boolean;
+    UsageDeniedIndicator: String;
     ValdtyPerd : Composition of many ValdtyPerd on ValdtyPerd.parentWeb = $self;
     WebNote: Composition of many WebNote on WebNote.parentWeb = $self;
     WebUsage: Composition of many WebUsage on WebUsage.parentWeb = $self;
@@ -2717,16 +2717,16 @@ entity WebNote: cuid{
 }
 
 entity WebUsage: cuid{
-    DefaultIndicator: Boolean;
+    DefaultIndicator: String;
     Usage: Composition of many Usage on Usage.parentWebUsage = $self;
     parentWeb: Association to Web;
 }
 
 entity Telephone: cuid{
     FormattedNumberDescription: String;
-    UsageDeniedIndicator: Boolean;
-    MobilePhoneNumberIndicator: Boolean;
-    SMSEnabledIndicator: Boolean;
+    UsageDeniedIndicator: String;
+    MobilePhoneNumberIndicator: String;
+    SMSEnabledIndicator: String;
     Number: Composition of many Number on Number.parentTelephone = $self;
     ValdtyPerd : Composition of many ValdtyPerd on ValdtyPerd.parentTelephone = $self;
     TelephoneNote: Composition of many TelephoneNote on TelephoneNote.parentTelephone = $self;
@@ -2741,7 +2741,7 @@ entity TelephoneNote: cuid{
 }
 
 entity TelephoneUsage: cuid{
-    DefaultIndicator: Boolean;
+    DefaultIndicator: String;
     Usage: Composition of many Usage on Usage.parentTelephoneUsage = $self;
     parentTelephone: Association to Telephone;
 }
@@ -2765,7 +2765,7 @@ entity OrganisationName: cuid{
 
 entity Facsimile: cuid{
     FormattedNumberDescription: String;
-    UsageDeniedIndicator: Boolean;
+    UsageDeniedIndicator: String;
     Number: Composition of many Number on Number.parentFacsimile = $self;
     ValdtyPerd : Composition of many ValdtyPerd on ValdtyPerd.parentFacsimile = $self;
     FacsimileNote: Composition of many FacsimileNote on FacsimileNote.parentFacsimile = $self;
@@ -2791,15 +2791,15 @@ entity FacsimileNote: cuid{
 }
 
 entity FacsimileUsage: cuid{
-    DefaultIndicator: Boolean;
+    DefaultIndicator: String;
     Usage: Composition of many Usage on Usage.parentFacsimileUsage = $self;
     parentFacsimile: Association to Facsimile;
 }
 
 entity Email: cuid{
     URI: String;
-    UsageDeniedIndicator: Boolean;
-    TransportNeutralEncapsulationFormatEnabledIndicator: Boolean;
+    UsageDeniedIndicator: String;
+    TransportNeutralEncapsulationFormatEnabledIndicator: String;
     ValdtyPerd : Composition of many ValdtyPerd on ValdtyPerd.parentEmail = $self;
     EmailNote: Composition of many EmailNote on EmailNote.parentEmail = $self;
     EmailUsage: Composition of many EmailUsage on EmailUsage.parentEmail = $self;
@@ -2813,7 +2813,7 @@ entity EmailNote: cuid{
 }
 
 entity EmailUsage: cuid{
-    DefaultIndicator: Boolean;
+    DefaultIndicator: String;
     Usage: Composition of many Usage on Usage.parentEmailUsage = $self;
     parentEmail: Association to Email;
 }
@@ -2867,7 +2867,7 @@ entity PostalAddr: cuid{
     POBoxLobbyName                             : String;
     POBoxID                                    : String;
     POBoxAddressMailNonDeliveryReasonCode      : String;
-    POBoxIDVisibleIndicator                    : Boolean;
+    POBoxIDVisibleIndicator                    : String;
     POBoxDeliveryServiceID                     : String;
     POBoxDeliveryServiceTypeCode               : String;
     TaxJurisdictionCode                        : String;
@@ -2906,8 +2906,8 @@ entity BankDetails: cuid{
     BankAccountIDLong: String;
     BankAccountStandardID: String;
     SubstituteBusinessPartnerBankDetailsID: String;
-    SubstituteDate: Date;
-    CollectionAuthorisationIndicator: Boolean;
+    SubstituteDate: String;
+    CollectionAuthorisationIndicator: String;
     BankControlKey: String;
     SpecificationsDescription: String;
     BankAccountExternalID: String;
@@ -2925,7 +2925,7 @@ entity BankDirectoryReference: cuid{
 
 entity PaymentCardDetails: cuid{
     PaymentCardDetailID: String;
-    DefaultIndicator: Boolean;
+    DefaultIndicator: String;
     PaymentCard: Composition of many PaymentCard on PaymentCard.parentPaymentCardDetails = $self;
     Block: Composition of many Block on Block.parentPaymentCardDetails = $self;
     parent: Association to FASTCoreCustomerMaster;
@@ -2938,12 +2938,12 @@ entity PaymentCard: cuid{
     ReferenceID: String;
     SequenceID: String;
     HolderName: String;
-    ValidFromDate: Date;
-    ExpirationDate: Date;
+    ValidFromDate: String;
+    ExpirationDate: String;
     Description: String;
     NickName: String;
     IssuerName: String;
-    IssueDateTime: DateTime;
+    IssueDateTime: String;
     MaskedID: String;
     parentPaymentCardDetails: Association to PaymentCardDetails;
 }
@@ -2957,17 +2957,17 @@ entity Block: cuid{
 entity CommonInfo: cuid{
     LocationStandardID                             : String;
     BusinessPartnerGroupCode                       : String;
-    DeletedIndicator                               : Boolean;
-    ReleasedIndicator                              : Boolean;
-    BlockedIndicator                               : Boolean;
+    DeletedIndicator                               : String;
+    ReleasedIndicator                              : String;
+    BlockedIndicator                               : String;
     BusinessPartnerAuthorisationGroupCode          : String;
     KeyWordsText                                   : String;
     AdditionalKeyWordsText                         : String;
     VerbalCommunicationLanguageCode                : String;
     SalutationText                                 : String;
-    CorrespondenceBrailleRequiredIndicator         : Boolean;
-    CorrespondenceLargePrintRequiredIndicator      : Boolean;
-    NaturalPersonIndicator                         : Boolean;
+    CorrespondenceBrailleRequiredIndicator         : String;
+    CorrespondenceLargePrintRequiredIndicator      : String;
+    NaturalPersonIndicator                         : String;
     ContactAllowedCode                             : String;
     LegacyBusinessPartnerID                        : String;
     DataOriginTypeCode                             : String;
@@ -3000,7 +3000,7 @@ entity CustOrgnstn: cuid{
     LegalEntityTypeCode                        : String;
     FoundationDate                             : String;
     LiquidationDate                            : String;
-    DataControllerIsNotRequiredIndicator: Boolean;
+    DataControllerIsNotRequiredIndicator: String;
     CustName: Composition of many CustName on CustName.parentCustOrgnstn = $self;
     parentCommonInfo: Association to CommonInfo;
 }
@@ -3056,7 +3056,7 @@ entity Identification: cuid{
     PartyIdentifierTypeCode:String;
     BusinessPartnerID:String;
     IdentifierIssuingAgencyName:String;
-    EntryDate:Date;
+    EntryDate:String;
     AreaOfValidityCountryCode:String;
     AreaOfValidityRegionCode:String;
     ValdtyPerd : Composition of many ValdtyPerd on ValdtyPerd.parentIdentification = $self;
@@ -3066,7 +3066,7 @@ entity Identification: cuid{
 entity IndSector: cuid{
     IndustryClassificationSystemCode: String;
     IndustrySectorCode: String;
-    DefaultIndicator: Boolean;
+    DefaultIndicator: String;
     parent: Association to FASTCoreCustomerMaster;
 }
 
@@ -3093,11 +3093,11 @@ entity CredMgmtProf: cuid {
     CreditLimitAndScoreCalculatingRuleCode : String;
     Score                                  : String;
     CalculatedScore                        : String;
-    ScoreValidityEndDate                    : Date;
-    ScoreChangeDate: Date;
+    ScoreValidityEndDate                    : String;
+    ScoreChangeDate: String;
     CreditRiskClassCode                    : String;
     CalculatedCreditRiskClassCode: String;
-    CreditRiskClassChangeDate              : Date;
+    CreditRiskClassChangeDate              : String;
     CreditLimitCheckRuleCode: String;
     CreditGroupCode                        : String;
     parent: Association to FASTCoreCustomerMaster;
@@ -3105,11 +3105,11 @@ entity CredMgmtProf: cuid {
 
 entity CreditManagementExternalCreditInformation: cuid {
     CreditRatingProcedureCode: String;
-    CreditRatingAllowedIndicator: Boolean;
+    CreditRatingAllowedIndicator: String;
     CreditRatingCode: String;
     CreditRatingTrendCode: String;
-    CreditRatingEntryDate: Date;
-    StandardCreditRatingProcedureIndicator: Boolean;
+    CreditRatingEntryDate: String;
+    StandardCreditRatingProcedureIndicator: String;
     Text: String;
     ValdtyPerd : Composition of many ValdtyPerd on ValdtyPerd.parentCreditManagementExternalCreditInformation = $self;
     parent: Association to FASTCoreCustomerMaster;
@@ -3117,23 +3117,23 @@ entity CreditManagementExternalCreditInformation: cuid {
 
 
 entity CredMgmtCredWorth: cuid {
-    AffidavitForAssetsMadeIndicator           : Boolean;
-    AffidavitForAssetsMadeDate                : Date;
-    BankruptcyProceedingsInitiatedIndicator   : Boolean;
-    BankruptcyProceedingsInitiatedDate        : Date;
-    ForeclosureProceedingsInitiatedIndicator  : Boolean;
-    ForeclosureProceedingsInitiatedDate       : Date;
+    AffidavitForAssetsMadeIndicator           : String;
+    AffidavitForAssetsMadeDate                : String;
+    BankruptcyProceedingsInitiatedIndicator   : String;
+    BankruptcyProceedingsInitiatedDate        : String;
+    ForeclosureProceedingsInitiatedIndicator  : String;
+    ForeclosureProceedingsInitiatedDate       : String;
     parent: Association to FASTCoreCustomerMaster;
 }
 
 entity FinServComm: cuid {
     SalutationCode                         : String;
-    VIPIndicator                           : Boolean;
-    CustomerUndesirableIndicator           : Boolean;
+    VIPIndicator                           : String;
+    CustomerUndesirableIndicator           : String;
     CustomerUndesirableReasonCode          : String;
     CustomerUndesirableReasonNote          : String;
-    LastContactDate                        : Date;
-    BusinessRelationshipEndDate            : Date;
+    LastContactDate                        : String;
+    BusinessRelationshipEndDate            : String;
     TargetMarketGroupCode                  : String;
     AffiliatedCompanyID                    : String;
     AffiliatedCompanyGroupID               : String;
@@ -3146,19 +3146,19 @@ entity FinServComm: cuid {
 entity FinServCommPerson: cuid {
     PrimaryCitizenshipCountryCode          : String;
     MaritalPropertyRegimeCode              : String;
-    ChildrenNumberValue                    : Integer;
-    HouseholdMembersNumberValue            : Integer;
-    AnnualNetIncomeAmount                  : Decimal;
+    ChildrenNumberValue                    : String;
+    HouseholdMembersNumberValue            : String;
+    AnnualNetIncomeAmount                  : String;
     AnnualNetIncomeYear                    : String;
-    MonthlyNetIncomeAmount                 : Decimal;
+    MonthlyNetIncomeAmount                 : String;
     MonthlyNetIncomeMonth                  : String;
     MonthlyNetIncomeYear                   : String;
     NetIncomeCurrencyCode                  : String;
     DeathPlaceName                         : String;
-    EmployeeIndicator                      : Boolean;
+    EmployeeIndicator                      : String;
     EmployeeID                             : String;
     EmployeeCustomGroupCode                : String;
-    EmployeeIDExistenceCheckIndicator      : Boolean;
+    EmployeeIDExistenceCheckIndicator      : String;
     UserAccountID                          : String;
     parentFinServComm: Association to FinServComm;
 }
@@ -3169,9 +3169,9 @@ entity FinServCommOrganisation {
     RegisteredOfficeRegionCode             : String;
     RegisteredOfficeCityName               : String;
     BalanceSheetDisclosureFormCode         : String;
-    EquityCapitalIncreaseAmount            : Decimal;
+    EquityCapitalIncreaseAmount            : String;
     EquityCapitalIncreaseFiscalYearID      : String;
-    MaxSizeOfOrderingFile                  : Integer;
+    MaxSizeOfOrderingFile                  : String;
     parentFinServComm: Association to FinServComm;
 }
 
@@ -3185,16 +3185,16 @@ entity Employment: cuid{
 }
 
 entity Period: cuid{
-    StartDate:Date;
-    EndDate: Date;
+    StartDate:String;
+    EndDate: String;
     parentEmployment: Association to Employment;
 }
 
 entity Rating: cuid{
     ProcedureCode: String;
     Code: String;
-    DeterminationDate: Date;
-    AllowedIndicator: Boolean;
+    DeterminationDate: String;
+    AllowedIndicator: String;
     TrendCode: String;
     Note: String;
     ValdtyPerd : Composition of many ValdtyPerd on ValdtyPerd.parentRating = $self;
@@ -3204,14 +3204,14 @@ entity Rating: cuid{
 entity CreditWorthiness: cuid{
     Code: String;
     RequestLifeCycleStatusCode: String;
-    AffidavitSubmittedIndicator: Boolean;
-    AffidavitDate: Date;
-    InsolvencyProceedingsStartedIndicator: Boolean;
-    InsolvencyProceedingsDate: Date;
-    ForeclosureStartedIndicator: Boolean;
-    ForeclosureDate: Date;
+    AffidavitSubmittedIndicator: String;
+    AffidavitDate: String;
+    InsolvencyProceedingsStartedIndicator: String;
+    InsolvencyProceedingsDate: String;
+    ForeclosureStartedIndicator: String;
+    ForeclosureDate: String;
     LegalProceedingsStatusCode: String;
-    LegalProceedingsDate: Date;
+    LegalProceedingsDate: String;
     parent: Association to FASTCoreCustomerMaster;
 }
 
@@ -3223,41 +3223,41 @@ entity FiscalYear: cuid{
 }
 
 entity FiscalYearPeriod: cuid{
-    StartDate: Date;
-    EndDate: Date;
+    StartDate: String;
+    EndDate: String;
     parentFiscalYear: Association to FiscalYear;
 }
 
 entity BalanceSheet: cuid {
     CurrencyCode: String;
-    AnnualFinancialStatementsPreparedIndicator: Boolean;
-    AnnualFinancialStatementsPreparedDate: Date;
-    AnnualConsolidatedFinancialStatementsPreparedDate: Date;
-    AnnualStockholderMeetingDate: Date;
-    OutstandingParticipationCertificatesAmount: Double;
-    EquityCapitalAmount: Double;
-    IssuedShareCapitalAmount: Double;
-    AuthorisedShareCapitalAmount: Double;
-    GrossContributionAmount: Double;
-    NetContributionAmount: Double;
-    RevenueAmount: Double;
-    AnnualNetProfitAmount: Double;
-    ProfitDistributionAmount: Double;
-    DebtCashFlowRatio: Double;
-    AnnualProfitAmount: Double;
-    TotalAmount: Double;
-    CapitalReserveAmount: Double;
-    LegalRevenueReserveAmount: Double;
-    OwnStockRevenueReserveAmount: Double;
-    StatutoryRevenueReserveAmount: Double;
-    OtherRevenueReserveAmount: Double;
-    ProfitLossCarriedForwardAmount: Double;
-    SubordinatedLiabilitiesAmount: Double;
-    ReturnOnTotalCapitalEmployedPercent: Double;
-    DebtClearancePeriodDecimalValue: Double;
+    AnnualFinancialStatementsPreparedIndicator: String;
+    AnnualFinancialStatementsPreparedDate: String;
+    AnnualConsolidatedFinancialStatementsPreparedDate: String;
+    AnnualStockholderMeetingDate: String;
+    OutstandingParticipationCertificatesAmount: String;
+    EquityCapitalAmount: String;
+    IssuedShareCapitalAmount: String;
+    AuthorisedShareCapitalAmount: String;
+    GrossContributionAmount: String;
+    NetContributionAmount: String;
+    RevenueAmount: String;
+    AnnualNetProfitAmount: String;
+    ProfitDistributionAmount: String;
+    DebtCashFlowRatio: String;
+    AnnualProfitAmount: String;
+    TotalAmount: String;
+    CapitalReserveAmount: String;
+    LegalRevenueReserveAmount: String;
+    OwnStockRevenueReserveAmount: String;
+    StatutoryRevenueReserveAmount: String;
+    OtherRevenueReserveAmount: String;
+    ProfitLossCarriedForwardAmount: String;
+    SubordinatedLiabilitiesAmount: String;
+    ReturnOnTotalCapitalEmployedPercent: String;
+    DebtClearancePeriodDecimalValue: String;
     EmployeeNumberValue: String;
-    FinancingCoefficientPercent: Double;
-    EquityRatioPercent: Double;
+    FinancingCoefficientPercent: String;
+    EquityRatioPercent: String;
     parentFiscalYear: Association to FiscalYear;
 }
 
@@ -3273,7 +3273,7 @@ entity Austria: cuid {
     OENBTargetGroupCode: String;
     OENBankIdentNumberAssigned: String;
     OENBBankIdentNumber: String;
-    RegulatoryReportingIndicator: Boolean;
+    RegulatoryReportingIndicator: String;
     GroupID: String;
     GroupAssignmentCategoryCode: String;
     GroupName: String;
@@ -3281,22 +3281,22 @@ entity Austria: cuid {
 }
 
 entity BankingGermany: cuid {
-    AWGNonResidentIndicator: Boolean;
-    AWGNonResidencyStartDate: Date;
-    KWGMillionBorrowerIndicator: Boolean;
+    AWGNonResidentIndicator: String;
+    AWGNonResidencyStartDate: String;
+    KWGMillionBorrowerIndicator: String;
     KWGBorrowerID: String;
     KWGBorrowerEntityID: String;
     KWGCreditStandingReviewCode: String;
-    KWGCreditStandingReviewDate: Date;
+    KWGCreditStandingReviewDate: String;
     KWGLoanToManagerCode: String;
     CompanyRelationshipCode: String;
     RiskGroupCode: String;
-    ClassificationDate: Date;
-    GroupAffiliationIndicator: Boolean;
-    MonetaryFinancialInstitutionIndicator: Boolean;
-    KWGCreditStandingReviewObligationIndicator: Boolean;
-    KWGLargeScaleLoanMonitoringIndicator: Boolean;
-    KWGCreditingReliefIndicator: Boolean;
+    ClassificationDate: String;
+    GroupAffiliationIndicator: String;
+    MonetaryFinancialInstitutionIndicator: String;
+    KWGCreditStandingReviewObligationIndicator: String;
+    KWGLargeScaleLoanMonitoringIndicator: String;
+    KWGCreditingReliefIndicator: String;
     LZBCountryCode: String;
     KWGCreditorID: String;
     parentFinancialServicesReporting: Association to FinancialServicesReporting;
@@ -3307,7 +3307,7 @@ entity InsuranceGermany: cuid {
     AnLVRestrictedAssetQuotaBusinessPartnerCode: String;
     BerVersVDebtorGroupCode: String;
     BusinessPurposeCode: String;
-    AnLVRestrictedAssetInvestmentAuthorizedIndicator: Boolean;
+    AnLVRestrictedAssetInvestmentAuthorizedIndicator: String;
     parentFinancialServicesReporting: Association to FinancialServicesReporting;
 }
 
@@ -3316,9 +3316,9 @@ entity TaxCompliance: cuid {
     UUID: String;
     RelevanceStatusCode: String;
     RelevanceReasonCode: String;
-    DeterminationDate: Date;
+    DeterminationDate: String;
     AgreementCode: String;
-    AgreementDate: Date;
+    AgreementDate: String;
     ValdtyPerd : Composition of many ValdtyPerd on ValdtyPerd.parentTaxCompliance = $self;
     Regulation: Composition of many Regulation on Regulation.parentTaxCompliance = $self;
     parent: Association to FASTCoreCustomerMaster;
@@ -3367,10 +3367,10 @@ entity CreditManagementCustomInformation: cuid{
     TypeCode: String;
     CounterValue: String;
     SubTypeCode: String;
-    Indicator: Boolean;
+    Indicator: String;
     Text: String;
-    Amount: Double;
-    Date: Date;
+    Amount: String;
+    Date: String;
     ValdtyPerd : Composition of many ValdtyPerd on ValdtyPerd.parentCreditManagementCustomInformation = $self;
     parent: Association to FASTCoreCustomerMaster;
 }
