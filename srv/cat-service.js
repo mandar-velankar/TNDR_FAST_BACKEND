@@ -1465,17 +1465,17 @@ module.exports = (srv) => {
 			return aRoles;
 		}
 
-		if (DIVISION === 'Radiology') {
+		if (DIVISION?.toLowerCase()?.trim() === 'radiology') {
 			aCurrentApproverTypes = [
 				{
 					name: "SM",
 					type: "nsm",
-					policyPriceRole: "NSM/SM/FM"
+					policyPriceRole: "SM/PCEA"
 				},
 				{
 					name: "PM",
 					type: "hbu",
-					policyPriceRole: "HBU"			
+					policyPriceRole: "PoH/CEH"			
 				},
 				{
 					name: "CDH",
@@ -1485,37 +1485,43 @@ module.exports = (srv) => {
 			]
 		}
 
-		if (DIVISION === 'Pharma') {
-			aCurrentApproverTypes = [
-				{
-					name: "PM/PCEA",
-					type: "nsm",
-					policyPriceRole: "NSM/SM/FM"
-				}
-			]
-		}
-		
-		if (DIVISION === 'Pharma' && ["Eylea", "Nubeqa", "Stivarga", "Xofigo"].includes(BRANDNAME)) {
-			aCurrentApproverTypes = [
-				{
-					name: "CE Coach",
-					type: "nsm",
-					policyPriceRole: "NSM/SM/FM"
-				},
-				{
-					name: "PM",
-					type: "hbu",
-					policyPriceRole: "HBU"			
-				},
-				{
-					name: "Head of Focus Brands and Market Access",
-					type: "cdh",
-					policyPriceRole: "CDH"		
-				}
-			]
+		if (DIVISION?.toLowerCase()?.trim() === 'pharma') {
+			if (isExcludedBrand(BRANDNAME)) {
+				aCurrentApproverTypes = [
+					{
+						name: "CE Coach",
+						type: "nsm",
+						policyPriceRole: "SM/PCEA"
+					},
+					{
+						name: "PM",
+						type: "hbu",
+						policyPriceRole: "PoH/CEH"			
+					},
+					{
+						name: "Head of Focus Brands and Market Access",
+						type: "cdh",
+						policyPriceRole: "CDH"		
+					}
+				]
+			}else {
+				aCurrentApproverTypes = [
+					{
+						name: "PM/PCEA",
+						type: "nsm",
+						policyPriceRole: "SM/PCEA"
+					}
+				]
+			}
 		}
 
 		return aCurrentApproverTypes;
+	}
+
+	function isExcludedBrand (brandName) {
+		const brands = ["eylea", "nubeqa", "stivarga", "xofigo"];
+		const normalized = brandName.toLowerCase().trim();
+		return brands.some(brand => normalized.includes(brand));
 	}
 
 	function buildProductValidationForType5(offer, product, productInfo, aApproverTypes) {//Argentina
