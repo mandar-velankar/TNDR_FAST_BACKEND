@@ -3163,7 +3163,7 @@ entity FinServCommPerson: cuid {
     parentFinServComm: Association to FinServComm;
 }
 
-entity FinServCommOrganisation {
+entity FinServCommOrganisation: cuid {
     CompanyWorkingDayCalendarCode          : String;
     RegisteredOfficeCountryCode            : String;
     RegisteredOfficeRegionCode             : String;
