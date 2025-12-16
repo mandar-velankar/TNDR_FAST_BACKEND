@@ -1319,6 +1319,7 @@ module.exports = (srv) => {
 		let inPolicy = true;//Boolean used to specify if product offer and net offer prices are within policy
 		let isPMAuthorized = false;
 		let isHeadOfFocusBrandAuthorized = false;
+		let isMDAuthorized = false;
 
 
 		let preApprovedAccountOfferPrice = product.ACCOUNT_OFFER_PRICE;
@@ -1374,13 +1375,9 @@ module.exports = (srv) => {
 			// 	requiredApprovalLevel = 4;
 			// }
 
-			if (ServiceHelper.isDoubleXBelowEqualY(FOCValue, 200000)) {
-				const pmApproverTypeIndex = currentApproverTypes.findIndex(currAppr => currAppr.name === 'PM');
-				isPMAuthorized = pmApproverTypeIndex > -1;
-			}else if (ServiceHelper.isDoubleXBelowEqualY(FOCValue, 500000)) {
-				const headOfFocusBrandApproverTypeIndex = currentApproverTypes.findIndex(currAppr => currAppr.name === 'Head of Focus Brands and Market Access');
-				isHeadOfFocusBrandAuthorized = headOfFocusBrandApproverTypeIndex > -1;
-			}
+			isPMAuthorized = ServiceHelper.isDoubleXBelowEqualY(FOCValue, 200000);
+			isHeadOfFocusBrandAuthorized = ServiceHelper.isDoubleXBelowY(200000, FOCValue) && ServiceHelper.isDoubleXBelowEqualY(FOCValue, 500000);
+			isMDAuthorized = ServiceHelper.isDoubleXBelowY(500000, FOCValue);
 		}
 
 		switch (requiredApprovalLevel) {
@@ -1407,16 +1404,28 @@ module.exports = (srv) => {
 				oApproverType.ValidationType = supply;
 			}
 
+			if (oApproverType.ApproverType === "PM") {
+				oApproverType.ValidationType = isPMAuthorized ? 3 : 1;
+			}
+
+			if (oApproverType.ApproverType === "Head of Focus Brands and Market Access") {
+				oApproverType.ValidationType = isHeadOfFocusBrandAuthorized ? 3 : 1;
+			}
+
+			if (oApproverType.ApproverType === "MD") {
+				oApproverType.ValidationType = isMDAuthorized ? 3 : 1;
+			}
+
 			if (currApprType) {
 				switch (currApprType.type) {
 					case "nsm":
 						oApproverType.ValidationType = nsmLevel;
 						break;
 					case "hbu":
-						oApproverType.ValidationType = isPMAuthorized && oApproverType.ApproverType === 'PM' ? 3 : hbuLevel;
+						oApproverType.ValidationType = hbuLevel;
 						break;
 					case "cdh":
-						oApproverType.ValidationType = isHeadOfFocusBrandAuthorized && oApproverType.ApproverType === 'Head of Focus Brands and Market Access' ? 3 : cdhLevel;
+						oApproverType.ValidationType = cdhLevel;
 						break;
 				}
 			}
