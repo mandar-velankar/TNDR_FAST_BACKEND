@@ -7859,8 +7859,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			hasExpiringSoonContracts: false,
 			hasExpiredContracts: false,
 			hasCancelledContracts: false,
-			hasContractsToBeSynchronized: false,
-			hasNewContracts: false,
+			hasNewContracts: true,
 			CCMContract: []
 		};
 
