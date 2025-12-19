@@ -1404,18 +1404,6 @@ module.exports = (srv) => {
 				oApproverType.ValidationType = supply;
 			}
 
-			if (oApproverType.ApproverType === "PM") {
-				oApproverType.ValidationType = isPMAuthorized ? 3 : 1;
-			}
-
-			if (oApproverType.ApproverType === "Head of Focus Brands and Market Access") {
-				oApproverType.ValidationType = isHeadOfFocusBrandAuthorized ? 3 : 1;
-			}
-
-			if (oApproverType.ApproverType === "MD") {
-				oApproverType.ValidationType = isMDAuthorized ? 3 : 1;
-			}
-
 			if (currApprType) {
 				switch (currApprType.type) {
 					case "nsm":
@@ -1428,6 +1416,21 @@ module.exports = (srv) => {
 						oApproverType.ValidationType = cdhLevel;
 						break;
 				}
+			}
+
+			if (oApproverType.ApproverType === "PM") {
+				oApproverType.ValidationType = isPMAuthorized ? 3 : oApproverType.ValidationType;
+				oApproverType.Hierarchy = isPMAuthorized ? 2 : oApproverType.Hierarchy;
+			}
+
+			if (oApproverType.ApproverType === "Head of Focus Brands and Market Access") {
+				oApproverType.ValidationType = isHeadOfFocusBrandAuthorized ? 3 : oApproverType.ValidationType;
+				oApproverType.Hierarchy = isHeadOfFocusBrandAuthorized ? 2 : oApproverType.Hierarchy;
+			}
+
+			if (oApproverType.ApproverType === "MD") {
+				oApproverType.ValidationType = isMDAuthorized ? 3 : oApproverType.ValidationType;
+				oApproverType.Hierarchy = isMDAuthorized ? 2 : oApproverType.Hierarchy;
 			}
 			
 		});
