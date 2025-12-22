@@ -7672,7 +7672,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	  
 		  // Handle PricingProcedureStep-specific values
 		  if (PricingProcedureStep === "330") {
-			result.SAPTAX = parseFloat(ConditionRateValue) / 10000 || 0;
+			result.SAPTAX = parseFloat(ConditionAmount || 0);
 		  }
 	  
 		  if (PricingProcedureStep === "332") {
@@ -7726,17 +7726,21 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD = result.YP10 ? (YD06 ? result.YP10 * (1 - YD06) : result.YP10) : null;
 		result.NETPRICEWITHTAXAFTERDEDUCTIONRD = (YD02 || YD30) ? result.SAPPriceWithTax : null;
 		if (YD02) {
-  			result.NETPRICEWITHOUTTAX = result.ConfidentialPrice * (1 - result.YD02) * (1 - result.YD06);
+  			result.NETPRICEWITHOUTTAX = YD06 ? basePrice * (1 - result.YD02) * (1 - result.YD06) : basePrice * (1 - result.YD02);
 		}
 		result.NETPRICEWITHTAX = result.SAPPriceWithTax;
 		result.SAPBaseGrossPrice = result.YP00;
 	  
 		// Determine the condition type
 		if (YP10) {
+			result.SAPTAX = result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD ? result.SAPTAX / result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD : 0;
 			result.ConditionType = "PrecioNeto";
 		} else if (YD02) {
+			result.SAPTAX = result.NETPRICEWITHOUTTAX && result.NETPRICEWITHOUTTAX !== 0 ? result.SAPTAX / result.NETPRICEWITHOUTTAX : 0;
 			result.ConditionType = "DescuentoComercial";
 		} else if (YP00) {
+			const iawot = YD06 ? basePrice * (1 - result.YD06) : basePrice
+			result.SAPTAX = iawot && iawot !==0 ? result.SAPTAX / iawot : 0;
 			result.ConditionType = "PVL";
 		} else {
 			result.ConditionType = null;
