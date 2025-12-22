@@ -1401,35 +1401,39 @@ module.exports = async (srv) => {
 			if (!data || (Array.isArray(data) && data.length === 0)) {
 				return data;
 			}
-
+			
 			const product = Array.isArray(data) ? data?.[0] : data;
+
 			const tender = await SELECT.one.from(PT_TMTEND).where({TenderID: product?.TenderID});
+			if (!tender || tender.CountryCode !== 'ES') return;
+
 			const institute = await SELECT.one.from(PT_TMINST).where({InstituteID: tender?.InstituteID, CountryCode: 'ES'});
+			if (!product.ProductCode || !institute) return;
 
-			if (tender?.CountryCode === 'ES' && product?.ProductCode && tender?.InstituteID) {
-				const classified = await classifyExistingContractsForRead({ProductCode: product?.ProductCode, InstituteID: institute?.InstituteID, AssortmentReference: institute?.External_InstituteId});
-				// const existingContracts = await ConditionContract.run(SELECT.from(IdentifyExistingContract).where({ProductCode: product?.ProductCode.toString(), InstituteID: tender?.InstituteID.toString()}));
-				// if (Array.isArray(existingContracts) && existingContracts.length > 0) {
-				// 	product.Custom_String_1 = `${existingContracts?.[0].FastConditionContractID}:${existingContracts?.map(contract => `${contract.OfferID};${contract.CCMContractID};${contract.ProductCode}`).join(',')}` || null
-				// 	product.Custom_String_2 = existingContracts?.map(contract => contract.ContractType).join(',') || null;
-				// }
-				if (classified && classified.length > 0) {
+			// Always reset derived fields
+			product.Custom_String_1 = null;
+			product.Custom_String_2 = null;
 
-					// Merge ALL contracts from ALL classification cases
-					let allContracts = classified.flatMap(entry => entry.contracts || []).filter(contract => contract.OfferID !== product.OfferID);
-					allContracts = Array.from(new Map(allContracts.map(c => [c.CCMContractID, c])).values());
+			let classified = await classifyExistingContractsForRead({ProductCode: product.ProductCode, InstituteID: institute.InstituteID, AssortmentReference: institute.External_InstituteId});
+			// const existingContracts = await ConditionContract.run(SELECT.from(IdentifyExistingContract).where({ProductCode: product?.ProductCode.toString(), InstituteID: tender?.InstituteID.toString()}));
+			// if (Array.isArray(existingContracts) && existingContracts.length > 0) {
+			// 	product.Custom_String_1 = `${existingContracts?.[0].FastConditionContractID}:${existingContracts?.map(contract => `${contract.OfferID};${contract.CCMContractID};${contract.ProductCode}`).join(',')}` || null
+			// 	product.Custom_String_2 = existingContracts?.map(contract => contract.ContractType).join(',') || null;
+			// }
+			classified = (classified || []).filter(entry => entry.case !== "NO_MATCH");
+			if (classified.length === 0) return;
 
-					if (allContracts.length > 0) {
-						product.Custom_String_1 =
-							`${allContracts
-								.map(c => `${c.FastConditionContractID};${c.OfferID};${c.CCMContractID};${c.ProductCode}`)
-								.join(",")}`;
+			// Merge ALL contracts from ALL classification cases
+			let allContracts = classified.flatMap(entry => entry.contracts || []).filter(contract => contract.OfferID !== product.OfferID);
+			allContracts = Array.from(new Map(allContracts.map(c => [c.CCMContractID, c])).values());
+			if (allContracts.length === 0) return;
 
-						product.Custom_String_2 =
-							allContracts.map(c => c.ContractType).join(",") || null;
-					}
-            	}
-        	}
+			product.Custom_String_1 =
+				`${allContracts
+					.map(c => `${c.FastConditionContractID};${c.OfferID};${c.CCMContractID};${c.ProductCode}`)
+					.join(",")}`;
+
+			product.Custom_String_2 = allContracts.map(c => c.ContractType).join(",");
 		} catch (error) {
 			console.error('Error in OfferProductsDetailView After READ');
             return req.reject(403, error?.message||"Error in OfferProductsDetailView");
