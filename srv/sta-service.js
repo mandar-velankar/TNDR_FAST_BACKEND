@@ -7676,7 +7676,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	  
 		  // Handle PricingProcedureStep-specific values
 		  if (PricingProcedureStep === "330") {
-			result.SAPTAX = parseFloat(ConditionAmount || 0);
+			const sapTax = parseFloat(ConditionAmount || 0);
+			result.SAPTAX = sapTax ? (UoM === "Pack" ? (sapTax / 10000) : (sapTax / 10000 / packFactor)) : 0;
 		  }
 	  
 		  if (PricingProcedureStep === "332") {
