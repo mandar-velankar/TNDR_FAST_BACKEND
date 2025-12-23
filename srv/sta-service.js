@@ -7429,9 +7429,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		['PriceConditionDescuentoComercialView','PriceConditionPVLView', 'PriceConditionPrecioNetoView', 'PriceConditionDescuentoEspecialView'], 
 		async (items, req) => {
 		try{
-			if(items.hasPriceCondition){
-				return items;
-			}else{
+			// if(items.hasPriceCondition){
+			// 	return items;
+			// }else{
 				const ccmPriceCondition = await SELECT.one.from(CCMPriceCondition).where({
 					OfferID: items.OfferID,
 					TenderID: items.TenderID,
@@ -7478,7 +7478,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			// }else{
 			// 	return fnCalculateFields(items);
 			// }
-		}
+
 		catch(error){
 			console.error('Error in PriceConditionDescuentoComercialView, PriceConditionPVLView, PriceConditionPrecioNetoView after READ');
 			return req.reject(403, error?.message||"Error in PriceConditionDescuentoComercialView, PriceConditionPVLView, PriceConditionPrecioNetoView after READ");
