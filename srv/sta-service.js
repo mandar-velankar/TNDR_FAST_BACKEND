@@ -1585,6 +1585,7 @@ module.exports = async (srv) => {
         	SubmittedBy: req.user.id,
 			TotalAwardedValue: req.data.TotalAwardedValue,
 			Appeal: req.data.Appeal,
+			InfoNeeded: req.data.InfoNeeded,
 			Custom_String_1: req.data.Custom_String_1,
 			Custom_String_2: req.data.Custom_String_2,
 			Custom_String_3: req.data.Custom_String_3,
