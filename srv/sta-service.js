@@ -7429,36 +7429,80 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		['PriceConditionDescuentoComercialView','PriceConditionPVLView', 'PriceConditionPrecioNetoView', 'PriceConditionDescuentoEspecialView'], 
 		async (items, req) => {
 		try{
+			const ccmPriceCondition = await SELECT.one.from(CCMPriceCondition).where({
+				OfferID: items.OfferID,
+				TenderID: items.TenderID,
+				ProductCode: items.ProductCode
+			});
+
+			if (!ccmPriceCondition) {
+				return items;
+			}
+
+			const num = v => (v === null || v === undefined ? null : Number(v));
+
+			const hasChanges =
+				num(items.PVL) !== num(ccmPriceCondition.YP00) ||
+				num(items.ConfidentialDiscount) !== num(ccmPriceCondition.YP04) ||
+				num(items.ConfidentialPrice) !== num(ccmPriceCondition.ConfidentialPrice);
+			
+			if (!items.hasPriceCondition || hasChanges) {
+
+				items.PVL = num(ccmPriceCondition.YP00);
+				items.ConfidentialDiscount = num(ccmPriceCondition.YP04);
+				items.RoyalDecree = ccmPriceCondition.RoyalDecree;
+				items.ConfidentialPrice = num(ccmPriceCondition.ConfidentialPrice);
+				items.ESDiscount = items.ConditionType === 'DescuentoEspecial' ? 1 : num(ccmPriceCondition.YD02);
+				items.RoyalDecreeValue = num(ccmPriceCondition.RoyalDecreeValue);
+				items.RoyalDecreeIncl = ccmPriceCondition.RoyalDecreeIncl;
+				items.RoyalDecreePercentage_1 = num(ccmPriceCondition.YD06);
+				items.StandardDiscount = num(ccmPriceCondition.StandardDiscount);
+				items.AdditionalDiscount = num(ccmPriceCondition.YD75);
+				items.NetPriceWithoutTaxBeforeDeductionRD = num(ccmPriceCondition.YP10);
+				items.NetPriceWithoutTaxAfterDeductionRD = num(ccmPriceCondition.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD);
+				items.NetPriceWithTaxAfterDeductionRD = num(ccmPriceCondition.NETPRICEWITHTAXAFTERDEDUCTIONRD);
+				items.NetPriceWithoutTax = num(ccmPriceCondition.NETPRICEWITHOUTTAX);
+				items.NetPriceWithTax = 
+					items.ConditionType === 'DescuentoEspecial'
+						? (num(ccmPriceCondition.YP04) !== 0
+							? num(ccmPriceCondition.ConfidentialPrice)
+							: num(ccmPriceCondition.YP00))
+						: num(ccmPriceCondition.NETPRICEWITHTAX);
+				items.Tax = num(ccmPriceCondition.SAPTAX);
+				items.Currency = 'EUR';
+			}
+
+			return items;
 			// if(items.hasPriceCondition){
 			// 	return items;
 			// }else{
-				const ccmPriceCondition = await SELECT.one.from(CCMPriceCondition).where({
-					OfferID: items.OfferID,
-					TenderID: items.TenderID,
-					ProductCode: items.ProductCode
-				});
-				if(ccmPriceCondition){
-					items.PVL = parseFloat(ccmPriceCondition.YP00);
-					items.ConfidentialDiscount = parseFloat(ccmPriceCondition.YP04);
-					items.RoyalDecree = ccmPriceCondition.RoyalDecree;
-					items.ConfidentialPrice = parseFloat(ccmPriceCondition.ConfidentialPrice);
-					items.ESDiscount = items.ConditionType === 'DescuentoEspecial' ? 1 : parseFloat(ccmPriceCondition.YD02);
-					items.RoyalDecreeValue = parseFloat(ccmPriceCondition.RoyalDecreeValue);
-					items.RoyalDecreeIncl = ccmPriceCondition.RoyalDecreeIncl;
-					items.RoyalDecreePercentage_1 = parseFloat(ccmPriceCondition.YD06);
-					items.StandardDiscount = parseFloat(ccmPriceCondition.StandardDiscount);
-					items.AdditionalDiscount = parseFloat(ccmPriceCondition.YD75);
-					items.NetPriceWithoutTaxBeforeDeductionRD = parseFloat(ccmPriceCondition.YP10);
-					items.NetPriceWithoutTaxAfterDeductionRD = parseFloat(ccmPriceCondition.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD);
-					items.NetPriceWithTaxAfterDeductionRD = parseFloat(ccmPriceCondition.NETPRICEWITHTAXAFTERDEDUCTIONRD);
-					items.NetPriceWithoutTax = parseFloat(ccmPriceCondition.NETPRICEWITHOUTTAX);
-					items.NetPriceWithTax = items.ConditionType === 'DescuentoEspecial' ? (ccmPriceCondition.YP04 !== 0 ?  parseFloat(ccmPriceCondition.ConfidentialPrice) : parseFloat(ccmPriceCondition.YP00)) : parseFloat(ccmPriceCondition.NETPRICEWITHTAX);
-					items.Tax = parseFloat(ccmPriceCondition.SAPTAX);
-					items.Currency = 'EUR'
-				}
+			// 	const ccmPriceCondition = await SELECT.one.from(CCMPriceCondition).where({
+			// 		OfferID: items.OfferID,
+			// 		TenderID: items.TenderID,
+			// 		ProductCode: items.ProductCode
+			// 	});
+			// 	if(ccmPriceCondition){
+			// 		items.PVL = parseFloat(ccmPriceCondition.YP00);
+			// 		items.ConfidentialDiscount = parseFloat(ccmPriceCondition.YP04);
+			// 		items.RoyalDecree = ccmPriceCondition.RoyalDecree;
+			// 		items.ConfidentialPrice = parseFloat(ccmPriceCondition.ConfidentialPrice);
+			// 		items.ESDiscount = items.ConditionType === 'DescuentoEspecial' ? 1 : parseFloat(ccmPriceCondition.YD02);
+			// 		items.RoyalDecreeValue = parseFloat(ccmPriceCondition.RoyalDecreeValue);
+			// 		items.RoyalDecreeIncl = ccmPriceCondition.RoyalDecreeIncl;
+			// 		items.RoyalDecreePercentage_1 = parseFloat(ccmPriceCondition.YD06);
+			// 		items.StandardDiscount = parseFloat(ccmPriceCondition.StandardDiscount);
+			// 		items.AdditionalDiscount = parseFloat(ccmPriceCondition.YD75);
+			// 		items.NetPriceWithoutTaxBeforeDeductionRD = parseFloat(ccmPriceCondition.YP10);
+			// 		items.NetPriceWithoutTaxAfterDeductionRD = parseFloat(ccmPriceCondition.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD);
+			// 		items.NetPriceWithTaxAfterDeductionRD = parseFloat(ccmPriceCondition.NETPRICEWITHTAXAFTERDEDUCTIONRD);
+			// 		items.NetPriceWithoutTax = parseFloat(ccmPriceCondition.NETPRICEWITHOUTTAX);
+			// 		items.NetPriceWithTax = items.ConditionType === 'DescuentoEspecial' ? (ccmPriceCondition.YP04 !== 0 ?  parseFloat(ccmPriceCondition.ConfidentialPrice) : parseFloat(ccmPriceCondition.YP00)) : parseFloat(ccmPriceCondition.NETPRICEWITHTAX);
+			// 		items.Tax = parseFloat(ccmPriceCondition.SAPTAX);
+			// 		items.Currency = 'EUR'
+			// 	}
 
-				return items;
-			}
+			// 	return items;
+			// }
 			// const fnCalculateFields = async item => {
 			// 	if(item.ConditionType === 'Discount'){
 			// 		item.OfferPrice = item.BasePrice * (1 - item.Discount);
@@ -7477,8 +7521,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			// 	return items.map(fnCalculateFields)
 			// }else{
 			// 	return fnCalculateFields(items);
-			// }
-
+			// }		
+		}
 		catch(error){
 			console.error('Error in PriceConditionDescuentoComercialView, PriceConditionPVLView, PriceConditionPrecioNetoView after READ');
 			return req.reject(403, error?.message||"Error in PriceConditionDescuentoComercialView, PriceConditionPVLView, PriceConditionPrecioNetoView after READ");
