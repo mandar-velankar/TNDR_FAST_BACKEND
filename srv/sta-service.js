@@ -7430,6 +7430,16 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		['PriceConditionDescuentoComercialView','PriceConditionPVLView', 'PriceConditionPrecioNetoView', 'PriceConditionDescuentoEspecialView'], 
 		async (items, req) => {
 		try{
+			const round = (value, decimals = 2) => {
+				if (value === null || value === undefined) return null;
+				const factor = Math.pow(10, decimals);
+				return Math.round((Number(value) + Number.EPSILON) * factor) / factor;
+			};
+			const equalRounded = (a, b, decimals = 2) => {
+				if (a === null && b === null) return true;
+				if (a === null || b === null) return false;
+				return round(a, decimals) === round(b, decimals);
+			};
 			const ccmPriceCondition = await SELECT.one.from(CCMPriceCondition).where({
 				OfferID: items.OfferID,
 				TenderID: items.TenderID,
@@ -7443,9 +7453,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const num = v => (v === null || v === undefined ? null : Number(v));
 
 			const hasChanges =
-				num(items.PVL) !== num(ccmPriceCondition.YP00) ||
-				num(items.ConfidentialDiscount) !== num(ccmPriceCondition.YP04) ||
-				num(items.ConfidentialPrice) !== num(ccmPriceCondition.ConfidentialPrice);
+				!equalRounded(items.PVL, ccmPriceCondition.YP00, 2) ||
+				!equalRounded(items.ConfidentialDiscount, ccmPriceCondition.YP04, 2) ||
+				!equalRounded(items.ConfidentialPrice, ccmPriceCondition.ConfidentialPrice, 2);
 			
 			if (!items.hasPriceCondition || hasChanges) {
 
