@@ -2149,7 +2149,8 @@ module.exports = async (srv) => {
 		const selectedTender = await SELECT.one.from(PT_TMTEND).where({TenderID:req.data.TenderID});
 		const priceCondition = await SELECT.one.from(PriceCondition).where({
 			OfferID: req.data.OfferID,
-			ProductCode: req.data.ProductCode
+			ProductCode: req.data.ProductCode,
+			PriceConditionCode: null
 		});
 
 		const productCurrentPrice = await SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({
@@ -6313,7 +6314,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		const priceCondition = await SELECT.one.from(PriceCondition).where({
 			OfferID: req.data.OfferID,
-			ProductCode: req.data.ProductCode
+			ProductCode: req.data.ProductCode,
+			PriceConditionCode: null
 		});
 
 		const priceConditionClassification = await SELECT.one.from(PriceConditionClassification).where({
@@ -6380,7 +6382,48 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				NetPrice: req.data.NetPrice,
 				NetOfferPrice: req.data.NetofferPrice,
 				OfferPrice: req.data.OfferPrice
-			}
+			},
+			"PrecioNeto":{
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice, 
+				NetPrice: req.data.NetPrice,
+				NetOfferPrice: req.data.NetofferPrice,
+				OfferPrice: req.data.OfferPrice
+			},
+			"DescuentoComercial":{
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice, 
+				NetPrice: req.data.NetPrice,
+				NetOfferPrice: req.data.NetofferPrice,
+				OfferPrice: req.data.OfferPrice
+			},
+			"PVL":{
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice, 
+				NetPrice: req.data.NetPrice,
+				NetOfferPrice: req.data.NetofferPrice,
+				OfferPrice: req.data.OfferPrice
+			},
+			"DescuentoEspecial":{
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice, 
+				NetPrice: req.data.NetPrice,
+				NetOfferPrice: req.data.NetofferPrice,
+				OfferPrice: req.data.OfferPrice
+			},
+			"Rental":{
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice, 
+				NetPrice: req.data.NetPrice,
+				NetOfferPrice: req.data.NetofferPrice,
+				OfferPrice: req.data.OfferPrice
+			},
+
 		}
 
 		return mappings[ConditionType];
@@ -6400,7 +6443,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		const priceCondition = await SELECT.one.from(PriceCondition).where({
 			OfferID: req.data.OfferID,
-			ProductCode: req.data.ProductCode
+			ProductCode: req.data.ProductCode,
+			PriceConditionCode: null
 		});
 
 		let foc = null;
@@ -7332,7 +7376,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const priceCondition = await SELECT.one.from(PriceCondition).where({
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
-				PriceConditionCode: 'YAW1'
+				PriceConditionCode : ['YAW1','YAW2']
 			});
 
 			const standardTenderPriceConditionView = await SELECT.one.from(StandardTenderPriceConditionView).where({
