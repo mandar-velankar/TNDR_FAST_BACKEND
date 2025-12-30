@@ -1419,35 +1419,39 @@ module.exports = async (srv) => {
 			if (!data || (Array.isArray(data) && data.length === 0)) {
 				return data;
 			}
-
+			
 			const product = Array.isArray(data) ? data?.[0] : data;
+
 			const tender = await SELECT.one.from(PT_TMTEND).where({TenderID: product?.TenderID});
+			if (!tender || tender.CountryCode !== 'ES') return;
+
 			const institute = await SELECT.one.from(PT_TMINST).where({InstituteID: tender?.InstituteID, CountryCode: 'ES'});
+			if (!product.ProductCode || !institute) return;
 
-			if (tender?.CountryCode === 'ES' && product?.ProductCode && tender?.InstituteID) {
-				const classified = await classifyExistingContractsForRead({ProductCode: product?.ProductCode, InstituteID: institute?.InstituteID, AssortmentReference: institute?.External_InstituteId});
-				// const existingContracts = await ConditionContract.run(SELECT.from(IdentifyExistingContract).where({ProductCode: product?.ProductCode.toString(), InstituteID: tender?.InstituteID.toString()}));
-				// if (Array.isArray(existingContracts) && existingContracts.length > 0) {
-				// 	product.Custom_String_1 = `${existingContracts?.[0].FastConditionContractID}:${existingContracts?.map(contract => `${contract.OfferID};${contract.CCMContractID};${contract.ProductCode}`).join(',')}` || null
-				// 	product.Custom_String_2 = existingContracts?.map(contract => contract.ContractType).join(',') || null;
-				// }
-				if (classified && classified.length > 0) {
+			// Always reset derived fields
+			product.Custom_String_1 = null;
+			product.Custom_String_2 = null;
 
-					// Merge ALL contracts from ALL classification cases
-					let allContracts = classified.flatMap(entry => entry.contracts || []).filter(contract => contract.OfferID !== product.OfferID);
-					allContracts = Array.from(new Map(allContracts.map(c => [c.CCMContractID, c])).values());
+			let classified = await classifyExistingContractsForRead({ProductCode: product.ProductCode, InstituteID: institute.InstituteID, AssortmentReference: institute.External_InstituteId});
+			// const existingContracts = await ConditionContract.run(SELECT.from(IdentifyExistingContract).where({ProductCode: product?.ProductCode.toString(), InstituteID: tender?.InstituteID.toString()}));
+			// if (Array.isArray(existingContracts) && existingContracts.length > 0) {
+			// 	product.Custom_String_1 = `${existingContracts?.[0].FastConditionContractID}:${existingContracts?.map(contract => `${contract.OfferID};${contract.CCMContractID};${contract.ProductCode}`).join(',')}` || null
+			// 	product.Custom_String_2 = existingContracts?.map(contract => contract.ContractType).join(',') || null;
+			// }
+			classified = (classified || []).filter(entry => entry.case !== "NO_MATCH");
+			if (classified.length === 0) return;
 
-					if (allContracts.length > 0) {
-						product.Custom_String_1 =
-							`${allContracts
-								.map(c => `${c.FastConditionContractID};${c.OfferID};${c.CCMContractID};${c.ProductCode}`)
-								.join(",")}`;
+			// Merge ALL contracts from ALL classification cases
+			let allContracts = classified.flatMap(entry => entry.contracts || []).filter(contract => contract.OfferID !== product.OfferID);
+			allContracts = Array.from(new Map(allContracts.map(c => [c.CCMContractID, c])).values());
+			if (allContracts.length === 0) return;
 
-						product.Custom_String_2 =
-							allContracts.map(c => c.ContractType).join(",") || null;
-					}
-            	}
-        	}
+			product.Custom_String_1 =
+				`${allContracts
+					.map(c => `${c.FastConditionContractID};${c.OfferID};${c.CCMContractID};${c.ProductCode}`)
+					.join(",")}`;
+
+			product.Custom_String_2 = allContracts.map(c => c.ContractType).join(",");
 		} catch (error) {
 			console.error('Error in OfferProductsDetailView After READ');
             return req.reject(403, error?.message||"Error in OfferProductsDetailView");
@@ -1599,6 +1603,7 @@ module.exports = async (srv) => {
         	SubmittedBy: req.user.id,
 			TotalAwardedValue: req.data.TotalAwardedValue,
 			Appeal: req.data.Appeal,
+			InfoNeeded: req.data.InfoNeeded,
 			Custom_String_1: req.data.Custom_String_1,
 			Custom_String_2: req.data.Custom_String_2,
 			Custom_String_3: req.data.Custom_String_3,
@@ -2162,7 +2167,8 @@ module.exports = async (srv) => {
 		const selectedTender = await SELECT.one.from(PT_TMTEND).where({TenderID:req.data.TenderID});
 		const priceCondition = await SELECT.one.from(PriceCondition).where({
 			OfferID: req.data.OfferID,
-			ProductCode: req.data.ProductCode
+			ProductCode: req.data.ProductCode,
+			PriceConditionCode: null
 		});
 
 		const productCurrentPrice = await SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({
@@ -6327,7 +6333,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		const priceCondition = await SELECT.one.from(PriceCondition).where({
 			OfferID: req.data.OfferID,
-			ProductCode: req.data.ProductCode
+			ProductCode: req.data.ProductCode,
+			PriceConditionCode: null
 		});
 
 		const priceConditionClassification = await SELECT.one.from(PriceConditionClassification).where({
@@ -6394,7 +6401,48 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				NetPrice: req.data.NetPrice,
 				NetOfferPrice: req.data.NetofferPrice,
 				OfferPrice: req.data.OfferPrice
-			}
+			},
+			"PrecioNeto":{
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice, 
+				NetPrice: req.data.NetPrice,
+				NetOfferPrice: req.data.NetofferPrice,
+				OfferPrice: req.data.OfferPrice
+			},
+			"DescuentoComercial":{
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice, 
+				NetPrice: req.data.NetPrice,
+				NetOfferPrice: req.data.NetofferPrice,
+				OfferPrice: req.data.OfferPrice
+			},
+			"PVL":{
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice, 
+				NetPrice: req.data.NetPrice,
+				NetOfferPrice: req.data.NetofferPrice,
+				OfferPrice: req.data.OfferPrice
+			},
+			"DescuentoEspecial":{
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice, 
+				NetPrice: req.data.NetPrice,
+				NetOfferPrice: req.data.NetofferPrice,
+				OfferPrice: req.data.OfferPrice
+			},
+			"Rental":{
+				Price2: req.data.NetofferPrice,
+				Price3: req.data.NetPrice,
+				Price1: req.data.OfferPrice, 
+				NetPrice: req.data.NetPrice,
+				NetOfferPrice: req.data.NetofferPrice,
+				OfferPrice: req.data.OfferPrice
+			},
+
 		}
 
 		return mappings[ConditionType];
@@ -6414,7 +6462,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		const priceCondition = await SELECT.one.from(PriceCondition).where({
 			OfferID: req.data.OfferID,
-			ProductCode: req.data.ProductCode
+			ProductCode: req.data.ProductCode,
+			PriceConditionCode: null
 		});
 
 		let foc = null;
@@ -7346,7 +7395,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			const priceCondition = await SELECT.one.from(PriceCondition).where({
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
-				PriceConditionCode: 'YAW1'
+				PriceConditionCode : ['YAW1','YAW2']
 			});
 
 			const standardTenderPriceConditionView = await SELECT.one.from(StandardTenderPriceConditionView).where({
@@ -7444,36 +7493,90 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		['PriceConditionDescuentoComercialView','PriceConditionPVLView', 'PriceConditionPrecioNetoView', 'PriceConditionDescuentoEspecialView'], 
 		async (items, req) => {
 		try{
-			if(items.hasPriceCondition){
-				return items;
-			}else{
-				const ccmPriceCondition = await SELECT.one.from(CCMPriceCondition).where({
-					OfferID: items.OfferID,
-					TenderID: items.TenderID,
-					ProductCode: items.ProductCode
-				});
-				if(ccmPriceCondition){
-					items.PVL = parseFloat(ccmPriceCondition.YP00);
-					items.ConfidentialDiscount = parseFloat(ccmPriceCondition.YP04);
-					items.RoyalDecree = ccmPriceCondition.RoyalDecree;
-					items.ConfidentialPrice = parseFloat(ccmPriceCondition.ConfidentialPrice);
-					items.ESDiscount = items.ConditionType === 'DescuentoEspecial' ? 1 : parseFloat(ccmPriceCondition.YD02);
-					items.RoyalDecreeValue = parseFloat(ccmPriceCondition.RoyalDecreeValue);
-					items.RoyalDecreeIncl = ccmPriceCondition.RoyalDecreeIncl;
-					items.RoyalDecreePercentage_1 = parseFloat(ccmPriceCondition.YD06);
-					items.StandardDiscount = parseFloat(ccmPriceCondition.StandardDiscount);
-					items.AdditionalDiscount = parseFloat(ccmPriceCondition.YD75);
-					items.NetPriceWithoutTaxBeforeDeductionRD = parseFloat(ccmPriceCondition.YP10);
-					items.NetPriceWithoutTaxAfterDeductionRD = parseFloat(ccmPriceCondition.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD);
-					items.NetPriceWithTaxAfterDeductionRD = parseFloat(ccmPriceCondition.NETPRICEWITHTAXAFTERDEDUCTIONRD);
-					items.NetPriceWithoutTax = parseFloat(ccmPriceCondition.NETPRICEWITHOUTTAX);
-					items.NetPriceWithTax = items.ConditionType === 'DescuentoEspecial' ? (ccmPriceCondition.YP04 !== 0 ?  parseFloat(ccmPriceCondition.ConfidentialPrice) : parseFloat(ccmPriceCondition.YP00)) : parseFloat(ccmPriceCondition.NETPRICEWITHTAX);
-					items.Tax = parseFloat(ccmPriceCondition.SAPTAX);
-					items.Currency = 'EUR'
-				}
+			const round = (value, decimals = 2) => {
+				if (value === null || value === undefined) return null;
+				const factor = Math.pow(10, decimals);
+				return Math.round((Number(value) + Number.EPSILON) * factor) / factor;
+			};
+			const equalRounded = (a, b, decimals = 2) => {
+				if (a === null && b === null) return true;
+				if (a === null || b === null) return false;
+				return round(a, decimals) === round(b, decimals);
+			};
+			const ccmPriceCondition = await SELECT.one.from(CCMPriceCondition).where({
+				OfferID: items.OfferID,
+				TenderID: items.TenderID,
+				ProductCode: items.ProductCode
+			});
 
+			if (!ccmPriceCondition) {
 				return items;
 			}
+
+			const num = v => (v === null || v === undefined ? null : Number(v));
+
+			const hasChanges =
+				!equalRounded(items.PVL, ccmPriceCondition.YP00, 2) ||
+				!equalRounded(items.ConfidentialDiscount, ccmPriceCondition.YP04, 2) ||
+				!equalRounded(items.ConfidentialPrice, ccmPriceCondition.ConfidentialPrice, 2);
+			
+			if (!items.hasPriceCondition || hasChanges) {
+
+				items.PVL = num(ccmPriceCondition.YP00);
+				items.ConfidentialDiscount = num(ccmPriceCondition.YP04);
+				items.RoyalDecree = ccmPriceCondition.RoyalDecree;
+				items.ConfidentialPrice = num(ccmPriceCondition.ConfidentialPrice);
+				items.ESDiscount = items.ConditionType === 'DescuentoEspecial' ? 1 : num(ccmPriceCondition.YD02);
+				items.RoyalDecreeValue = num(ccmPriceCondition.RoyalDecreeValue);
+				items.RoyalDecreeIncl = ccmPriceCondition.RoyalDecreeIncl;
+				items.RoyalDecreePercentage_1 = num(ccmPriceCondition.YD06);
+				items.StandardDiscount = num(ccmPriceCondition.StandardDiscount);
+				items.AdditionalDiscount = num(ccmPriceCondition.YD75);
+				items.NetPriceWithoutTaxBeforeDeductionRD = num(ccmPriceCondition.YP10);
+				items.NetPriceWithoutTaxAfterDeductionRD = num(ccmPriceCondition.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD);
+				items.NetPriceWithTaxAfterDeductionRD = num(ccmPriceCondition.NETPRICEWITHTAXAFTERDEDUCTIONRD);
+				items.NetPriceWithoutTax = num(ccmPriceCondition.NETPRICEWITHOUTTAX);
+				items.NetPriceWithTax = 
+					items.ConditionType === 'DescuentoEspecial'
+						? (num(ccmPriceCondition.YP04) !== 0
+							? num(ccmPriceCondition.ConfidentialPrice)
+							: num(ccmPriceCondition.YP00))
+						: num(ccmPriceCondition.NETPRICEWITHTAX);
+				items.Tax = num(ccmPriceCondition.SAPTAX);
+				items.Currency = 'EUR';
+			}
+
+			return items;
+			// if(items.hasPriceCondition){
+			// 	return items;
+			// }else{
+			// 	const ccmPriceCondition = await SELECT.one.from(CCMPriceCondition).where({
+			// 		OfferID: items.OfferID,
+			// 		TenderID: items.TenderID,
+			// 		ProductCode: items.ProductCode
+			// 	});
+			// 	if(ccmPriceCondition){
+			// 		items.PVL = parseFloat(ccmPriceCondition.YP00);
+			// 		items.ConfidentialDiscount = parseFloat(ccmPriceCondition.YP04);
+			// 		items.RoyalDecree = ccmPriceCondition.RoyalDecree;
+			// 		items.ConfidentialPrice = parseFloat(ccmPriceCondition.ConfidentialPrice);
+			// 		items.ESDiscount = items.ConditionType === 'DescuentoEspecial' ? 1 : parseFloat(ccmPriceCondition.YD02);
+			// 		items.RoyalDecreeValue = parseFloat(ccmPriceCondition.RoyalDecreeValue);
+			// 		items.RoyalDecreeIncl = ccmPriceCondition.RoyalDecreeIncl;
+			// 		items.RoyalDecreePercentage_1 = parseFloat(ccmPriceCondition.YD06);
+			// 		items.StandardDiscount = parseFloat(ccmPriceCondition.StandardDiscount);
+			// 		items.AdditionalDiscount = parseFloat(ccmPriceCondition.YD75);
+			// 		items.NetPriceWithoutTaxBeforeDeductionRD = parseFloat(ccmPriceCondition.YP10);
+			// 		items.NetPriceWithoutTaxAfterDeductionRD = parseFloat(ccmPriceCondition.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD);
+			// 		items.NetPriceWithTaxAfterDeductionRD = parseFloat(ccmPriceCondition.NETPRICEWITHTAXAFTERDEDUCTIONRD);
+			// 		items.NetPriceWithoutTax = parseFloat(ccmPriceCondition.NETPRICEWITHOUTTAX);
+			// 		items.NetPriceWithTax = items.ConditionType === 'DescuentoEspecial' ? (ccmPriceCondition.YP04 !== 0 ?  parseFloat(ccmPriceCondition.ConfidentialPrice) : parseFloat(ccmPriceCondition.YP00)) : parseFloat(ccmPriceCondition.NETPRICEWITHTAX);
+			// 		items.Tax = parseFloat(ccmPriceCondition.SAPTAX);
+			// 		items.Currency = 'EUR'
+			// 	}
+
+			// 	return items;
+			// }
 			// const fnCalculateFields = async item => {
 			// 	if(item.ConditionType === 'Discount'){
 			// 		item.OfferPrice = item.BasePrice * (1 - item.Discount);
@@ -7492,7 +7595,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			// 	return items.map(fnCalculateFields)
 			// }else{
 			// 	return fnCalculateFields(items);
-			// }
+			// }		
 		}
 		catch(error){
 			console.error('Error in PriceConditionDescuentoComercialView, PriceConditionPVLView, PriceConditionPrecioNetoView after READ');
@@ -7691,7 +7794,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	  
 		  // Handle PricingProcedureStep-specific values
 		  if (PricingProcedureStep === "330") {
-			result.SAPTAX = parseFloat(ConditionRateValue) / 10000 || 0;
+			const sapTax = parseFloat(ConditionAmount || 0);
+			result.SAPTAX = sapTax ? (UoM === "Pack" ? (sapTax / 10000) : (sapTax / 10000 / packFactor)) : 0;
 		  }
 	  
 		  if (PricingProcedureStep === "332") {
@@ -7745,17 +7849,21 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD = result.YP10 ? (YD06 ? result.YP10 * (1 - YD06) : result.YP10) : null;
 		result.NETPRICEWITHTAXAFTERDEDUCTIONRD = (YD02 || YD30) ? result.SAPPriceWithTax : null;
 		if (YD02) {
-  			result.NETPRICEWITHOUTTAX = result.ConfidentialPrice * (1 - result.YD02) * (1 - result.YD06);
+  			result.NETPRICEWITHOUTTAX = YD06 ? basePrice * (1 - result.YD02) * (1 - result.YD06) : basePrice * (1 - result.YD02);
 		}
 		result.NETPRICEWITHTAX = result.SAPPriceWithTax;
 		result.SAPBaseGrossPrice = result.YP00;
 	  
 		// Determine the condition type
 		if (YP10) {
+			result.SAPTAX = result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD ? result.SAPTAX / result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD : 0;
 			result.ConditionType = "PrecioNeto";
 		} else if (YD02) {
+			result.SAPTAX = result.NETPRICEWITHOUTTAX && result.NETPRICEWITHOUTTAX !== 0 ? result.SAPTAX / result.NETPRICEWITHOUTTAX : 0;
 			result.ConditionType = "DescuentoComercial";
 		} else if (YP00) {
+			const iawot = YD06 ? basePrice * (1 - result.YD06) : basePrice
+			result.SAPTAX = iawot && iawot !==0 ? result.SAPTAX / iawot : 0;
 			result.ConditionType = "PVL";
 		} else {
 			result.ConditionType = null;
@@ -7878,8 +7986,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			hasExpiringSoonContracts: false,
 			hasExpiredContracts: false,
 			hasCancelledContracts: false,
-			hasContractsToBeSynchronized: false,
-			hasNewContracts: false,
+			hasNewContracts: true,
 			CCMContract: []
 		};
 
