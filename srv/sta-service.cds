@@ -14,6 +14,7 @@ using {com.bayer.SXTENDER.PriceAgreementData} from '../db/PriceAgreementData';
 using {com.bayer.SXTENDER.BrazilContractingData} from '../db/BrazilContractingData';
 using {com.bayer.SXTENDER.ExternalDataViews} from '../db/ExternalDataViews';
 using {UITemplates as UITemplateSrv} from './external/UITemplates';
+using {ConditionContract as ConditionContract} from './external/ConditionContract';
 using { com.bayer.SXTENDER.ClaimsData} from '../db/ClaimsData';
 using { com.bayer.SXTENDER.ClaimsViews } from '../db/ClaimsViews';
 
@@ -74,6 +75,14 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity FullPropertiesView as projection on UITemplateSrv.FullPropertiesView;
     @readonly 
     entity FormFieldsView as projection on UITemplateSrv.FormFieldsView;
+
+    entity FastConditionContracts as projection on ConditionContract.FastConditionContracts;
+    
+    entity CCMContract as projection on ConditionContract.CCMContract;
+
+    entity CCMMaterial as projection on ConditionContract.CCMMaterial;
+
+    entity IdentifyExistingContract as projection on ConditionContract.IdentifyExistingContract;
     @readonly 
     entity BrandsInTender  as projection on TransactionalDataViews.BrandsInTender;
     @cds.redirection.target
@@ -86,6 +95,13 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.InstituteID as ParentInstituteID,
         Institute.External_InstituteId,
         Institute.Address,
+        Institute.CustomerID,
+        Institute.Province.Name as ProvinceName,
+        Institute.City,
+        Institute.CifCode,
+        Institute.RegionalHealthSystem,
+        Institute.CG1_Description,
+        Institute.CG2_Description,
         Country.Region
     }; 
 
@@ -214,6 +230,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity PT_TMOFRS as projection on TransactionalData.PT_TMOFRS;
     entity PT_TMTNOFST as projection on TransactionalData.PT_TMTNOFST;
     entity PT_TMINST   as projection on MasterData.PT_TMINST;
+    entity PT_TMINSHIER   as projection on MasterData.PT_TMINSHIER;
     entity PT_TMTEND as projection on TransactionalData.PT_TMTEND;
     entity PT_TMDIST as projection on MasterData.PT_TMDIST;
     entity PT_TMOFPR as projection on TransactionalData.PT_TMOFPR;
@@ -230,6 +247,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         ifnull(NewOfferDueDate, Tender.BidDueDate) as OfferDueDate: Date,
         Tender.InstituteID as InstituteID,
         Tender.TenderChannel as Channel,
+        Tender.TenderName,
         OfferStatus.STATUS as OfferStatus
     };
     //inner join TransactionalData.PT_TMTEND as tender on tender.TenderID = offer.TenderID ;
@@ -271,7 +289,6 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             else Price.BudgetRate
         end as NetPriceInEUR: Double,
         RequestedVolume,
-        PriceCondition.AnticipatedYearlyVolumeBranch,
         Price.OfferPrice * (1 - Price.Deductions) *
         case 
         when Price.FOCType = 'FOC 1'
@@ -314,7 +331,156 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Offer.Tender.Custom.Integer_2 as ContractDuration_2,
         NLContractDurationOfferPrices.OfferPrice_2,
         Offer.Tender.Custom.Integer_3 as ContractDuration_3,
-        NLContractDurationOfferPrices.OfferPrice_3
+        NLContractDurationOfferPrices.OfferPrice_3,
+        case   
+            when (Price.NetofferPrice is not null and Price.NetofferPrice <> 0) 
+            and (RequestedVolume is not null and RequestedVolume <> 0) 
+            and (RequestedVolume <> Price.FOC)
+                then 
+                    round(Price.NetofferPrice * ( 
+                        (
+                            case 
+                                when Offer.FOCType = 'FOC 1'
+                                    then RequestedVolume - (
+                                        case
+                                            when Price.FOC_ABS_PCT = 'ABS'
+                                                then Price.FOC
+                                            else Price.FOC * RequestedVolume
+                                        end
+                                    ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                                else RequestedVolume 
+                            end
+                        ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                        
+                    / 
+                    
+                    (
+                        case 
+                            when Offer.FOCType = 'FOC 2'
+                                then RequestedVolume + (
+                                    case
+                                        when Price.FOC_ABS_PCT = 'ABS'
+                                            then Price.FOC
+                                        else Price.FOC * RequestedVolume
+                                    end
+                                ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                            else RequestedVolume 
+                        end
+                    ) //=$self.totalVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                    
+                    ),2)
+            else null
+        end as NetPriceFOC:Double,
+        case   
+            when UnitPerPack = 'Pack'
+                then Cogs.COGS
+            else round(Cogs.COGS / SKU.PACKFACTOR,2)
+        end as cogsUoM :Double,
+        case   
+            when Price.NetofferPrice is not null
+                then 
+                    Price.NetofferPrice * (
+                        case 
+                            when Offer.FOCType = 'FOC 1'
+                                then RequestedVolume - (
+                                    case
+                                        when Price.FOC_ABS_PCT = 'ABS'
+                                            then Price.FOC
+                                        else Price.FOC * RequestedVolume
+                                    end
+                                ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                            else RequestedVolume 
+                        end
+                    ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+            else null
+        end as GrossSales:Double,
+        case   
+            when Price.NetofferPrice is not null
+                then 
+                    (Price.NetofferPrice * 
+                        (
+                            case 
+                                when Offer.FOCType = 'FOC 1'
+                                    then RequestedVolume - (
+                                        case
+                                            when Price.FOC_ABS_PCT = 'ABS'
+                                                then Price.FOC
+                                            else Price.FOC * RequestedVolume
+                                        end
+                                    ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                                else RequestedVolume 
+                            end
+                        ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                    ) - (
+                        (
+                            case   
+                                when UnitPerPack = 'Pack'
+                                    then Cogs.COGS
+                                else round(Cogs.COGS / SKU.PACKFACTOR,2)
+                            end
+                        ) //=$self.cogsUoM but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future) 
+                    * 
+                        (
+                            case 
+                                when Offer.FOCType = 'FOC 2'
+                                    then RequestedVolume + (
+                                        case
+                                            when Price.FOC_ABS_PCT = 'ABS'
+                                                then Price.FOC
+                                            else Price.FOC * RequestedVolume
+                                        end
+                                    ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                                else RequestedVolume 
+                            end
+                        ) //=$self.totalVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                    )
+            else null
+        end as GrossProfit:Double,
+        case   
+            when (Price.NetofferPrice is not null and Price.NetofferPrice <> 0) 
+            and (RequestedVolume is not null and RequestedVolume <> 0) 
+            and (RequestedVolume <> Price.FOC)
+                then 
+                    round(1 - ((
+                        (
+                            case   
+                                when UnitPerPack = 'Pack'
+                                    then Cogs.COGS
+                                else round(Cogs.COGS / SKU.PACKFACTOR,2)
+                            end
+                        ) //=$self.cogsUoM but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                    * 
+                        (
+                            case 
+                                when Offer.FOCType = 'FOC 2'
+                                    then RequestedVolume + (
+                                        case
+                                            when Price.FOC_ABS_PCT = 'ABS'
+                                                then Price.FOC
+                                            else Price.FOC * RequestedVolume
+                                        end
+                                    ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                                else RequestedVolume 
+                            end
+                        ) //=$self.totalVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                    ) / (Price.NetofferPrice * 
+                        (
+                            case 
+                                when Offer.FOCType = 'FOC 1'
+                                    then RequestedVolume - (
+                                        case
+                                            when Price.FOC_ABS_PCT = 'ABS'
+                                                then Price.FOC
+                                            else Price.FOC * RequestedVolume
+                                        end
+                                    ) //=$self.focAbsolute but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                                else RequestedVolume 
+                            end
+                        ) //=$self.paidVolume but this syntax gave problems during deploy thats why we copy it (maybe solve it in node.js in future)
+                    ) ),2) 
+            else null
+        end as GrossMargin:Double,
+        SKU.ProductType
     } order by SORTER asc; // Form used in the Offer tab - offer products
 
     type copyOfferResponse {
@@ -424,7 +590,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         case when PricingPolicy.Type = 'BudgetedProfitability'
             then PricingPolicy.Value 
             else 0
-        end as VwBudgetedProfitability:Double
+        end as VwBudgetedProfitability:Double,
+        SKU.ProductType
     };
 
     entity OfferProductsTotalForOffer as select from TransactionalData.PT_TMOFRS as offer
@@ -445,6 +612,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         *,
         Country: redirected to Country,
         User: redirected to Users,
+        Country.CountryName,
         User.UserName,
         User.UserEmail
     };
@@ -686,6 +854,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         result.UoM,
         result.Reason,
         result.Comment,
+        result.Appeal,
+        result.InfoNeeded,
         product.Active,
         key result.LotID,
         freegoods.FreeGoodsOther,
@@ -743,6 +913,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         result.Custom.Date_8 as Custom_Date_8,
         result.Custom.Date_9 as Custom_Date_9,
         result.Custom.Date_10 as Custom_Date_10,
+        result.TotalAwardedValue,
         priceCondition.ID as priceconditionID : UUID
 
     };
@@ -931,6 +1102,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     }where p.InstituteType <> 'Branch';
 
     entity StandardTenderHistory as projection on TransactionalDataViews.StandardTenderHistory;
+    entity StandardTenderHistorySpain as projection on TransactionalDataViews.StandardTenderHistorySpain;
 
     entity PriceConditionCurrentSectionTaiwanView as projection on TransactionalDataViews.PriceConditionCurrentSectionTaiwanView;
     
@@ -1278,8 +1450,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             cd.SKU.PACKFACTOR,
             cd.WholesalerPurchasePrice,
             cd.WholesalerContractPrice,
-            cf.WholesalerPurchaseAmount, 
-            cf.NetSales,
+            cf.WholesalerPurchaseAmount,
             cd.Product.RequestedVolume,
             cd.BrandContractVolume,
             cd.BrandUsedVolume,
@@ -1381,6 +1552,558 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         cd.ProductPackID,
         cd.BrandId;
 
+    entity ProfitabilityCalcParamView @(cds.redirection.target:false) as select from TransactionalData.PT_TMOFRS;
+    entity Settlements                                  as projection on MasterData.Settlements;
+    entity DiscountCondition @(cds.redirection.target:false) as projection on TransactionalData.DiscountCondition;
+    entity DiscountConditionView as Select from TransactionalData.DiscountCondition as dc
+        inner join TransactionalDataViews.StandardTenderPriceConditionView as pc on dc.PriceCondition.ID = pc.PriceConditionID{
+            key dc.ID,
+            pc.CountryCode,
+            pc.Region,
+            pc.Currency,
+            pc.OfferID,
+            pc.ProductCode,
+            pc.PriceConditionID,
+            dc.Volume,
+            dc.Discount,
+            dc.NetPriceWithoutTax,
+            dc.NetPriceWithTax, 
+            pc.Tax
+    }where pc.ConditionType = 'Rappel';
+    entity PriceConditionRappelView as Select from TransactionalDataViews.StandardTenderPriceConditionView as std
+        left outer join TransactionalDataViews.StandardTenderPriceConditionView as main
+            on std.CountryCode = main.CountryCode
+            and std.OfferID = main.OfferID
+            and std.ProductCode = main.ProductCode
+            and main.isMain = true
+            and main.PriceConditionID is not null{
+                key std.TenderID,
+                key std.OfferID,
+                key std.ProductCode,
+                std.RequestedVolume,
+                std.hasPriceCondition,
+                std.PriceConditionID,
+                std.ClassificationID,
+                std.Classification,
+                key std.ConditionType,
+                std.Division,
+                std.isMain,
+                main.ConfidentialPrice,
+                main.PVL,
+                main.RoyalDecree,
+                main.Tax,
+                std.Liquidation,
+                std.RefundDate,
+                std.Settlement_ID,
+                std.PriceConditionCode,
+                std.ESDiscount,
+                std.RoyalDecreeValue,
+                std.RoyalDecreeIncl,
+                std.StandardDiscount,
+                std.AdditionalDiscount,
+                std.NetPriceWithoutTaxBeforeDeductionRD,
+                std.NetPriceWithoutTaxAfterDeductionRD,
+                std.NetPriceWithTaxAfterDeductionRD,
+                std.NetPriceWithoutTax,
+                std.NetPriceWithTax,
+                std.MaximumPrice,
+                std.ConfidentialDiscount,
+                std.RoyalDecreePercentage_1,
+                std.MonthlyRentPerUnit,
+                std.AnnualValue,
+                std.MarketIncentiveID
+            };
+    entity CCMPriceConditionView                   as select from TransactionalData.CCMPriceCondition{
+        CountryCode,
+        key OfferID,
+        key TenderID,
+        key ProductCode,
+        MaterialNumber,
+        InstituteID,
+        CustomerID,
+        Currency,
+        YP00,
+        YP04,
+        YP10,
+        YD75,
+        YD06,
+        YD02,
+        YD30,
+        SAPBaseGrossPrice,  
+        SAPTAX,
+        SAPPriceWithTax,
+        RoyalDecree,
+        RoyalDecreeValue,
+        RoyalDecreeIncl,
+        ConfidentialPrice,
+        NETPRICEWITHOUTTAXAFTERDEDUCTIONRD,
+        NETPRICEWITHTAXAFTERDEDUCTIONRD,
+        NETPRICEWITHOUTTAX,
+        NETPRICEWITHTAX,
+        key ConditionType
+    };
+    entity PriceConditionDescuentoComercialView         as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+    entity PriceConditionPVLView                        as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+    entity PriceConditionPrecioNetoView                 as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+    entity PriceConditionDescuentoEspecialView          as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+    entity PriceConditionRentalView                     as projection on TransactionalDataViews.StandardTenderPriceConditionView;
+
+    entity FastConditionContractsView as select from TransactionalData.PT_TMTEND as tender
+        inner join AdminData.PT_TMUSER as USR
+            on tender.SubmittedBy = USR.UserName
+        inner join TransactionalData.PT_TMOFRS as offer 
+            on offer.TenderID = tender.TenderID
+            and offer.Active = 1
+        inner join TransactionalData.PT_TMOFPR as product 
+            on product.OfferID = offer.OfferID
+            and product.Active = 1
+            and product.ActiveProduct = 1 
+        inner join MasterData.PT_TMINST as institute 
+            on tender.InstituteID = institute.InstituteID
+    {
+        tender.TenderID,
+        key offer.OfferID,
+        product.CountryCode,
+        institute.InstituteID,
+        institute.InstituteName,
+        institute.External_InstituteId,
+        offer.Division,
+        offer.DistributorID,
+        institute.CustomerID,
+        tender.SubmittedBy as Owner:String,
+        USR.UserName as OwnerName:String,
+        USR.UserEmail as OwnerEmail:String,
+        tender.TenderName as Reference:String,
+        tender.Classification as ContractType:String,
+        tender.SAPID,
+        tender.ExternalID
+    }where tender.CountryCode = 'ES' 
+    group by tender.TenderID, offer.OfferID, product.CountryCode, institute.InstituteID, institute.InstituteName, institute.External_InstituteId, offer.Division, offer.DistributorID, institute.CustomerID, tender.SubmittedBy, USR.UserName, USR.UserEmail, tender.TenderName, tender.Classification, tender.SAPID, tender.ExternalID;
+
+    entity ConditionContractsView as select from TransactionalData.PT_TMTEND as tender
+        inner join TransactionalData.PT_TMOFRS as offer 
+            on offer.TenderID = tender.TenderID
+            and offer.Active = 1
+        inner join TransactionalData.PT_TMOFPR as product 
+            on product.OfferID = offer.OfferID
+            and product.Active = 1
+            and product.ActiveProduct = 1 
+        inner join MasterData.PT_TMINST as institute 
+            on tender.InstituteID = institute.InstituteID
+        left join TransactionalDataViews.BrandsInTender as brands 
+            on brands.OFFERID = offer.OfferID
+    {
+        tender.TenderID,
+        key offer.OfferID,
+        product.CountryCode,
+        key product.ProductCode,
+        product.Price.OfferPrice,
+        product.SKU.PRODUCTPACKNAME as ProductPackName:String,
+        product.UnitPerPack as UoM:String,
+        max(brands.BRANDID) as BrandID:String,
+        max(brands.BRANDNAME) as BrandName:String,
+        product.SKU.PACKFACTOR,
+        institute.InstituteID,
+        institute.InstituteName,
+        institute.CustomerID,
+        institute.InstituteType,
+        product.SKUCountry.EAN
+    }where tender.CountryCode = 'ES'
+    group by tender.TenderID, offer.OfferID, product.CountryCode, product.ProductCode, product.Price.OfferPrice, product.SKU.PRODUCTPACKNAME, product.UnitPerPack, institute.InstituteID, institute.InstituteName, institute.CustomerID, institute.InstituteType, product.SKUCountry.EAN, product.SKU.PACKFACTOR;
+
+    entity CCMMaterilsView as select from TransactionalData.PT_TMOFPR as product 
+        inner join MasterData.PT_TMSKUPRDPCK as skuprdpck 
+            on skuprdpck.ProductPackID = product.ProductCode
+    {
+        key product.ProductCode,
+        skuprdpck.SKUCode,
+        skuprdpck.ActiveRecord,
+        product.CountryCode
+    }where product.CountryCode = 'ES'
+    group by product.ProductCode, skuprdpck.SKUCode, skuprdpck.ActiveRecord, product.CountryCode; 
+
+   entity PriceConditionInvoiceView as select from TransactionalData.PT_TMTEND as tender 
+    inner join TransactionalData.PT_TMOFRS as offer 
+        on offer.TenderID = tender.TenderID
+        and offer.Active = 1
+    inner join TransactionalData.PT_TMOFPR as product 
+        on product.OfferID = offer.OfferID
+        and product.Active = 1
+    inner join MasterData.PT_TMPRDPCK as productPacks
+        on productPacks.PRODUCTPACKID = product.ProductCode
+        and productPacks.ACTIVERECORD = 'Yes' 
+    inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+        on priceConditionClassification.CountryCode = product.CountryCode
+        and priceConditionClassification.Classification = tender.Classification
+        and priceConditionClassification.Division = offer.Division 
+        and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
+        and priceConditionClassification.isMain = true
+    inner join TransactionalData.PriceCondition as priceCondition 
+        on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+        and product.OfferID = priceCondition.OfferID
+        and product.ProductCode = priceCondition.ProductCode{
+            tender.CountryCode,
+            tender.Country.Region,
+            product.TenderID,
+            key offer.OfferID,
+            key product.ProductCode,
+            product.RequestedVolume,
+            case   
+                when priceCondition.ID is not null then True
+                else False
+            end as hasPriceCondition:Boolean,
+            priceCondition.ID as PriceConditionID: UUID,
+            priceConditionClassification.ID as ClassificationID: UUID,
+            priceConditionClassification.Classification,
+            priceConditionClassification.ConditionType,
+            priceConditionClassification.Division,
+            priceConditionClassification.isMain,
+            offer.Currency,
+            priceCondition.ConfidentialPrice,
+            priceCondition.PVL as YP00: Double,
+            priceCondition.RoyalDecree,
+            priceCondition.PriceConditionCode,
+            priceCondition.Discount as YD02: Double,
+            priceCondition.RoyalDecreeValue,
+            priceCondition.RoyalDecreeIncl,
+            priceCondition.StandardDiscount,
+            priceCondition.AdditionalDiscount as YD75: Double,
+            priceCondition.NetPriceWithoutTaxBeforeDeductionRD as YP10: Double,
+            priceCondition.NetPriceWithoutTaxAfterDeductionRD,
+            priceCondition.NetPriceWithTaxAfterDeductionRD,
+            priceCondition.NetPriceWithoutTax,
+            priceCondition.NetPriceWithTax,
+            product.MaxPrice as MaximumPrice: Double,
+            priceCondition.ConfidentialDiscount as YP04: Double,
+            priceCondition.RoyalDecreePercentage_1 as YD06: Double,
+            priceCondition.MonthlyRentPerUnit,
+            priceCondition.AnnualValue,
+            priceCondition.Tax
+        }where tender.Active = 1 and tender.CountryCode = 'ES'
+        group by 
+            tender.CountryCode,
+            tender.Country.Region,
+            product.TenderID,
+            offer.OfferID,
+            product.ProductCode,
+            product.RequestedVolume,
+            priceCondition.ID,
+            priceConditionClassification.ID,
+            priceConditionClassification.Classification,
+            priceConditionClassification.ConditionType,
+            priceConditionClassification.Division,
+            priceConditionClassification.isMain,
+            offer.Currency,
+            priceCondition.ConfidentialPrice,
+            priceCondition.PVL,
+            priceCondition.RoyalDecree,
+            priceCondition.PriceConditionCode,
+            priceCondition.Discount,
+            priceCondition.RoyalDecreeValue,
+            priceCondition.RoyalDecreeIncl,
+            priceCondition.StandardDiscount,
+            priceCondition.AdditionalDiscount,
+            priceCondition.NetPriceWithoutTaxBeforeDeductionRD,
+            priceCondition.NetPriceWithoutTaxAfterDeductionRD,
+            priceCondition.NetPriceWithTaxAfterDeductionRD,
+            priceCondition.NetPriceWithoutTax,
+            priceCondition.NetPriceWithTax,
+            product.MaxPrice, 
+            priceCondition.ConfidentialDiscount, 
+            priceCondition.RoyalDecreePercentage_1, 
+            priceCondition.MonthlyRentPerUnit, 
+            priceCondition.AnnualValue, 
+            priceCondition.Tax; 
+            
+
+    entity PriceConditionRebateView as select from TransactionalData.PT_TMTEND as tender 
+    inner join TransactionalData.PT_TMOFRS as offer 
+        on offer.TenderID = tender.TenderID
+        and offer.Active = 1
+    inner join TransactionalData.PT_TMOFPR as product 
+        on product.OfferID = offer.OfferID
+        and product.Active = 1
+    inner join MasterData.PT_TMPRDPCK as productPacks
+        on productPacks.PRODUCTPACKID = product.ProductCode
+        and productPacks.ACTIVERECORD = 'Yes' 
+    inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+        on priceConditionClassification.CountryCode = product.CountryCode
+        and priceConditionClassification.Classification = tender.Classification
+        and priceConditionClassification.Division = offer.Division 
+        and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
+        and priceConditionClassification.isMain = false and priceConditionClassification.ConditionType = 'Rappel'
+    inner join TransactionalData.PriceCondition as priceCondition 
+        on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+        and product.OfferID = priceCondition.OfferID
+        and product.ProductCode = priceCondition.ProductCode
+        {
+            tender.CountryCode,
+            tender.Country.Region,
+            product.TenderID,
+            key offer.OfferID,
+            key product.ProductCode,
+            product.RequestedVolume,
+            case   
+                when priceCondition.ID is not null then True
+                else False
+            end as hasPriceCondition:Boolean,
+            priceCondition.ID as PriceConditionID: UUID,
+            priceConditionClassification.ID as ClassificationID: UUID,
+            priceConditionClassification.Classification,
+            priceConditionClassification.ConditionType,
+            priceConditionClassification.Division,
+            priceConditionClassification.isMain,
+            offer.Currency,
+            priceCondition.ConfidentialPrice,
+            priceCondition.PVL as YP00: Double,
+            priceCondition.RoyalDecree,
+            priceCondition.PriceConditionCode,
+            priceCondition.RoyalDecreeValue,
+            priceCondition.RoyalDecreeIncl,
+            priceCondition.Liquidation,
+            priceCondition.RefundDate,
+            priceCondition.Settlement.ID as Settlement_ID: UUID,
+            priceCondition.Settlement.Description as SettlementDescription: String,
+            priceCondition.Tax,
+            priceCondition.MarketIncentiveID
+        }where tender.Active = 1 and tender.CountryCode = 'ES'
+        group by 
+            tender.CountryCode,
+            tender.Country.Region,
+            product.TenderID,
+            offer.OfferID,
+            product.ProductCode,
+            product.RequestedVolume,
+            priceCondition.ID,
+            priceConditionClassification.ID,
+            priceConditionClassification.Classification,
+            priceConditionClassification.ConditionType,
+            priceConditionClassification.Division,
+            priceConditionClassification.isMain,
+            offer.Currency,
+            priceCondition.ConfidentialPrice,
+            priceCondition.PVL,
+            priceCondition.RoyalDecree,
+            priceCondition.PriceConditionCode,
+            priceCondition.RoyalDecreeValue,
+            priceCondition.RoyalDecreeIncl,
+            priceCondition.Liquidation,
+            priceCondition.RefundDate,
+            priceCondition.Settlement.ID,
+            priceCondition.Settlement.Description,
+            priceCondition.Tax,
+            priceCondition.MarketIncentiveID; 
+
+entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_TMTEND as tender 
+    inner join TransactionalData.PT_TMOFRS as offer 
+        on offer.TenderID = tender.TenderID
+        and offer.Active = 1
+    inner join TransactionalData.PT_TMOFPR as product 
+        on product.OfferID = offer.OfferID
+        and product.Active = 1
+    inner join MasterData.PT_TMPRDPCK as productPacks
+        on productPacks.PRODUCTPACKID = product.ProductCode
+        and productPacks.ACTIVERECORD = 'Yes' 
+    inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+        on priceConditionClassification.CountryCode = product.CountryCode
+        and priceConditionClassification.Classification = tender.Classification
+        and priceConditionClassification.Division = offer.Division 
+        and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
+        and priceConditionClassification.isMain = false and priceConditionClassification.ConditionType = 'Rappel'
+    inner join TransactionalData.PriceCondition as priceCondition 
+        on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+        and product.OfferID = priceCondition.OfferID
+        and product.ProductCode = priceCondition.ProductCode
+    inner join TransactionalData.DiscountCondition as discountCondition 
+        on discountCondition.PriceCondition.ID = priceCondition.ID
+        {
+            tender.CountryCode,
+            tender.Country.Region,
+            product.TenderID,
+            key offer.OfferID,
+            key product.ProductCode,
+            product.RequestedVolume,
+            case   
+                when priceCondition.ID is not null then True
+                else False
+            end as hasPriceCondition:Boolean,
+            key discountCondition.PriceCondition.ID as PriceConditionID: UUID,
+            priceConditionClassification.ID as ClassificationID: UUID,
+            priceConditionClassification.Classification,
+            priceConditionClassification.ConditionType,
+            priceConditionClassification.Division,
+            priceConditionClassification.isMain,
+            offer.Currency,
+            discountCondition.Volume,
+            discountCondition.Discount,
+            discountCondition.NetPriceWithoutTax,
+            discountCondition.NetPriceWithTax,
+            priceCondition.Tax
+        }where tender.Active = 1 and tender.CountryCode = 'ES'
+        group by 
+            tender.CountryCode,
+            tender.Country.Region,
+            product.TenderID,
+            offer.OfferID,
+            product.ProductCode,
+            product.RequestedVolume,
+            priceCondition.ID,
+            discountCondition.PriceCondition.ID,
+            priceConditionClassification.ID,
+            priceConditionClassification.Classification,
+            priceConditionClassification.ConditionType,
+            priceConditionClassification.Division,
+            priceConditionClassification.isMain,
+            offer.Currency,
+            discountCondition.Volume,
+            discountCondition.Discount,
+            discountCondition.NetPriceWithoutTax,
+            discountCondition.NetPriceWithTax,
+            priceCondition.Tax; 
+            
+    entity PriceConditionFOCView as select from TransactionalData.PT_TMTEND as tender 
+    inner join TransactionalData.PT_TMOFRS as offer 
+        on offer.TenderID = tender.TenderID
+        and offer.Active = 1
+    inner join TransactionalData.PT_TMOFPR as product 
+        on product.OfferID = offer.OfferID
+        and product.Active = 1
+    inner join MasterData.PT_TMPRDPCK as productPacks
+        on productPacks.PRODUCTPACKID = product.ProductCode
+        and productPacks.ACTIVERECORD = 'Yes' 
+    inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+        on priceConditionClassification.CountryCode = product.CountryCode
+        and priceConditionClassification.Classification = tender.Classification
+        and priceConditionClassification.Division = offer.Division 
+        and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
+        and priceConditionClassification.isMain = true
+    inner join TransactionalData.PriceCondition as priceCondition 
+        on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+        and product.OfferID = priceCondition.OfferID
+        and product.ProductCode = priceCondition.ProductCode
+    inner join TransactionalData.FreeGoodsOther as foc
+        on foc.PriceCondition.ID = priceCondition.ID{
+            tender.CountryCode,
+            tender.Country.Region,
+            product.TenderID,
+            key offer.OfferID,
+            key product.ProductCode,
+            product.RequestedVolume,
+            case   
+                when priceCondition.ID is not null then True
+                else False
+            end as hasPriceCondition:Boolean,
+            key foc.PriceCondition.ID as PriceConditionID: UUID,
+            priceConditionClassification.ID as ClassificationID: UUID,
+            priceConditionClassification.Classification,
+            priceConditionClassification.ConditionType,
+            priceConditionClassification.Division,
+            priceConditionClassification.isMain,
+            offer.Currency,
+            foc.FreeGoodsOther,
+            case
+                when foc.FreeGoodsOther_ABS_PCT = 'PCT'
+                    then round(100 * foc.FreeGoodsOther, 2) || '%'
+                when foc.FreeGoodsOther_ABS_PCT = 'ABS'
+                    then foc.FreeGoodsOther || ' '  || product.UnitPerPack
+                when foc.FreeGoodsOther_ABS_PCT = 'STP'
+                    then foc.FreeGoodsOther || ' '  || product.UnitPerPack
+            end as Bonus:String,
+            foc.FreeGoodsOther_Step,
+            foc.FreeGoodsOther_ABS_PCT,
+            foc.VAT,
+            foc.FOCMinAmount,
+            foc.FOCBonus,
+            foc.PotentialGeneratedSavings,
+            foc.RoyalDecree,
+            foc.ADD_INCLUDE
+    }where tender.Active = 1 and tender.CountryCode = 'ES'
+        group by 
+            tender.CountryCode,
+            tender.Country.Region,
+            product.TenderID,
+            product.UnitPerPack,
+            offer.OfferID,
+            product.ProductCode,
+            product.RequestedVolume,
+            priceCondition.ID,
+            foc.PriceCondition.ID,
+            priceConditionClassification.ID,
+            priceConditionClassification.Classification,
+            priceConditionClassification.ConditionType,
+            priceConditionClassification.Division,
+            priceConditionClassification.isMain,
+            offer.Currency,
+            foc.FreeGoodsOther,
+            foc.FreeGoodsOther_Step,
+            foc.FreeGoodsOther_ABS_PCT,
+            foc.VAT,
+            foc.FOCMinAmount,
+            foc.FOCBonus,
+            foc.PotentialGeneratedSavings,
+            foc.RoyalDecree,
+            foc.ADD_INCLUDE;
+
+    entity BankGuarantees                               as projection on BankGuaranteeData.BankGuarantees;
+    entity MarketIncentive                              as projection on MasterData.MarketIncentive;  
+
+    entity RelatedInstitutes as select from PT_TMINST as inst
+        left join PT_TMINSHIER as childRel
+            on childRel.ParentInstituteID = inst.InstituteID and childRel.ActiveRecord = 'Yes'
+        left join PT_TMINSHIER as parentRel
+            on parentRel.InstituteID = inst.InstituteID and parentRel.ActiveRecord = 'Yes'
+    {
+        inst.InstituteID as BaseInstituteID,
+        inst.External_InstituteId as AssortmentReference,
+        inst.CustomerID,
+
+        childRel.InstituteID  as ChildInstituteID,
+        parentRel.ParentInstituteID as ParentInstituteID
+    } where inst.CountryCode = 'ES' and inst.ActiveRecord = 'Yes';
+
+    entity CandidateInstitutes as select from RelatedInstitutes as rel
+        left join PT_TMINST as childInst
+            on childInst.InstituteID = rel.ChildInstituteID
+    {
+        rel.BaseInstituteID,
+        rel.ChildInstituteID as CandidateInstituteID,
+        childInst.CustomerID,
+        childInst.InstituteName,  
+        'CHILD' as RelationType : String
+    }
+    where rel.ChildInstituteID is not null
+
+    union select from RelatedInstitutes as rel
+        left join PT_TMINST as parentInst
+            on parentInst.InstituteID = rel.ParentInstituteID
+    {
+        rel.BaseInstituteID,
+        rel.ParentInstituteID as CandidateInstituteID,
+        parentInst.CustomerID,
+        parentInst.InstituteName,   
+        'PARENT' as RelationType : String
+    }
+    where rel.ParentInstituteID is not null
+
+    union select from RelatedInstitutes as rel
+        left join PT_TMINST as baseInst
+            on baseInst.InstituteID = rel.BaseInstituteID
+    {
+        rel.BaseInstituteID,
+        rel.BaseInstituteID as CandidateInstituteID,
+        baseInst.CustomerID, 
+        baseInst.InstituteName,
+        'SELF' as RelationType : String
+    };
+
+    type ContractMngtDateConstraintsResponse {
+        minDate: String;
+    }
+    
+    action getSAPSalesOrderSimulation(offerID: String, tenderID: String, productCode: Integer, instituteID: Integer, customerID: String, materialNumber: String, countryCode: String, packFactor: Double, UoM: String) returns String;
+    action updateFinalContractStartEndDate(OfferID: String, ContractStartDate: Date, ContractEndDate: Date) returns String;
+    action createAllFastConditionContracts(OfferID: String, ContractStartDate: Date, ContractEndDate: Date) returns String;
+    function getFastContractForOffer(offerID: String, tenderID: String) returns String;
     entity PolandPendingTMApprovals as select from TransactionalData.PT_TMOFRS as o
         inner join TransactionalData.PT_TMAPPRST as a
             on o.OfferID = a.OfferId
@@ -1424,4 +2147,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         and PendingApproverType = 'TM'
         and PendingTMCount > 0
     order by OfferID desc;
+    
+    function getContractMngtDateConstraints(TenderID: String, OfferID: String, CountryCode: String) returns ContractMngtDateConstraintsResponse;
+    function getQuotationData(OfferID : String) returns String;
 }

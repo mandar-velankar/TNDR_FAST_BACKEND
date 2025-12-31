@@ -1,3 +1,12 @@
+###
+POST http://localhost:4004/sta_tender/createAllFastConditionContracts
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+
+{
+    "OfferID":"ES-25-1064-1"
+}
+
 ### OfferValidation  
 POST http://localhost:8089/v2/sta_tender/OfferValidation
 Authorization: Basic YXJ0aW9t
