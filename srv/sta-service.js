@@ -5369,7 +5369,10 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability >= 40){
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
-                        case "KAMS":
+                        case "KAM1":
+                            oApproverType.ValidationType = 3;
+                            break;
+						case "KAM2":
                             oApproverType.ValidationType = 3;
                             break;
 						case "Supply Chain":
@@ -5382,11 +5385,15 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             } else if(product.NET_PRICE > dFloorPrice && dRadiologyProfitability < 40){
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
-                        case "KAMS":
+                        case "KAM1":
+                            oApproverType.ValidationType = 3;
+                            break;
+						case "KAM2":
                             oApproverType.ValidationType = 3;
                             break;
                         case "BU/RAM":
                             oApproverType.ValidationType = 3;
+                            oApproverType.Hierarchy = 2;
                             break;
 						case "Supply Chain":
 							oApproverType.ValidationType = supply;
@@ -5399,14 +5406,18 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
          else {
                 aApproverTypes.map(async function (oApproverType) {
                     switch (oApproverType.ApproverType) {
-						case "KAMS":
-							oApproverType.ValidationType = 3;
-							break;
+						case "KAM1":
+                            oApproverType.ValidationType = 3;
+                            break;
+						case "KAM2":
+                            oApproverType.ValidationType = 3;
+                            break;
 						case "CDH":
 							oApproverType.ValidationType = 3;
 							break;
                         case "BU/RAM":
                             oApproverType.ValidationType = 3;
+							oApproverType.Hierarchy = 2;
                             break;
 						case "Supply Chain":
 							oApproverType.ValidationType = supply;
