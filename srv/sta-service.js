@@ -7524,7 +7524,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				items.RoyalDecreePercentage_1 = num(ccmPriceCondition.YD06);
 				items.StandardDiscount = num(ccmPriceCondition.StandardDiscount);
 				items.AdditionalDiscount = num(ccmPriceCondition.YD75);
-				items.NetPriceWithoutTaxBeforeDeductionRD = num(ccmPriceCondition.YP10);
+				items.NetPriceWithoutTaxBeforeDeductionRD = ccmPriceCondition.YP10 ? num(ccmPriceCondition.YP10) : num(ccmPriceCondition.YP11);
 				items.NetPriceWithoutTaxAfterDeductionRD = num(ccmPriceCondition.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD);
 				items.NetPriceWithTaxAfterDeductionRD = num(ccmPriceCondition.NETPRICEWITHTAXAFTERDEDUCTIONRD);
 				items.NetPriceWithoutTax = num(ccmPriceCondition.NETPRICEWITHOUTTAX);
@@ -7759,6 +7759,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		  YD30: 0,
 		  YD75: null,
 		  YP10: null,
+		  YP11: null,
 		  NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD: null,
 		  NETPRICEWITHOUTTAXAFTERDEDUCTIONRD: null,
 		  NETPRICEWITHTAXAFTERDEDUCTIONRD: null,
@@ -7812,6 +7813,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const YP00 = conditions["YP00"]?.ConditionAmount || 0;
 		const YP04 = conditions["YP04"] ? Math.abs(conditions["YP04"].ConditionRateValue) / 100 : 0;
 		const YP10 = conditions["YP10"]?.ConditionRateValue ?? null;
+		const YP11 = conditions["YP11"]?.ConditionRateValue ?? null;
 		const YD02 = conditions["YD02"] ? Math.abs(conditions["YD02"].ConditionRateValue) / 100 : 0;
 		const YD06 = conditions["YD06"] ? Math.abs(conditions["YD06"].ConditionRateValue) / 100 : 0;
 		const YD75 = conditions["YD75"]?.ConditionAmount ?? null;
@@ -7828,17 +7830,19 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		result.RoyalDecreeIncl = YD06 ? false : true;
 		result.YD30 = YD30 ? UoM === 'Pack' ? (YD30 / 10000) : (YD30 / 10000 / packFactor) : 0;
+		result.YP11 = YP11 ? UoM === 'Pack' ? (YP11 / 10000) : (YP11 / 10000 / packFactor) : null;
 		result.YP10 = YP10 ? UoM === 'Pack' ? (YP10 / 10000) : (YP10 / 10000 / packFactor) : null;
-		result.RoyalDecreeValue = YD06 && YP10 ? YD06 * result.YP10 : 0;
+		const precioNeto = result.YP11 ?? result.YP10 ?? null;
+		result.RoyalDecreeValue = YD06 && precioNeto ? YD06 * precioNeto : 0;
 
 		const useConfidential = YP04 !== 0;
 		const basePrice = useConfidential ? result.ConfidentialPrice : result.YP00;
 
-		result.YD75 = (basePrice - result.YP10) / basePrice;
+		result.YD75 = (basePrice - precioNeto) / basePrice;
 	  
 		// Mapped values for NETPRICE fields
-		result.NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD = result.YP10;
-		result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD = result.YP10 ? (YD06 ? result.YP10 * (1 - YD06) : result.YP10) : null;
+		result.NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD = precioNeto;
+		result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD = precioNeto ? (YD06 ? precioNeto * (1 - YD06) : precioNeto) : null;
 		result.NETPRICEWITHTAXAFTERDEDUCTIONRD = (YD02 || YD30) ? result.SAPPriceWithTax : null;
 		if (YD02) {
   			result.NETPRICEWITHOUTTAX = YD06 ? basePrice * (1 - result.YD02) * (1 - result.YD06) : basePrice * (1 - result.YD02);
@@ -7847,7 +7851,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		result.SAPBaseGrossPrice = result.YP00;
 	  
 		// Determine the condition type
-		if (YP10) {
+		if (precioNeto) {
 			result.SAPTAX = result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD ? result.SAPTAX / result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD : 0;
 			result.ConditionType = "PrecioNeto";
 		} else if (YD02) {
