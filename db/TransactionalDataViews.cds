@@ -1735,7 +1735,9 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
     ifnull(priceCondition.FreeGoods_Amount,0) as FreeGoods_Amount:Double,
      @Core.Computed: false
     ifnull(priceCondition.FreeGoods_Percentage,0) as FreeGoods_Percentage:Double,
-    priceCondition.NLPriceConditionType,
+    priceCondition.NLPriceConditionType_1,
+    priceCondition.NLPriceConditionType_2,
+    priceCondition.NLPriceConditionType_3,
     @Core.Computed: false
     ifnull(priceCondition.CurrentBasePrice, curentSection.Price0) as TWCurrentBasePrice: Decimal,
     @Core.Computed: false

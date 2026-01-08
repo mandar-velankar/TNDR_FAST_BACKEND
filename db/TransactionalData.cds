@@ -571,7 +571,9 @@ entity PriceCondition: cuid, managed {
     PriceAgreement                      : Association to PriceAgreementData.PriceAgreements;
     Settlement                          : Association to MasterData.Settlements;
     IsPricingUnlocked                   : Boolean default false;
-    NLPriceConditionType                : Array of NLConditions;
+    NLPriceConditionType_1              : NLConditions;
+    NLPriceConditionType_2              : NLConditions;
+    NLPriceConditionType_3              : NLConditions;
     CurrentBasePrice                    : Decimal;
     CurrentInvoicePrice                 : Decimal;
     CurrentGeneralDiscount              : Double;
