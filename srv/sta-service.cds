@@ -1553,6 +1553,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         cd.BrandId;
 
     entity ProfitabilityCalcParamView @(cds.redirection.target:false) as select from TransactionalData.PT_TMOFRS;
+    entity ProductTypeProfitability as projection on TransactionalData.ProductTypeProfitability;
     entity Settlements                                  as projection on MasterData.Settlements;
     entity DiscountCondition @(cds.redirection.target:false) as projection on TransactionalData.DiscountCondition;
     entity DiscountConditionView as Select from TransactionalData.DiscountCondition as dc
