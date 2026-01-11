@@ -2212,35 +2212,36 @@ module.exports = async (srv) => {
 	}
 
 	async function handleNetherlandsPriceConditions(req) {
+		const promises = [];
 		const priceCondition = await SELECT.one.from(PriceCondition).where({
 			OfferID: req.data.OfferID,
 			ProductCode: req.data.ProductCode
 		});
 		const existingNLPriceConditions = await SELECT.from(NLPriceConditions).where({PriceCondition_ID: priceCondition.ID});
 
-		if (existingNLPriceConditions.length > 0) {
-			await Promise.all(req.data.NLPriceConditionType.map(pc => {
-				const mappedNLPriceCondition = mappedNLPriceConditions(pc, priceCondition.ID);
-				const nlPriceCondIndex = existingNLPriceConditions.findIndex(el => el.ContractDuration == pc.ContractDuration);
-				if (nlPriceCondIndex > -1) {
-					return UPDATE(NLPriceConditions)
-					.with(mappedNLPriceCondition)
-					.where({
-						ContractDuration: pc.ContractDuration,
-						PriceCondition_ID: priceCondition.ID
-					});
-				}else if (nlPriceCondIndex == -1 && pc.ContractDuration) {
-					return INSERT(mappedNLPriceCondition).into(NLPriceConditions);
-				}
-			}))
-		}else {
-			await Promise.all(req.data.NLPriceConditionType.map(pc => {
-				const mappedNLPriceCondition = mappedNLPriceConditions(pc, priceCondition.ID);
+		for(let i = 1; i <= 3; i++) {
+			const nlPriceCondIndex = existingNLPriceConditions.findIndex(el => el.ContractDuration == req.data[`Custom_Integer_${i}`]);
+			const mappedNLPriceCondition = mappedNLPriceConditions(req.data, i, priceCondition.ID);
+			if (nlPriceCondIndex > -1) {
+				promises.push(
+					UPDATE(NLPriceConditions)
+						.with(mappedNLPriceCondition)
+						.where({
+							ContractDuration: mappedNLPriceCondition.ContractDuration,
+							PriceCondition_ID: priceCondition.ID
+						})
+				)
+			}else {	
+				//no need to save price without contract duration
 				if (mappedNLPriceCondition.ContractDuration) {
-					return INSERT(mappedNLPriceCondition).into(NLPriceConditions);
+					promises.push(
+						INSERT(mappedNLPriceCondition).into(NLPriceConditions)
+					)
 				}
-			}))
+			}
 		}
+
+		await Promise.all(promises);
 	}
 
 	async function handlePriceConditionUpsert(priceCondition, mappedPriceCondition){
@@ -2255,12 +2256,12 @@ module.exports = async (srv) => {
 		}
 	}
 
-	const mappedNLPriceConditions = function(pc, PriceconditionID) {
+	const mappedNLPriceConditions = function(pc, i, PriceconditionID) {
 		return {
-			ContractDuration: pc.ContractDuration,
-			OfferPrice: pc.OfferPrice,
-			Discount: pc.Discount,
-			NetPrice: pc.NetPrice,
+			ContractDuration: pc[`NLPriceConditionType_${i}_ContractDuration`],
+			OfferPrice: pc[`NLPriceConditionType_${i}_OfferPrice`],
+			Discount: pc[`NLPriceConditionType_${i}_Discount`],
+			NetPrice: pc[`NLPriceConditionType_${i}_NetPrice`],
 			PriceCondition_ID: PriceconditionID
 		}
 	}
@@ -2886,17 +2887,17 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			for(let i = 1; i <= 3; i++) {
 				const existingCondition = nlPriceConditions.find(el => el.ContractDuration == item[`Custom_Integer_${i}`] && el.ID);
 				if (existingCondition) {
-					item.NLPriceConditionType[i] = existingCondition;
-				}else {
-					item.NLPriceConditionType[i] = {
-						ContractDuration: item[`Custom_Integer_${i}`],
-						OfferPrice: item.OfferPrice,
-						Discount: 0,
-						NetPrice: 0,
-					}
+					item[`NLPriceConditionType_${i}_ContractDuration`] = existingCondition.ContractDuration;
+					item[`NLPriceConditionType_${i}_OfferPrice`] = existingCondition.OfferPrice;
+					item[`NLPriceConditionType_${i}_Discount`] = existingCondition.Discount;
+					item[`NLPriceConditionType_${i}_NetPrice`] = existingCondition.NetPrice;
+				}else {	
+					item[`NLPriceConditionType_${i}_ContractDuration`] = item[`Custom_Integer_${i}`];
+					item[`NLPriceConditionType_${i}_OfferPrice`] = item.OfferPrice;
+					item[`NLPriceConditionType_${i}_Discount`] = 0;
+					item[`NLPriceConditionType_${i}_NetPrice`] = 0;
 				}
 			}
-			item.NLPriceConditionType = item.NLPriceConditionType.filter(el => el);
 			item.NetOfferPrice = await calculateNetOfferPrice(item);
 			item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
 		};
