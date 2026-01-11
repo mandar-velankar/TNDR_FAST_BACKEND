@@ -2149,9 +2149,8 @@ module.exports = async (srv) => {
 		const selectedTender = await SELECT.one.from(PT_TMTEND).where({TenderID:req.data.TenderID});
 		const priceCondition = await SELECT.one.from(PriceCondition).where({
 			OfferID: req.data.OfferID,
-			ProductCode: req.data.ProductCode,
-			PriceConditionCode: null
-		});
+			ProductCode: req.data.ProductCode
+		}).and(`PriceConditionCode IS NULL OR PriceConditionCode IN ('YP10','YP11')`);
 
 		const productCurrentPrice = await SELECT.one.from(PriceConditionCurrentSectionTaiwanView).where({
 			ProductCode: req.data.ProductCode,
@@ -2479,6 +2478,7 @@ module.exports = async (srv) => {
 				RoyalDecree: req.data.RoyalDecree,
 				RoyalDecreeValue: req.data.RoyalDecreeValue,
 				RoyalDecreeIncl: req.data.RoyalDecreeIncl,
+				PriceConditionCode: req.data.PriceConditionCode,
 				StandardDiscount: req.data.StandardDiscount,
 				AdditionalDiscount: req.data.AdditionalDiscount,
 				NetPriceWithoutTaxBeforeDeductionRD: req.data.NetPriceWithoutTaxBeforeDeductionRD,
@@ -6325,9 +6325,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		const priceCondition = await SELECT.one.from(PriceCondition).where({
 			OfferID: req.data.OfferID,
-			ProductCode: req.data.ProductCode,
-			PriceConditionCode: null
-		});
+			ProductCode: req.data.ProductCode
+		}).and(`PriceConditionCode IS NULL OR PriceConditionCode IN ('YP10','YP11')`);
 
 		const priceConditionClassification = await SELECT.one.from(PriceConditionClassification).where({
 			ID: priceCondition.PriceConditionClassification_ID
@@ -6454,9 +6453,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		const priceCondition = await SELECT.one.from(PriceCondition).where({
 			OfferID: req.data.OfferID,
-			ProductCode: req.data.ProductCode,
-			PriceConditionCode: null
-		});
+			ProductCode: req.data.ProductCode
+		}).and(`PriceConditionCode IS NULL OR PriceConditionCode IN ('YP10','YP11')`);
 
 		let foc = null;
 		if(priceCondition){
@@ -7512,6 +7510,20 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				!equalRounded(items.ConfidentialDiscount, ccmPriceCondition.YP04, 2) ||
 				!equalRounded(items.ConfidentialPrice, ccmPriceCondition.ConfidentialPrice, 2);
 			
+			const hasYP11 = ccmPriceCondition.YP11 !== null && ccmPriceCondition.YP11 !== undefined;
+			const hasYP10 = ccmPriceCondition.YP10 !== null && ccmPriceCondition.YP10 !== undefined;
+
+			let activePrecioNeto = null;
+			let activePriceConditionCode = null;
+
+			if (hasYP11) {
+				activePrecioNeto = num(ccmPriceCondition.YP11);
+				activePriceConditionCode = 'YP11';
+			} else if (hasYP10) {
+				activePrecioNeto = num(ccmPriceCondition.YP10);
+				activePriceConditionCode = 'YP10';
+			}
+
 			if (!items.hasPriceCondition || hasChanges) {
 
 				items.PVL = num(ccmPriceCondition.YP00);
@@ -7524,7 +7536,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				items.RoyalDecreePercentage_1 = num(ccmPriceCondition.YD06);
 				items.StandardDiscount = num(ccmPriceCondition.StandardDiscount);
 				items.AdditionalDiscount = num(ccmPriceCondition.YD75);
-				items.NetPriceWithoutTaxBeforeDeductionRD = ccmPriceCondition.YP10 ? num(ccmPriceCondition.YP10) : num(ccmPriceCondition.YP11);
+				items.NetPriceWithoutTaxBeforeDeductionRD = activePrecioNeto;
+				items.PriceConditionCode = activePriceConditionCode;
 				items.NetPriceWithoutTaxAfterDeductionRD = num(ccmPriceCondition.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD);
 				items.NetPriceWithTaxAfterDeductionRD = num(ccmPriceCondition.NETPRICEWITHTAXAFTERDEDUCTIONRD);
 				items.NetPriceWithoutTax = num(ccmPriceCondition.NETPRICEWITHOUTTAX);
@@ -7832,18 +7845,47 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		result.YD30 = YD30 ? UoM === 'Pack' ? (YD30 / 10000) : (YD30 / 10000 / packFactor) : 0;
 		result.YP11 = YP11 ? UoM === 'Pack' ? (YP11 / 10000) : (YP11 / 10000 / packFactor) : null;
 		result.YP10 = YP10 ? UoM === 'Pack' ? (YP10 / 10000) : (YP10 / 10000 / packFactor) : null;
-		const precioNeto = result.YP11 ?? result.YP10 ?? null;
-		result.RoyalDecreeValue = YD06 && precioNeto ? YD06 * precioNeto : 0;
+		const hasYP11 = YP11 !== null && YP11 !== undefined;
+		const hasYP10 = YP10 !== null && YP10 !== undefined;
+
+		let precioNeto = null;
+		let precioNetoIncludesRD = false;
+
+		if (hasYP11) {
+			precioNeto = result.YP11;
+			precioNetoIncludesRD = true;
+		} else if (hasYP10) {
+			precioNeto = result.YP10;
+		}
+		if (!precioNetoIncludesRD && YD06 && precioNeto) {
+			result.RoyalDecreeValue = YD06 * precioNeto;
+		} else {
+			result.RoyalDecreeValue = 0;
+		}
 
 		const useConfidential = YP04 !== 0;
 		const basePrice = useConfidential ? result.ConfidentialPrice : result.YP00;
 
-		result.YD75 = (basePrice - precioNeto) / basePrice;
+		if (basePrice && precioNeto) {
+			if (precioNetoIncludesRD && YD06) {
+				result.YD75 = 1 - precioNeto / basePrice / (1 - YD06);
+			} else {
+				result.YD75 = (basePrice - precioNeto) / basePrice;
+			}
+		}
 	  
 		// Mapped values for NETPRICE fields
 		result.NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD = precioNeto;
-		result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD = precioNeto ? (YD06 ? precioNeto * (1 - YD06) : precioNeto) : null;
+		
+		if (precioNetoIncludesRD) {
+			// YP11 already includes RD
+			result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD = precioNeto;
+		} else {
+			result.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD = precioNeto ? (YD06 ? precioNeto * (1 - YD06) : precioNeto) : null;
+		}
+
 		result.NETPRICEWITHTAXAFTERDEDUCTIONRD = (YD02 || YD30) ? result.SAPPriceWithTax : null;
+
 		if (YD02) {
   			result.NETPRICEWITHOUTTAX = YD06 ? basePrice * (1 - result.YD02) * (1 - result.YD06) : basePrice * (1 - result.YD02);
 		}
