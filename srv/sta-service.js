@@ -7562,6 +7562,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				items.StandardDiscount = num(ccmPriceCondition.StandardDiscount);
 				items.AdditionalDiscount = num(ccmPriceCondition.YD75);
 				items.NetPriceWithoutTaxBeforeDeductionRD = activePrecioNeto;
+				items.ConditionType = ccmPriceCondition.ConditionType;
 				items.PriceConditionCode = activePriceConditionCode;
 				items.NetPriceWithoutTaxAfterDeductionRD = num(ccmPriceCondition.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD);
 				items.NetPriceWithTaxAfterDeductionRD = num(ccmPriceCondition.NETPRICEWITHTAXAFTERDEDUCTIONRD);
@@ -7879,6 +7880,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		if (hasYP11) {
 			precioNeto = result.YP11;
 			precioNetoIncludesRD = true;
+			result.RoyalDecreeIncl = true;
 		} else if (hasYP10) {
 			precioNeto = result.YP10;
 		}
