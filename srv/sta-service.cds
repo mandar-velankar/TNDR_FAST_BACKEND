@@ -141,6 +141,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         offer.Distributor.DistributorName,
         tender.Institute.InstituteName,
         tender.Institute.InstituteID,
+        tender.Institute.InstituteType,
         key offer.OfferID,
         offer.OfferValue.VALUE,
         case 
@@ -176,6 +177,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         offer.Distributor.DistributorName,
         tender.Institute.InstituteName,
         tender.Institute.InstituteID,
+        tender.Institute.InstituteType,
         offer.OfferID,
         offer.OfferValue.VALUE,
         offer.OfferStatus.STATUS,     
