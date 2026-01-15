@@ -8175,6 +8175,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						RentalPrice: toDecimal(invoiceRow.RentalPrice),
 						MonthlyRentPerUnit: toDecimal(invoiceRow.MonthlyRentPerUnit),
 						AnnualValue: toDecimal(invoiceRow.AnnualValue),
+						PriceConditionCode:toStr(invoiceRow.PriceConditionCode),
 						CCMContract_ID: ccmContractId,
 						validFrom: today,
 						validTo: "9999-12-31"
