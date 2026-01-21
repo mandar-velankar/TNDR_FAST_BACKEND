@@ -28,16 +28,9 @@ module.exports = class JobFactory {
             case this.jobNames.ProcessCustomersJob:
                 return new ProcessCustomers(jobName,jobTime)
                 break;
-            case this.jobNames.ProcessMaterialsBrazilJob:
-                return new ProcessMaterialsBrazil(jobName,jobTime)
-                break;
-            case this.jobNames.ProcessCustomersBrazilJob:
-                return new ProcessCustomersBrazil(jobName,jobTime)
-                break;
             case this.jobNames.PriceAgreementMailJob:
                 return new PriceAgreementMailJob(jobName,jobTime)
-                break;
-              
+                break;              
             case this.jobNames.PriceAgreementPriceConditionNotificationMailJob:
                 return new PriceAgreementPriceConditionNotificationMailJob(jobName,jobTime)
                 break;
@@ -49,30 +42,6 @@ module.exports = class JobFactory {
                 break;
             case this.jobNames.ExtendPriceAgreements:
                 return new ExtendPriceAgreements(jobName,jobTime)
-                break;
-            case this.jobNames.ProcessMasterDataPrices:
-                return new ProcessMasterDataPrices(jobName,jobTime)
-                break;
-            case this.jobNames.ProcessBrazilCustomers:
-                return new ProcessBrazilCustomers(jobName,jobTime)
-                break;
-            case this.jobNames.ProcessBrazilMaterials:
-                return new ProcessBrazilMaterials(jobName,jobTime)
-                break;
-            case this.jobNames.ProcessBrazilOpportunities:
-                return new ProcessBrazilOpportunities(jobName,jobTime)
-                break;
-            case this.jobNames.ProcessEmpenho:
-                return new ProcessEmpenho(jobName,jobTime)
-                break;
-            case this.jobNames.ProcessBrazilIbizContracts:
-                return new ProcessBrazilIbizContracts(jobName,jobTime)
-                break;
-            case this.jobNames.NewIBIZTenderNotifications:
-                return new NewIBIZTenderNotifications(jobName, jobTime)
-                break;
-            case this.jobNames.ProcessTenderResults:
-                return new ProcessTenderResults(jobName,jobTime)
                 break;
             case this.jobNames.ProcessSpainRappelData:
                 return new ProcessSpainRappelData(jobName,jobTime)
@@ -98,22 +67,11 @@ module.exports = class JobFactory {
         return {
             ProcessMaterialsJob: "ProcessMaterialsJob",
             ProcessCustomersJob: "ProcessCustomersJob",
-            ProcessMaterialsBrazilJob: "ProcessMaterialsBrazilJob", // TODO: are these old jobs? if yes, remove them
-            ProcessCustomersBrazilJob: "ProcessCustomersBrazilJob", // TODO: are these old jobs? if yes, remove them
             PriceAgreementMailJob: "PriceAgreementMailJob",
             PriceAgreementPriceConditionNotificationMailJob: "PriceAgreementPriceConditionNotificationMailJob",
             PriceAgreementNotificationNetPriceAbovePVLJob: "PriceAgreementNotificationNetPriceAbovePVLJob",
             PriceAgreementNotificationNetPriceBelowFloorJob: "PriceAgreementNotificationNetPriceBelowFloorJob",
             ExtendPriceAgreements: "ExtendPriceAgreements",
-            PriceAgreementExpiredMailJob :"PriceAgreementExpiredMailJob",
-            ProcessMasterDataPrices:"ProcessMasterDataPrices",
-            ProcessBrazilCustomers:"ProcessBrazilCustomers",
-            ProcessBrazilMaterials:"ProcessBrazilMaterials",
-            ProcessBrazilOpportunities:"ProcessBrazilOpportunities",
-            ProcessEmpenho:"ProcessEmpenho",
-            ProcessBrazilIbizContracts:"ProcessBrazilIbizContracts",
-            NewIBIZTenderNotifications:"NewIBIZTenderNotifications",
-            ProcessTenderResults:"ProcessTenderResults",
             ProcessSpainRappelData: "ProcessSpainRappelData",
             PriceConditionQualityControl: "PriceConditionQualityControl",
             PriceAgreementExpiredMailJob :"PriceAgreementExpiredMailJob",

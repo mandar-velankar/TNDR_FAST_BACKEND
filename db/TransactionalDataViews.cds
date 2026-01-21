@@ -12,16 +12,19 @@ using { com.bayer.SXTENDER.BrazilContractingData } from './BrazilContractingData
 entity LatestApprovalRequests as select from TransactionalData.PT_TMAPPRST as approvals{
     key approvals.OfferId,
     key approvals.ApproverType,
+    key approvals.ApproverEmailID,
     max(approvals.Statustime) as MaxStatusTime:DateTime
 }where approvals.Active = 1
 group by approvals.OfferId,
-    approvals.ApproverType;
+    approvals.ApproverType,
+    approvals.ApproverEmailID;
 
 entity ApprovalRequests as select from TransactionalData.PT_TMAPPRST as approvals
 inner join LatestApprovalRequests as latestApprovals
     on approvals.OfferId = latestApprovals.OfferId 
     and approvals.Statustime = latestApprovals.MaxStatusTime 
     and approvals.ApproverType = latestApprovals.ApproverType
+    and approvals.ApproverEmailID = latestApprovals.ApproverEmailID
     and approvals.Active = 1
 inner join MasterData.PT_TMCTRY as country
     on country.CountryCode = approvals.CountryCode
@@ -236,6 +239,7 @@ inner join LatestApprovalRequests as latestApprovals
     on approvals.OfferId = latestApprovals.OfferId 
     and approvals.Statustime = latestApprovals.MaxStatusTime 
     and approvals.ApproverType = latestApprovals.ApproverType
+    and approvals.ApproverEmailID = latestApprovals.ApproverEmailID
     and approvals.Active = 1
 left join OfferLatestApprovalStatus as offerLatestApprStatus
     on offerLatestApprStatus.OfferID = approvals.OfferId
@@ -1001,7 +1005,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
             then ifnull(offer.Quotation.EffectiveDate, offer.Tender.PublicationDate)
         when offer.CountryCode NOT IN ('ES')
             then ifnull(offer.Quotation.EffectiveDate, ADD_DAYS(CURRENT_DATE,1))
-        else ifnull(offer.Tender.EffectiveDate,ifnull(offer.Quotation.EffectiveDate,ADD_DAYS(CURRENT_DATE,1)))
+        else ifnull(offer.Tender.EffectiveDate,ifnull(offer.Quotation.EffectiveDate, CURRENT_DATE))
     end as EffectiveDate,
 
 	 case when offer.CountryCode NOT IN ('ES')
@@ -1009,7 +1013,7 @@ left outer join TransactionalDataViews.ApprovalRequests as approvalRequests
 
         then ifnull(offer.Quotation.ExpiryDate, ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1))
 
-        else ifnull(offer.Tender.ExpiryDate,ifnull(offer.Quotation.ExpiryDate,ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1)))
+        else ifnull(offer.Tender.ExpiryDate,ifnull(offer.Quotation.ExpiryDate,ADD_YEARS(CURRENT_DATE, 1)))
 
     end as ExpiryDate,
 
@@ -1613,6 +1617,11 @@ left outer join MasterData.NLPPP as nlppp
 left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as curentSection
 	on curentSection.INSTITUTE_ID = tender.InstituteID
 	and curentSection.ProductCode = product.ProductCode
+left outer join MasterData.PricingPolicy as pricingPolicy 
+    on  pricingPolicy.CountryCode = product.CountryCode
+    and pricingPolicy.ProductPackID = product.ProductCode
+    and pricingPolicy.InstituteID =  tender.InstituteID
+    and pricingPolicy.DistributorID = offer.DistributorID
 {
     tender.CountryCode,
     tender.Country.Region,
@@ -1767,7 +1776,36 @@ left outer join TransactionalDataViews.PriceConditionCurrentSectionTaiwanView as
     @Core.Computed: false
     ifnull(priceCondition.CurrentTotalDiscountNHI, curentSection.TotalDiscountNHI) as CurrentTotalDiscountNHI: Double,
     @Core.Computed: false
-    ifnull(priceCondition.CurrentTotalDiscountInvoice, curentSection.TotalDiscountInvoice) as CurrentTotalDiscountInvoice: Double
+    ifnull(priceCondition.CurrentTotalDiscountInvoice, curentSection.TotalDiscountInvoice) as CurrentTotalDiscountInvoice: Double,
+    priceCondition.ConfidentialPrice,
+    priceCondition.PVL,
+    priceCondition.RoyalDecree,
+    priceCondition.Liquidation,
+    priceCondition.RefundDate,
+    priceCondition.Settlement.ID as Settlement_ID,
+    priceCondition.PriceConditionCode,
+    priceCondition.Discount as ESDiscount:Double,
+    priceCondition.RoyalDecreeValue,
+    priceCondition.RoyalDecreeIncl,
+    priceCondition.StandardDiscount,
+    priceCondition.AdditionalDiscount,
+    priceCondition.NetPriceWithoutTaxBeforeDeductionRD,
+    priceCondition.NetPriceWithoutTaxAfterDeductionRD,
+    priceCondition.NetPriceWithTaxAfterDeductionRD,
+    priceCondition.NetPriceWithoutTax,
+    priceCondition.NetPriceWithTax,
+    product.MaxPrice as MaximumPrice: Double,
+    priceCondition.ConfidentialDiscount,
+    priceCondition.RoyalDecreePercentage_1,
+    priceCondition.MonthlyRentPerUnit,
+    priceCondition.AnnualValue,
+    priceCondition.MarketIncentiveID,
+    @Core.Computed: false
+    case 
+        when product.UnitPerPack = 'Unit'
+            then  pricingPolicy.Value / product.SKU.PACKFACTOR
+        else ifnull(pricingPolicy.Value, 0)
+    end as PricingPolicyValue: Double
 }where tender.Active = 1;
 //CR2
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 
@@ -2412,6 +2450,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             AttentionTo: String;
             QuotationDate: Date;
             InternalBidDueDate     : Date;
+            COUNTRY_REGION         : String;
             Tender_Custom_Integer_1: Integer;
             Tender_Custom_Integer_2: Integer;
             Tender_Custom_Integer_3: Integer;
@@ -3295,6 +3334,103 @@ left outer join TransactionalData.PriceCondition as priceCondition
         offer.OfferStatus.STATUS,
         foc.ProductPackId,
         productTotal.TotalAmount;
+
+entity StandardTenderHistorySpain as select from TransactionalData.PT_TMTEND as tender
+    inner join TransactionalData.PT_TMOFRS as offer 
+        on offer.TenderID = tender.TenderID
+        and offer.Active = 1
+    inner join TransactionalData.PT_TMOFPR as product 
+        on product.OfferID = offer.OfferID
+        and product.Active = 1
+        and product.ActiveProduct = 1 
+    inner join MasterData.PT_TMPRDPCK as productPacks
+        on productPacks.PRODUCTPACKID = product.ProductCode
+        and productPacks.ACTIVERECORD = 'Yes' 
+    inner join TransactionalData.PriceConditionClassification as priceConditionClassification  
+        on priceConditionClassification.CountryCode = product.CountryCode
+        and priceConditionClassification.Classification = tender.Classification
+        and priceConditionClassification.Division = offer.Division
+        and priceConditionClassification.isMain = 'true' 
+        and (priceConditionClassification.ProductType = 'All' or priceConditionClassification.ProductType = productPacks.ProductType)
+    inner join MasterData.PT_TMINST as institute 
+        on tender.InstituteID = institute.InstituteID
+    inner join MasterDataViews.MostRecentMasterPricesView as masterPrices 
+        on product.ProductCode = masterPrices.ProductPackId
+        and product.CountryCode = masterPrices.CountryCode    
+    inner join TransactionalData.PriceCondition as priceCondition 
+        on priceConditionClassification.ID = priceCondition.PriceConditionClassification.ID
+        and product.OfferID = priceCondition.OfferID
+        and product.ProductCode = priceCondition.ProductCode
+    left outer join TransactionalDataViews.TenderFOCView as tenderFOC
+        on tender.TenderID = tenderFOC.TenderID
+        and offer.OfferID = tenderFOC.OfferID
+        and product.ProductCode = tenderFOC.ProductCode
+        and institute.InstituteID = tenderFOC.INSTITUTE_ID
+    left outer join TransactionalDataViews.TenderRappelView as tenderRappel
+        on tender.TenderID = tenderRappel.TenderID
+        and offer.OfferID = tenderRappel.OfferID
+        and product.ProductCode = tenderRappel.ProductCode
+        and institute.InstituteID = tenderRappel.INSTITUTE_ID
+    {
+        key tender.TenderID,
+        key offer.OfferID,
+        key product.ProductCode,
+        tender.TenderName as TENDER_NAME,
+        ifnull(offer.Quotation.OfferDate, CURRENT_DATE) as OFFER_DATE: Date,
+        key institute.InstituteID as INSTITUTE_ID,
+        institute.InstituteName as INSTITUTE_NAME,
+        product.SKU.PRODUCTPACKNAME as PRODUCT_NAME,
+        product.Price.OfferPrice *
+            case when product.UnitPerPack = 'Unit'
+                then product.SKU.PACKFACTOR
+                else 1
+            end as PACK_PRICE:Double,
+        product.Price.OfferPrice *
+            case when product.UnitPerPack = 'Unit'
+                then 1
+                else 1 / product.SKU.PACKFACTOR
+            end as UNIT_PRICE:Double,
+        priceCondition.PVL as PVL,
+        ifnull(tenderFOC.FOC, 'No') as FOC:String(10),
+        ifnull(tenderRappel.RAPPEL, 'No') as RAPPEL:String(10),
+        priceCondition.ConfidentialPrice as CONFIDENTIAL_PRICE,
+        priceCondition.PriceConditionCode as PriceConditionCode,
+        priceConditionClassification.ConditionType as PRICE_CONDITION,
+        priceCondition.RoyalDecree as ROYALDECREE,
+        case 
+            when priceConditionClassification.ConditionType = 'PrecioNeto'
+                then priceCondition.AdditionalDiscount
+            when priceConditionClassification.ConditionType = 'DescuentoComercial' or priceConditionClassification.ConditionType = 'DescuentoEspecial'
+                then priceCondition.Discount
+            when priceConditionClassification.ConditionType = 'PVL'
+                then priceCondition.ConfidentialDiscount
+            else priceCondition.Discount 
+        end as DISCOUNT: Double,
+        priceCondition.ConfidentialDiscount as CONFIDENTIAL_DISCOUNT,
+        ifnull(product.Results.Outcome, 'NA') as OUTCOME:String(10)
+}where (offer.OfferStatusTable.STATUS = 'Quotation Submitted' or offer.OfferStatusTable.STATUS = 'Results Recorded' or offer.OfferStatusTable.STATUS = 'Delivery Ongoing')
+group by tender.TenderID,
+    offer.OfferID,
+    product.ProductCode,
+    tender.TenderName,
+    offer.Quotation.OfferDate,
+    institute.InstituteID,
+    institute.InstituteName,
+    product.SKU.PRODUCTPACKNAME,
+    product.Price.OfferPrice,
+    product.SKU.PACKFACTOR,
+    product.UnitPerPack,
+    priceCondition.PVL,
+    tenderFOC.FOC,
+    tenderRappel.RAPPEL,
+    priceCondition.ConfidentialPrice,
+    priceConditionClassification.ConditionType,
+    priceCondition.RoyalDecree,
+    priceCondition.PriceConditionCode,
+    priceCondition.Discount,    
+    product.Results.Outcome,
+    priceCondition.AdditionalDiscount,
+    priceCondition.ConfidentialDiscount;
 
 entity PriceConditionCurrentSectionTaiwanView as select from TransactionalDataViews.StandardTenderHistory as standardTenderHistory
 inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 

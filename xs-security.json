@@ -145,6 +145,10 @@
     {
       "name": "$XSAPPNAME.f_tndr_cag_claims_user",
       "description": "f_tndr_cag_claims_user"
+    },
+    {
+      "name": "$XSAPPNAME.f_tndr_cag_ccma_user",
+      "description": "f_tndr_cag_ccma_user"
     }
   ],
   "attributes": [],
@@ -420,7 +424,16 @@
         "$XSAPPNAME.f_tndr_cag_claims_user"
       ],
       "attribute-references": []
+    },
+    {		  
+      "name": "f_tndr_cag_ccma_user",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.f_tndr_cag_ccma_user"
+      ],
+      "attribute-references": []
     }
+
     
   ],
   "oauth2-configuration": {

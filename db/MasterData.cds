@@ -86,6 +86,11 @@ entity PT_TMINST{
 	KAM_Territory: String;
 	External_InstituteId: String(50);
 	Class: Integer;
+	SAPGroupId: String;
+	CG1_Description: String;
+	CG2_Description: String;
+	CG1_Code: String;
+	CG2_Code: String;
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
@@ -347,6 +352,7 @@ entity PT_TMCTPRDPCK{
 	ProductScope: String(100);
 	ProductGroup: String;
 	OutSourcedStatus: String;
+	EAN: String;
  	//Associations
 	Country:Association to PT_TMCTRY on Country.CountryCode = COUNTRYCODE;
 	Origin:Association to PT_TMCTRY on Origin.CountryCode = COUNTRYOFORIGIN;
@@ -721,6 +727,7 @@ entity CountryProvinces: cuid {
 entity CountryRegions: cuid {
 	CountryCode     	: String;
 	Name				: String;
+	RegionCode		    : String;
 	Tenders				: Composition of many Tenders_in_Regions on Tenders.Region = $self;
 }
 
@@ -925,6 +932,7 @@ entity UserTerritory {
 
 
 entity PaymentTerms {
+	CountryCode	: String not null;
     E1KNVVM_ZTERM : String(6) not null;
     Description : String;
 }
@@ -1068,4 +1076,62 @@ entity WholesalePurchasePriceApprovalsNotification {
 	WPPApprovers: Array of WPPApprovers;
 	SelectedWppApprover: WPPApprovers;
 	WholesalePurchasePriceApprovalPageLink: String;
+}
+
+entity INTERIM_SPAINMATERIALS : cuid, managed {
+    EAN_UPC                : String;
+    MaterialNumber         : Integer;
+    SAPName                : String;
+    CommercialName         : String;
+    ProductType            : String;
+    PackFactor             : Double;
+    Presentation           : String;
+    Strength               : Double;
+    UOM                    : String;
+    SalesUnitOfMeasure     : String;
+    ProductHierarchy       : String;
+    DivisionCode           : Integer;
+    Division               : String;
+    BrandID                : String;
+    MaterialGroup1         : String;
+    MaterialGroup4         : String;
+    MaterialGroup5         : String;
+    ItemCategoryGroup      : String;
+    MaterialStatus         : String;
+    Status                 : String;
+    Comments               : String;
+	FASTCoreMaterialID	   : String;
+};
+
+entity MarketIncentive: managed{
+    CountryCode: String;
+    MarketIncentiveID: String;
+    Description: String;
+}
+
+entity INTERIM_SPAINCUSTOMERS : cuid, managed {
+    CustomerID     	   : String;
+    CustomerName       : String;
+	CountryCode	   	   : String;
+	CG1_Description	   : String;
+	CG2_Description	   : String;
+	CG1_Code	       : String;
+	CG2_Code	       : String;
+    CustomerType       : String;
+    Address            : String;
+    Region             : String;
+    Province           : String;
+    Taxcode            : String;
+    PaymentTerm        : String;
+	Status             : String;
+    Comments           : String;
+}
+
+entity CustomerGroups: cuid, managed {
+	CountryCode			: String;
+	CGR1			 	: String;
+	CG1_Description  	: String;
+	CGR2			 	: String;
+	CG2_Description  	: String;
+	FastInstituteType	: String;
 }
