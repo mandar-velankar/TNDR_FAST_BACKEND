@@ -7562,7 +7562,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				items.StandardDiscount = num(ccmPriceCondition.StandardDiscount);
 				items.AdditionalDiscount = num(ccmPriceCondition.YD75);
 				items.NetPriceWithoutTaxBeforeDeductionRD = activePrecioNeto;
-				items.ConditionType = ccmPriceCondition.ConditionType;
 				items.PriceConditionCode = activePriceConditionCode;
 				items.NetPriceWithoutTaxAfterDeductionRD = num(ccmPriceCondition.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD);
 				items.NetPriceWithTaxAfterDeductionRD = num(ccmPriceCondition.NETPRICEWITHTAXAFTERDEDUCTIONRD);
@@ -7578,55 +7577,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			}
 
 			return items;
-			// if(items.hasPriceCondition){
-			// 	return items;
-			// }else{
-			// 	const ccmPriceCondition = await SELECT.one.from(CCMPriceCondition).where({
-			// 		OfferID: items.OfferID,
-			// 		TenderID: items.TenderID,
-			// 		ProductCode: items.ProductCode
-			// 	});
-			// 	if(ccmPriceCondition){
-			// 		items.PVL = parseFloat(ccmPriceCondition.YP00);
-			// 		items.ConfidentialDiscount = parseFloat(ccmPriceCondition.YP04);
-			// 		items.RoyalDecree = ccmPriceCondition.RoyalDecree;
-			// 		items.ConfidentialPrice = parseFloat(ccmPriceCondition.ConfidentialPrice);
-			// 		items.ESDiscount = items.ConditionType === 'DescuentoEspecial' ? 1 : parseFloat(ccmPriceCondition.YD02);
-			// 		items.RoyalDecreeValue = parseFloat(ccmPriceCondition.RoyalDecreeValue);
-			// 		items.RoyalDecreeIncl = ccmPriceCondition.RoyalDecreeIncl;
-			// 		items.RoyalDecreePercentage_1 = parseFloat(ccmPriceCondition.YD06);
-			// 		items.StandardDiscount = parseFloat(ccmPriceCondition.StandardDiscount);
-			// 		items.AdditionalDiscount = parseFloat(ccmPriceCondition.YD75);
-			// 		items.NetPriceWithoutTaxBeforeDeductionRD = parseFloat(ccmPriceCondition.YP10);
-			// 		items.NetPriceWithoutTaxAfterDeductionRD = parseFloat(ccmPriceCondition.NETPRICEWITHOUTTAXAFTERDEDUCTIONRD);
-			// 		items.NetPriceWithTaxAfterDeductionRD = parseFloat(ccmPriceCondition.NETPRICEWITHTAXAFTERDEDUCTIONRD);
-			// 		items.NetPriceWithoutTax = parseFloat(ccmPriceCondition.NETPRICEWITHOUTTAX);
-			// 		items.NetPriceWithTax = items.ConditionType === 'DescuentoEspecial' ? (ccmPriceCondition.YP04 !== 0 ?  parseFloat(ccmPriceCondition.ConfidentialPrice) : parseFloat(ccmPriceCondition.YP00)) : parseFloat(ccmPriceCondition.NETPRICEWITHTAX);
-			// 		items.Tax = parseFloat(ccmPriceCondition.SAPTAX);
-			// 		items.Currency = 'EUR'
-			// 	}
-
-			// 	return items;
-			// }
-			// const fnCalculateFields = async item => {
-			// 	if(item.ConditionType === 'Discount'){
-			// 		item.OfferPrice = item.BasePrice * (1 - item.Discount);
-			// 		item.OfferPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.OfferPrice,4) : roundToDecimalPlaces(item.OfferPrice,2);
-			// 		item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
-			// 		item.NetPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : roundToDecimalPlaces(item.NetPrice,2);
-			// 	}
-			// 	else{
-			// 		item.Discount = (item.BasePrice - item.OfferPrice) / item.BasePrice;
-			// 		item.Discount = (item.CountryCode === 'AU' || item.CountryCode?.includes("HM")) ? roundToDecimalPlaces(item.Discount,4) : roundToDecimalPlaces(item.Discount,2);
-			// 		item.NetPrice = item.OfferPrice * (1 - item.Deductions); 
-			// 		item.NetPrice = item.CountryCode?.includes("HM") ? roundToDecimalPlaces(item.NetPrice,4) : roundToDecimalPlaces(item.NetPrice,2);
-			// 	}
-			// };
-			// if(Array.isArray(items)){
-			// 	return items.map(fnCalculateFields)
-			// }else{
-			// 	return fnCalculateFields(items);
-			// }		
 		}
 		catch(error){
 			console.error('Error in PriceConditionDescuentoComercialView, PriceConditionPVLView, PriceConditionPrecioNetoView after READ');
