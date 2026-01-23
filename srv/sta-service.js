@@ -7836,7 +7836,10 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}
 		if (!precioNetoIncludesRD && YD06 && precioNeto) {
 			result.RoyalDecreeValue = YD06 * precioNeto;
-		} else {
+		} else if (YD06 && YD02){
+			result.RoyalDecreeValue = basePrice * YD06;
+		}
+		else{
 			result.RoyalDecreeValue = 0;
 		}
 
@@ -7864,7 +7867,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		result.NETPRICEWITHTAXAFTERDEDUCTIONRD = (YD02 || YD30) ? result.SAPPriceWithTax : null;
 
 		if (YD02) {
-  			result.NETPRICEWITHOUTTAX = YD06 ? basePrice * (1 - result.YD02) * (1 - result.YD06) : basePrice * (1 - result.YD02);
+  			result.NETPRICEWITHOUTTAX = YD06 ? basePrice * (1 - result.YD02 - result.YD06) : basePrice * (1 - result.YD02);
 		}
 		result.NETPRICEWITHTAX = result.SAPPriceWithTax;
 		result.SAPBaseGrossPrice = result.YP00;
