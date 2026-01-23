@@ -342,7 +342,7 @@ module.exports = (srv) => {
 			//Insert Claim Approvals
 			await INSERT.into(ClaimApprovals).entries(mappedClaimApprovals);
 
-			await DELETE.from(SalesReportFile).where({DistributorID: req.DistributorID});
+			// await DELETE.from(SalesReportFile).where({DistributorID: req.DistributorID});
 
 			return res.reply("Sales Data uploaded successfully");
 
