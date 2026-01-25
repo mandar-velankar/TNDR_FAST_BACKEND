@@ -5,8 +5,6 @@ const compression = require("compression");
 const args = process.argv.slice(2);
 const host = "0.0.0.0";
 const port = process.env.PORT || 4004;
-const jobManager = require("./jobs/JobManager");
-
 (async () => {
   console.log("begin start app gen");
   const app = express();
@@ -49,7 +47,6 @@ const jobManager = require("./jobs/JobManager");
     returnComplexNested: false
   }));
   // OData V4
-    await cds.serve("SchedulerService").from("./gen/srv/").in(app);
     await cds.serve("EpaService").from("./gen/srv/").in(app);
     await cds.serve("CatalogService").from("./gen/srv/").in(app);
     await cds.serve("PolicyService").from("./gen/srv/").in(app);
@@ -66,17 +63,6 @@ const jobManager = require("./jobs/JobManager");
     await cds.serve("ClaimsService").from("./gen/srv/").in(app);
     await cds.serve("UITemplateService").from("./gen/srv/").in(app);
     await cds.serve("ExternalService").from("./gen/srv/").in(app);
-
-  console.log("register jobs")
-  // Scheduler Jobs
-  jobManager.registerJobs();
-  // const scheduler = await jobScheduler();
-  // //TODO: only start if config is available => start via api from now on
-  // scheduler.mercadoPublico.fetchTenders();//.start(); // runs every day at midnight server time '0 0 0 1/1 * ? *'
-  // //scheduler.mercadoPublico.fetchTenderResults('00 00 * * *').start();
-  // //scheduler.mercadoPublico.fetchPurchaseOrders('00 00 * * *').start();
-  // jobScheduler.ItalyJobs.processMaterials('00 00 * * *').start(); // TODO: check if this settings is correct
-  // jobScheduler.ItalyJobs.processCustomers('00 00 * * *').start(); // TODO: check if this settings is correct
 
   console.log("start")
 
