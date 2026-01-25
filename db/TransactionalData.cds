@@ -1015,6 +1015,7 @@ entity CCMPriceCondition: cuid, managed{
     YP00                                : Decimal; //PVL
     YP04                                : Decimal; //Confidential Discount
     YP10                                : Decimal; //NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD
+    YP11                                : Decimal;
     YD75                                : Double;  //ADDITIONALDISCOUNT
     YD06                                : Double; //ROYALDECREE
     YD02                                : Double; //Commercial Discount 
