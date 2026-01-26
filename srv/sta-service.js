@@ -2087,6 +2087,33 @@ module.exports = async (srv) => {
 		}
 	);
 
+	srv.after(
+		['CREATE','UPDATE'], 
+		['PriceConditionRentalView'], 
+		async (data, req) => {
+			try{
+				const tx = cds.tx(req);
+				const currentProduct = await SELECT.one.from(PT_TMOFPR).where({ProductCode: data.ProductCode, Active: 1});
+				
+				const mappedAwardedProducts = {
+					TenderID: currentProduct.TenderID,
+					OfferID: currentProduct.OfferID,
+					CountryCode: currentProduct.CountryCode,
+					LotID: currentProduct.LotID,
+					ProductCode: currentProduct.ProductCode,
+					AwardedPrice: data.MonthlyRentPerUnit
+				};
+
+
+				await INSERT.into(PT_TMTRRES).entries(mappedAwardedProducts);
+			}
+			catch(error){
+				console.error('Error in PriceConditionRentalView after CREATE or UPDATE');
+				return req.reject(403, error?.message||"Error in PriceConditionRentalView after CREATE or UPDATE");
+			}
+		}
+	);
+
 	/**
 	 * Upserts a price condition based on the provided request data.
 	 * If `req.data.PriceConditionID` exists, updates the existing price condition.
