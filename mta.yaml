@@ -19,6 +19,11 @@ modules:
   - name: FAST-db
     type: hdb
     path: db
+    build-parameters:
+      builder: custom
+      commands: [] 
+      ignore:
+        - node_modules/
     parameters:
       memory: 256M
       disk-quota: 1024M
@@ -27,6 +32,11 @@ modules:
   - name: FAST-srv
     type: nodejs
     path: srv
+    build-parameters:
+      builder: custom
+      commands: [] 
+      ignore:
+        - node_modules/
     parameters:
       memory: 8192M
       disk-quota: 8192M
@@ -46,6 +56,11 @@ modules:
   - name: FAST-API-AppRouter
     type: html5
     path: app
+    build-parameters:
+      builder: custom
+      commands: [] 
+      ignore:
+        - node_modules/
     properties:
       INCOMING_CONNECTION_TIMEOUT: 480000
     requires:
