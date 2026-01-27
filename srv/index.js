@@ -66,28 +66,42 @@ const port = process.env.PORT || 4004;
   const catalogStartTime = Date.now();
   await cds.serve("CatalogService").from(csn).in(app);
   await cds.serve("AccessService").from(csn).in(app);
+  await cds.serve("EpaService").from(csn).in(app);
+  await cds.serve("PolicyService").from(csn).in(app);
+  await cds.serve("ContractService").from(csn).in(app);
+  await cds.serve("MasterDataManagementService").from(csn).in(app);
+  await cds.serve("SalesOpportunityService").from(csn).in(app);
+  await cds.serve("CreateOpportunityService").from(csn).in(app);
+  await cds.serve("BankGuaranteeService").from(csn).in(app);
+  await cds.serve("PriceAgreementService").from(csn).in(app);
+  await cds.serve("CpiService").from(csn).in(app);
+  await cds.serve("BrazilContractingService").from(csn).in(app);
+  await cds.serve("StandardAppService").from(csn).in(app);
+  await cds.serve("ClaimsService").from(csn).in(app);
+  await cds.serve("UITemplateService").from(csn).in(app);
+  await cds.serve("ExternalService").from(csn).in(app);
   console.log(`[STARTUP] CatalogService and AccessService initialized in ${Date.now() - catalogStartTime}ms`);
 
   // Step 5: Load remaining services in parallel
-  console.log("[STARTUP] Initializing remaining services in parallel...");
-  const servicesStartTime = Date.now();
-  await Promise.all([
-    cds.serve("EpaService").from(csn).in(app),
-    cds.serve("PolicyService").from(csn).in(app),
-    cds.serve("ContractService").from(csn).in(app),
-    cds.serve("MasterDataManagementService").from(csn).in(app),
-    cds.serve("SalesOpportunityService").from(csn).in(app),
-    cds.serve("CreateOpportunityService").from(csn).in(app),
-    cds.serve("BankGuaranteeService").from(csn).in(app),
-    cds.serve("PriceAgreementService").from(csn).in(app),
-    cds.serve("CpiService").from(csn).in(app),
-    cds.serve("BrazilContractingService").from(csn).in(app),
-    cds.serve("StandardAppService").from(csn).in(app),
-    cds.serve("ClaimsService").from(csn).in(app),
-    cds.serve("UITemplateService").from(csn).in(app),
-    cds.serve("ExternalService").from(csn).in(app)
-  ]);
-  console.log(`[STARTUP] All remaining services initialized in ${Date.now() - servicesStartTime}ms`);
+  // console.log("[STARTUP] Initializing remaining services in parallel...");
+  // const servicesStartTime = Date.now();
+  // await Promise.all([
+  //   cds.serve("EpaService").from(csn).in(app),
+  //   cds.serve("PolicyService").from(csn).in(app),
+  //   cds.serve("ContractService").from(csn).in(app),
+  //   cds.serve("MasterDataManagementService").from(csn).in(app),
+  //   cds.serve("SalesOpportunityService").from(csn).in(app),
+  //   cds.serve("CreateOpportunityService").from(csn).in(app),
+  //   cds.serve("BankGuaranteeService").from(csn).in(app),
+  //   cds.serve("PriceAgreementService").from(csn).in(app),
+  //   cds.serve("CpiService").from(csn).in(app),
+  //   cds.serve("BrazilContractingService").from(csn).in(app),
+  //   cds.serve("StandardAppService").from(csn).in(app),
+  //   cds.serve("ClaimsService").from(csn).in(app),
+  //   cds.serve("UITemplateService").from(csn).in(app),
+  //   cds.serve("ExternalService").from(csn).in(app)
+  // ]);
+  // console.log(`[STARTUP] All remaining services initialized in ${Date.now() - servicesStartTime}ms`);
 
   // Step 6: Start server
   console.log("[STARTUP] Starting HTTP server...");
