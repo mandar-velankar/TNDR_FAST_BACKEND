@@ -49,7 +49,8 @@ const port = process.env.PORT || 4004;
 
   // OData V4 - CatalogService must be ready before server starts
   await cds.serve("CatalogService").from(csn).in(app);
-await 
+  await cds.serve("AccessService").from(csn).in(app);
+
   // Load remaining services in background (no await)
   Promise.all([
     cds.serve("EpaService").from(csn).in(app),
@@ -57,7 +58,6 @@ await
     cds.serve("ClaimsService").from(csn).in(app),
     cds.serve("PolicyService").from(csn).in(app),
     cds.serve("ContractService").from(csn).in(app),
-    cds.serve("AccessService").from(csn).in(app),
     cds.serve("MasterDataManagementService").from(csn).in(app),
     cds.serve("SalesOpportunityService").from(csn).in(app),
     cds.serve("CreateOpportunityService").from(csn).in(app),

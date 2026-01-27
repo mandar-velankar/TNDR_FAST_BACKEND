@@ -62,10 +62,11 @@ const port = process.env.PORT || 4004;
   }));
 
   // Step 4: OData V4 - CatalogService must be ready before server starts
-  console.log("[STARTUP] Initializing CatalogService (required before server start)...");
+  console.log("[STARTUP] Initializing CatalogService and AccessService (required before server start)...");
   const catalogStartTime = Date.now();
   await cds.serve("CatalogService").from(csn).in(app);
-  console.log(`[STARTUP] CatalogService initialized in ${Date.now() - catalogStartTime}ms`);
+  await cds.serve("AccessService").from(csn).in(app);
+  console.log(`[STARTUP] CatalogService and AccessService initialized in ${Date.now() - catalogStartTime}ms`);
 
   // Step 5: Load remaining services in parallel
   console.log("[STARTUP] Initializing remaining services in parallel...");
@@ -74,7 +75,6 @@ const port = process.env.PORT || 4004;
     cds.serve("EpaService").from(csn).in(app),
     cds.serve("PolicyService").from(csn).in(app),
     cds.serve("ContractService").from(csn).in(app),
-    cds.serve("AccessService").from(csn).in(app),
     cds.serve("MasterDataManagementService").from(csn).in(app),
     cds.serve("SalesOpportunityService").from(csn).in(app),
     cds.serve("CreateOpportunityService").from(csn).in(app),
