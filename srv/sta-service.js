@@ -7861,14 +7861,6 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		} else if (hasYP10) {
 			precioNeto = result.YP10;
 		}
-		if (!precioNetoIncludesRD && YD06 && precioNeto) {
-			result.RoyalDecreeValue = YD06 * precioNeto;
-		} else if (YD06 && YD02){
-			result.RoyalDecreeValue = basePrice * YD06;
-		}
-		else{
-			result.RoyalDecreeValue = 0;
-		}
 
 		const useConfidential = YP04 !== 0;
 		const basePrice = useConfidential ? result.ConfidentialPrice : result.YP00;
@@ -7879,6 +7871,14 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			} else {
 				result.YD75 = (basePrice - precioNeto) / basePrice;
 			}
+		}
+
+		if (!precioNetoIncludesRD && YD06 && precioNeto) {
+			result.RoyalDecreeValue = YD06 * precioNeto;
+		} else if (YD06 && YD02){
+			result.RoyalDecreeValue = basePrice * YD06;
+		} else{
+			result.RoyalDecreeValue = 0;
 		}
 	  
 		// Mapped values for NETPRICE fields
