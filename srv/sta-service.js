@@ -7858,6 +7858,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			precioNeto = result.YP11;
 			precioNetoIncludesRD = true;
 			result.RoyalDecreeIncl = true;
+			result.RoyalDecree = 'Yes';
 		} else if (hasYP10) {
 			precioNeto = result.YP10;
 		}
