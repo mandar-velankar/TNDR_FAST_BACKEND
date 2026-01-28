@@ -2087,32 +2087,6 @@ module.exports = async (srv) => {
 		}
 	);
 
-	srv.after(
-		['CREATE','UPDATE'], 
-		['PriceConditionRentalView'], 
-		async (data, req) => {
-			try{
-				const tx = cds.tx(req);
-				const currentProduct = await SELECT.one.from(PT_TMOFPR).where({ProductCode: data.ProductCode, Active: 1});
-				
-				const mappedAwardedProducts = {
-					TenderID: currentProduct.TenderID,
-					OfferID: currentProduct.OfferID,
-					CountryCode: currentProduct.CountryCode,
-					LotID: currentProduct.LotID,
-					ProductCode: currentProduct.ProductCode,
-					AwardedPrice: data.MonthlyRentPerUnit
-				};
-
-
-				await INSERT.into(PT_TMTRRES).entries(mappedAwardedProducts);
-			}
-			catch(error){
-				console.error('Error in PriceConditionRentalView after CREATE or UPDATE');
-				return req.reject(403, error?.message||"Error in PriceConditionRentalView after CREATE or UPDATE");
-			}
-		}
-	);
 
 	/**
 	 * Upserts a price condition based on the provided request data.
@@ -2540,7 +2514,8 @@ module.exports = async (srv) => {
 				NetPriceWithTax: req.data.NetPriceWithTax,
 				MaximumPrice: req.data.MaximumPrice,
 				Tax: req.data.Tax,
-				NetPrice: req.data.NetPriceWithoutTaxAfterDeductionRD || req.data.NetPriceWithoutTax,
+				NetPrice: req.data.NetPrice,
+				Currency: req.data.Currency,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
 			"DescuentoComercial":{
@@ -2564,7 +2539,8 @@ module.exports = async (srv) => {
 				NetPriceWithTax: req.data.NetPriceWithTax,
 				MaximumPrice: req.data.MaximumPrice,
 				Tax: req.data.Tax,
-				NetPrice: req.data.NetPriceWithoutTaxAfterDeductionRD || req.data.NetPriceWithoutTax,
+				NetPrice: req.data.NetPrice,
+				Currency: req.data.Currency,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
 			"PVL":{
@@ -2588,7 +2564,8 @@ module.exports = async (srv) => {
 				NetPriceWithTax: req.data.NetPriceWithTax,
 				MaximumPrice: req.data.MaximumPrice,
 				Tax: req.data.Tax,
-				NetPrice: req.data.NetPriceWithoutTaxAfterDeductionRD || req.data.NetPriceWithoutTax,
+				NetPrice: req.data.ConfidentialDiscount !==0 ? req.data.ConfidentialPrice : req.data.PVL,
+				Currency: req.data.Currency,
 				PriceConditionClassification_ID: req.data.ClassificationID
 			},
 			"DescuentoEspecial":{
@@ -2612,7 +2589,8 @@ module.exports = async (srv) => {
 				NetPriceWithTax: req.data.NetPriceWithTax,
 				MaximumPrice: req.data.MaximumPrice,
 				Tax: req.data.Tax,
-				NetPrice: req.data.NetPriceWithoutTaxAfterDeductionRD || req.data.NetPriceWithoutTax,
+				NetPrice: 0,
+				Currency: req.data.Currency,
 				PriceConditionClassification_ID: req.data.ClassificationID
 			},
 			"Rental":{
@@ -2636,9 +2614,10 @@ module.exports = async (srv) => {
 				NetPriceWithTax: req.data.NetPriceWithTax,
 				MaximumPrice: req.data.MaximumPrice,
 				Tax: req.data.Tax,
-				NetPrice: req.data.NetPriceWithoutTaxAfterDeductionRD || req.data.NetPriceWithoutTax,
+				NetPrice: req.data.NetPrice,
 				MonthlyRentPerUnit: req.data.MonthlyRentPerUnit,
 				AnnualValue: req.data.AnnualValue,
+				Currency: req.data.Currency,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
 		}
@@ -2705,6 +2684,15 @@ module.exports = async (srv) => {
 
 		const budgetRate = await SELECT.one.from(ExchangeRates).where(whereConditionBudgetRate);
 
+		if(req.data.CountryCode === 'ES'){
+			if(req.data.ConditionType === 'PVL'){
+				const discount = Number(req.data.ConfidentialDiscount);
+				req.data.NetPrice = discount > 0 ? req.data.ConfidentialPrice : req.data.PVL;
+			}else if(req.data.ConditionType === 'DescuentoEspecial'){
+				req.data.NetPrice = 0
+			}
+		}
+
 		const mappedPTTMBDPR = mapToPTTMBDPR({priceCondition:req.data, offer, user: req.user, cogs, spotRate, budgetRate, foc});
 
 		if(productPricing){
@@ -2731,11 +2719,11 @@ module.exports = async (srv) => {
 			FOCStep               : foc?.FreeGoodsOther_Step || null, 
 			FOCType               : priceCondition.CountryCode === 'PL' ? 'FOC 1' : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
 			Discount              : priceCondition.CountryCode === 'PL' ? 0 : priceCondition.Discount, 
-			OfferPrice            : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.CountryCode === 'ES' ? priceCondition.NetPriceWithoutTaxAfterDeductionRD || priceCondition.NetPriceWithoutTax : priceCondition.OfferPrice, 
+			OfferPrice            : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.CountryCode === 'ES' ? priceCondition.NetPrice : priceCondition.OfferPrice, 
 			Deductions            : priceCondition.Deductions, 
 			StandardDiscount      : priceCondition.CountryCode === 'ES' ? priceCondition.StandardDiscount: 0, 
 			AdditionalDiscount    : priceCondition.CountryCode === 'ES' ? priceCondition.AdditionalDiscount: 0, 
-			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.CountryCode === 'ES' ? priceCondition.NetPriceWithoutTaxAfterDeductionRD || priceCondition.NetPriceWithoutTax : priceCondition.NetOfferPrice || priceCondition.OfferPrice, 
+			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.CountryCode === 'ES' ? priceCondition.NetPrice : priceCondition.NetOfferPrice || priceCondition.OfferPrice, 
 			BusinessCasePrice     : 0, 
 			// WholesalePrice        : null, 
 			COGS                  : cogs?.COGS || 0,
@@ -2747,7 +2735,7 @@ module.exports = async (srv) => {
 			// FOC_ABS_PCT_Bundled_1 : 0, 
 			FOCProduct_Bundled_1  : 0, 
 			ActiveTier            : 0, 
-			NetPrice              : priceCondition.CountryCode === 'TW' ? priceCondition.Price3 : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.CountryCode === 'ES' ? priceCondition.NetPriceWithoutTaxAfterDeductionRD || priceCondition.NetPriceWithoutTax : priceCondition.NetPrice, 
+			NetPrice              : priceCondition.CountryCode === 'TW' ? priceCondition.Price3 : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.CountryCode === 'ES' ? priceCondition.NetPrice : priceCondition.NetPrice, 
 			NetPrice_OfPaid       : 0, 
 			PRICE_UPDATE          : offer?.APPROVALS_SENT, 
 			LotID                 : 1, 
