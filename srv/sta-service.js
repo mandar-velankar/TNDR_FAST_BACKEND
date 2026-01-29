@@ -2593,23 +2593,7 @@ module.exports = async (srv) => {
 				CountryCode : req.data.CountryCode,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
-				PVL: req.data.PVL,
-				ConfidentialPrice: req.data.ConfidentialPrice,
-				ConfidentialDiscount: req.data.ConfidentialDiscount,
-				Discount: req.data.ESDiscount,
-				RoyalDecreePercentage_1: req.data.RoyalDecreePercentage_1,
-				RoyalDecree: req.data.RoyalDecree,
-				RoyalDecreeValue: req.data.RoyalDecreeValue,
-				RoyalDecreeIncl: req.data.RoyalDecreeIncl,
-				StandardDiscount: req.data.StandardDiscount,
-				AdditionalDiscount: req.data.AdditionalDiscount,
-				NetPriceWithoutTaxBeforeDeductionRD: req.data.NetPriceWithoutTaxBeforeDeductionRD,
-				NetPriceWithoutTaxAfterDeductionRD: req.data.NetPriceWithoutTaxAfterDeductionRD,
-				NetPriceWithTaxAfterDeductionRD: req.data.NetPriceWithTaxAfterDeductionRD,
-				NetPriceWithoutTax: req.data.NetPriceWithoutTax,
-				NetPriceWithTax: req.data.NetPriceWithTax,
 				MaximumPrice: req.data.MaximumPrice,
-				Tax: req.data.Tax,
 				NetPrice: req.data.NetPrice,
 				MonthlyRentPerUnit: req.data.MonthlyRentPerUnit,
 				AnnualValue: req.data.AnnualValue,
@@ -8916,7 +8900,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						oCalculatedResult.GrossMargin = oCalculatedResultTotals.GrossMargin;
 						oCalculatedResult.NetSales = oCalculatedResultTotals.NetSales;
 						oCalculatedResult.COGS = oCalculatedResultTotals.COGS;
-						oCalculatedResult.Profitability = oCalculatedResultTotals.GrossMargin / oCalculatedResultTotals.NetSales;
+						oCalculatedResult.Profitability = oCalculatedResultTotals.NetSales !== 0 ? oCalculatedResultTotals.GrossMargin / oCalculatedResultTotals.NetSales : 0;
 					}
 
 					if(consolidatedEntry.ProductType !== 'Total'){
