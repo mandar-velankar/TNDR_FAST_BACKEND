@@ -7738,7 +7738,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		  RoyalDecree: "No",
 		  YD06: 0,
 		  RoyalDecreeValue: 0,
-		  RoyalDecreeIncl: true,
+		  RoyalDecreeIncl: false,
 		  YD30: 0,
 		  YD75: null,
 		  YP10: null,
@@ -7877,6 +7877,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		} else if (YP00) {
 			const iawot = YD06 ? basePrice * (1 - result.YD06) : basePrice
 			result.SAPTAX = iawot && iawot !==0 ? result.SAPTAX / iawot : 0;
+			result.RoyalDecreeIncl = false;
 			result.ConditionType = "PVL";
 		} else {
 			result.ConditionType = null;
