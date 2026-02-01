@@ -1174,22 +1174,16 @@ module.exports = (srv) => {
 			CountryCode: offer.COUNTRYCODE,
 			BrandId: product.BRANDID,
 		};
-
+		const currentApproverTypes = getTHApproverTypesByDivisionAndBrand(product);
 		let latestApprovedBrandPolicy = await tx.run(SELECT.from(LatestApprovedBrandPolicies).where(whereLatestApprovedBrandPolicy));
 		if (latestApprovedBrandPolicy.length === 0) {//No pricing policy
 			//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
 			//based upon the country the correct approverType will be handled 
 			aApproverTypes.map(async function (oApproverType) {
+				const apprTypeIndex = currentApproverTypes.findIndex(currAppr => currAppr.name === oApproverType.ApproverType);
+				if (apprTypeIndex > -1) oApproverType.ValidationType = 1;
+				
 				switch (oApproverType.ApproverType) {
-					case "PoH/CEH":
-						oApproverType.ValidationType = 1;
-						break;
-					case "CDH":
-						oApproverType.ValidationType = 1;
-						break;
-					case "SM/PCEA":
-						oApproverType.ValidationType = 1;
-						break;
 					case "Supply Chain":
 						oApproverType.ValidationType = supply;
 						break;
@@ -1248,16 +1242,10 @@ module.exports = (srv) => {
 			//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
 			//based upon the country the correct approverType will be handled 
 			aApproverTypes.map(async function (oApproverType) {
+				const apprTypeIndex = currentApproverTypes.findIndex(currAppr => currAppr.name === oApproverType.ApproverType);
+				if (apprTypeIndex > -1) oApproverType.ValidationType = 1;
+
 				switch (oApproverType.ApproverType) {
-					case "PoH/CEH":
-						oApproverType.ValidationType = 1;
-						break;
-					case "CDH":
-						oApproverType.ValidationType = 1;
-						break;
-					case "SM/PCEA":
-						oApproverType.ValidationType = 1;
-						break;
 					case "Supply Chain":
 						oApproverType.ValidationType = supply;
 						break;
@@ -1298,18 +1286,41 @@ module.exports = (srv) => {
 			*/
 		}
 		//Set variables for policy prices thresholds
-		let nsmMSP = extractPolicyValue(productPolicyPrices, 'SM/PCEA', 'MSP') / uomFactor;
-		let nsmNSP = extractPolicyValue(productPolicyPrices, 'SM/PCEA', 'NSP') / uomFactor;
-		let hbuMSP = extractPolicyValue(productPolicyPrices, 'PoH/CEH', 'MSP') / uomFactor;
-		let hbuNSP = extractPolicyValue(productPolicyPrices, 'PoH/CEH', 'NSP') / uomFactor;
-		let cdhMSP = extractPolicyValue(productPolicyPrices, 'CDH', 'MSP') / uomFactor;
-		let cdhNSP = extractPolicyValue(productPolicyPrices, 'CDH', 'NSP') / uomFactor;
+		let nsmMSP;
+		let nsmNSP;
+		let hbuMSP;
+		let hbuNSP;
+		let cdhMSP;
+		let cdhNSP;
+
+		currentApproverTypes.forEach(currApp => {
+			switch (currApp.type) {
+				case "nsm":
+					nsmMSP = extractPolicyValue(productPolicyPrices, currApp.policyPriceRole, 'MSP') / uomFactor;
+					nsmNSP = extractPolicyValue(productPolicyPrices, currApp.policyPriceRole, 'NSP') / uomFactor;
+					break;
+				case "hbu":
+					hbuMSP = extractPolicyValue(productPolicyPrices, currApp.policyPriceRole, 'MSP') / uomFactor;
+					hbuNSP = extractPolicyValue(productPolicyPrices, currApp.policyPriceRole, 'NSP') / uomFactor;
+					break;
+				case "cdh":
+					cdhMSP = extractPolicyValue(productPolicyPrices, currApp.policyPriceRole, 'MSP') / uomFactor;
+					cdhNSP = extractPolicyValue(productPolicyPrices, currApp.policyPriceRole, 'NSP') / uomFactor;
+					break;
+				default:
+					break;
+			}
+		})
 
 		//Set initial approvals requirement to "Optional", i.e. 1
 		let nsmLevel = 1;
 		let hbuLevel = 1;
 		let cdhLevel = 1;
 		let inPolicy = true;//Boolean used to specify if product offer and net offer prices are within policy
+		let isPMAuthorized = false;
+		let isHeadOfFocusBrandAuthorized = false;
+		let isMDAuthorized = false;
+
 
 		let preApprovedAccountOfferPrice = product.ACCOUNT_OFFER_PRICE;
 		let preApprovedAccountNetOfferPrice = product.ACCOUNT_NET_OFFER_PRICE;
@@ -1324,10 +1335,10 @@ module.exports = (srv) => {
 			if (ServiceHelper.isDoubleXBelowEqualY(nsmMSP, product.OFFER_PRICE)) {//SM/PCEA can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
 			}
-			else if (ServiceHelper.isDoubleXBelowEqualY(hbuMSP, product.OFFER_PRICE)) {//PoH/CEH can approve
+			else if (hbuMSP && ServiceHelper.isDoubleXBelowEqualY(hbuMSP, product.OFFER_PRICE)) {//PoH/CEH can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
 			}
-			else if (ServiceHelper.isDoubleXBelowEqualY(cdhMSP, product.OFFER_PRICE)) {//CDH can approve
+			else if (cdhMSP && ServiceHelper.isDoubleXBelowEqualY(cdhMSP, product.OFFER_PRICE)) {//CDH can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
 			}
 			else {
@@ -1342,10 +1353,10 @@ module.exports = (srv) => {
 			if (ServiceHelper.isDoubleXBelowEqualY(nsmNSP, product.NET_PRICE)) {//SM/PCEA can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
 			}
-			else if (ServiceHelper.isDoubleXBelowEqualY(hbuNSP, product.NET_PRICE)) {//PoH/CEH can approve
+			else if (hbuNSP && ServiceHelper.isDoubleXBelowEqualY(hbuNSP, product.NET_PRICE)) {//PoH/CEH can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
 			}
-			else if (ServiceHelper.isDoubleXBelowEqualY(cdhNSP, product.NET_PRICE)) {//CDH can approve
+			else if (cdhNSP && ServiceHelper.isDoubleXBelowEqualY(cdhNSP, product.NET_PRICE)) {//CDH can approve
 				requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
 			}
 			else {
@@ -1354,15 +1365,19 @@ module.exports = (srv) => {
 		}
 
 		if (FOCValue) {
-			if (ServiceHelper.isDoubleXBelowEqualY(FOCValue, 30000)) {
-				requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
-			}else if (ServiceHelper.isDoubleXBelowY(30000, FOCValue) && ServiceHelper.isDoubleXBelowEqualY(FOCValue, 200000)) {
-				requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
-			}else if (ServiceHelper.isDoubleXBelowY(200000, FOCValue)) {
-				requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
-			}else {
-				requiredApprovalLevel = 4;
-			}
+			// if (ServiceHelper.isDoubleXBelowEqualY(FOCValue, 30000)) {
+			// 	requiredApprovalLevel = Math.max(requiredApprovalLevel, 1);
+			// }else if (ServiceHelper.isDoubleXBelowY(30000, FOCValue) && ServiceHelper.isDoubleXBelowEqualY(FOCValue, 200000)) {
+			// 	requiredApprovalLevel = Math.max(requiredApprovalLevel, 2);
+			// }else if (ServiceHelper.isDoubleXBelowY(200000, FOCValue)) {
+			// 	requiredApprovalLevel = Math.max(requiredApprovalLevel, 3);
+			// }else {
+			// 	requiredApprovalLevel = 4;
+			// }
+
+			isPMAuthorized = ServiceHelper.isDoubleXBelowEqualY(FOCValue, 200000);
+			isHeadOfFocusBrandAuthorized = ServiceHelper.isDoubleXBelowY(200000, FOCValue) && ServiceHelper.isDoubleXBelowEqualY(FOCValue, 500000);
+			isMDAuthorized = ServiceHelper.isDoubleXBelowY(500000, FOCValue);
 		}
 
 		switch (requiredApprovalLevel) {
@@ -1383,20 +1398,41 @@ module.exports = (srv) => {
 		//change corresponding ApproverTypes.ValidationType with calculated BuildProductValidationForTypeX
 		//based upon the country the correct approverType will be handled 
 		aApproverTypes.map(async function (oApproverType) {
-			switch (oApproverType.ApproverType) {
-				case "PoH/CEH":
-					oApproverType.ValidationType = hbuLevel;
-					break;
-				case "CDH":
-					oApproverType.ValidationType = cdhLevel;
-					break;
-				case "SM/PCEA":
-					oApproverType.ValidationType = nsmLevel;
-					break;
-				case "Supply Chain":
-					oApproverType.ValidationType = supply;
-					break;
+			const currApprType = currentApproverTypes.find(currAppr => currAppr.name === oApproverType.ApproverType);
+
+			if (oApproverType.ApproverType === "Supply Chain") {
+				oApproverType.ValidationType = supply;
 			}
+
+			if (currApprType) {
+				switch (currApprType.type) {
+					case "nsm":
+						oApproverType.ValidationType = nsmLevel;
+						break;
+					case "hbu":
+						oApproverType.ValidationType = hbuLevel;
+						break;
+					case "cdh":
+						oApproverType.ValidationType = cdhLevel;
+						break;
+				}
+			}
+
+			if (oApproverType.ApproverType === "PM") {
+				oApproverType.ValidationType = isPMAuthorized ? 3 : oApproverType.ValidationType;
+				oApproverType.Hierarchy = isPMAuthorized ? 2 : oApproverType.Hierarchy;
+			}
+
+			if (oApproverType.ApproverType === "Head of Focus Brands and Market Access") {
+				oApproverType.ValidationType = isHeadOfFocusBrandAuthorized ? 3 : oApproverType.ValidationType;
+				oApproverType.Hierarchy = isHeadOfFocusBrandAuthorized ? 2 : oApproverType.Hierarchy;
+			}
+
+			if (oApproverType.ApproverType === "MD") {
+				oApproverType.ValidationType = isMDAuthorized ? 3 : oApproverType.ValidationType;
+				oApproverType.Hierarchy = isMDAuthorized ? 2 : oApproverType.Hierarchy;
+			}
+			
 		});
 
 		results = {
@@ -1431,6 +1467,73 @@ module.exports = (srv) => {
 		*/
 
 		return results;
+	}
+
+	function getTHApproverTypesByDivisionAndBrand (product) {
+		const {DIVISION, BRANDNAME} = product;
+		let aCurrentApproverTypes = [];
+		if (!BRANDNAME) {
+			this.setProperty("brandRoles", aRoles);
+			return aRoles;
+		}
+
+		if (DIVISION?.toLowerCase()?.trim() === 'radiology') {
+			aCurrentApproverTypes = [
+				{
+					name: "SM",
+					type: "nsm",
+					policyPriceRole: "SM/PCEA"
+				},
+				{
+					name: "PM",
+					type: "hbu",
+					policyPriceRole: "PoH/CEH"			
+				},
+				{
+					name: "CDH",
+					type: "cdh",
+					policyPriceRole: "CDH"		
+				}
+			]
+		}
+
+		if (DIVISION?.toLowerCase()?.trim() === 'pharma') {
+			if (isExcludedBrand(BRANDNAME)) {
+				aCurrentApproverTypes = [
+					{
+						name: "CE Coach",
+						type: "nsm",
+						policyPriceRole: "SM/PCEA"
+					},
+					{
+						name: "PM",
+						type: "hbu",
+						policyPriceRole: "PoH/CEH"			
+					},
+					{
+						name: "Head of Focus Brands and Market Access",
+						type: "cdh",
+						policyPriceRole: "CDH"		
+					}
+				]
+			}else {
+				aCurrentApproverTypes = [
+					{
+						name: "PM/PCEA",
+						type: "nsm",
+						policyPriceRole: "SM/PCEA"
+					}
+				]
+			}
+		}
+
+		return aCurrentApproverTypes;
+	}
+
+	function isExcludedBrand (brandName) {
+		const brands = ["eylea", "nubeqa", "stivarga", "xofigo"];
+		const normalized = brandName.toLowerCase().trim();
+		return brands.some(brand => normalized.includes(brand));
 	}
 
 	function buildProductValidationForType5(offer, product, productInfo, aApproverTypes) {//Argentina
@@ -1785,6 +1888,36 @@ module.exports = (srv) => {
 		return results;
 	}
 
+	async function buildProductValidationForType12(tx, product, aApproverTypes) {
+		const { PriceCondition} = cds.entities("com.bayer.SXTENDER.TransactionalData");
+		let results = {
+			IN_POLICY: false
+		}
+
+		const priceCondition = await tx.run(SELECT.one.from(PriceCondition).where({'OfferID': product.OFFERID, ProductCode: product.ProductCode}));
+
+		if(priceCondition){
+			if(ServiceHelper.isDoubleXBelowEqualY(priceCondition.Price1, priceCondition.Price0)){
+				aApproverTypes.map(async function (oApproverType) {
+					oApproverType.ValidationType = 3;
+				});
+			}
+			
+			if(ServiceHelper.isDoubleEqual(priceCondition.Price1, priceCondition.Price0) || ServiceHelper.isDoubleXBelowEqualY(priceCondition.Price1, priceCondition.Price0)){
+				aApproverTypes.map(async function (oApproverType) {
+					oApproverType.ValidationType = oApproverType.ValidationType2;
+				});
+			}
+		
+			//In Policy flag is used to block the UI for clicking on the approval button (for example used for Thailand)
+			results.IN_POLICY = true
+			
+		}
+
+		return results;
+			
+	}
+
 	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
@@ -1811,6 +1944,9 @@ module.exports = (srv) => {
         }
 		else if (offer.APPROVAL_TYPE === 11) { //Applicable for Brazil
 			productValidation = await buildProductValidationForType11(tx, offer, product, commnonProductInfo, aApproverTypes, offerProductsTotalValue)
+        }
+		else if (offer.APPROVAL_TYPE === 12) {
+			productValidation = await buildProductValidationForType12(tx, product, aApproverTypes)
         }
 		else if (offer.APPROVAL_TYPE === 19) {//Applicable for MEA
 			productValidation = buildProductValidationForType19(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags)

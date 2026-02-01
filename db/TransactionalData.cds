@@ -570,7 +570,9 @@ entity PriceCondition: cuid, managed {
     PriceAgreement                      : Association to PriceAgreementData.PriceAgreements;
     Settlement                          : Association to MasterData.Settlements;
     IsPricingUnlocked                   : Boolean default false;
-    NLPriceConditionType                : Array of NLConditions;
+    NLPriceConditionType_1              : NLConditions;
+    NLPriceConditionType_2              : NLConditions;
+    NLPriceConditionType_3              : NLConditions;
     CurrentBasePrice                    : Decimal;
     CurrentInvoicePrice                 : Decimal;
     CurrentGeneralDiscount              : Double;
@@ -994,6 +996,13 @@ entity THQuotationDelevery : cuid {
     QuotationRecipientcontact : String;
 }
 
+type MEAApprovalUpdatedFields {
+    Volume      : Integer default 0;
+    UOM         : Integer default 0;
+    FOC         : Integer default 0;
+    Price       : Integer default 0;
+    Deductions  : Integer default 0;
+}
 entity CCMPriceCondition: cuid, managed{
     CountryCode                         : String;
     OfferID                             : String;
@@ -1024,12 +1033,4 @@ entity CCMPriceCondition: cuid, managed{
     NETPRICEWITHOUTTAX                  : Decimal;
     NETPRICEWITHTAX                     : Decimal;
     ConditionType                       : String;
-}
-
-type MEAApprovalUpdatedFields {
-    Volume      : Integer default 0;
-    UOM         : Integer default 0;
-    FOC         : Integer default 0;
-    Price       : Integer default 0;
-    Deductions  : Integer default 0;
 }

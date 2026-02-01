@@ -2108,6 +2108,50 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
     action updateFinalContractStartEndDate(OfferID: String, ContractStartDate: Date, ContractEndDate: Date) returns String;
     action createAllFastConditionContracts(OfferID: String, ContractStartDate: Date, ContractEndDate: Date) returns String;
     function getFastContractForOffer(offerID: String, tenderID: String) returns String;
+    entity PolandPendingTMApprovals as select from TransactionalData.PT_TMOFRS as o
+        inner join TransactionalData.PT_TMAPPRST as a
+            on o.OfferID = a.OfferId
+        inner join TransactionalDataViews.OfferStatus as os
+            on os.OFFER_ID = o.OfferID {
+        o.OfferID,
+        o.CountryCode,
+        max(a.Statustime) as STATUSTIME: DateTime,
+
+        count( distinct case
+            when a.ApprovalStatus in ('Waiting') 
+            then a.ApproverType 
+        end ) as PendingApproverTypes: Integer,
+
+        max( case
+            when a.ApprovalStatus in ('Waiting') 
+            and a.REQUIRED_ACTION = 'Approval' 
+            then a.ApproverType 
+        end ) as PendingApproverType: String,
+
+        sum( case
+            when a.ApprovalStatus in ('Waiting') 
+            and a.REQUIRED_ACTION = 'Approval' 
+            and a.ApproverType = 'TM' 
+            then 1 else 0 end ) as PendingTMCount: Integer
+    }
+    where 
+        o.CountryCode = 'PL'
+        and os.STATUS = 'Awaiting Approval'
+    group by 
+        o.OfferID,
+        o.CountryCode;
+
+    entity PolandOffersWithOnlyTMPending as select from PolandPendingTMApprovals {
+        key OfferID,
+        CountryCode,
+        STATUSTIME
+    }
+    where 
+        PendingApproverTypes = 1
+        and PendingApproverType = 'TM'
+        and PendingTMCount > 0
+    order by OfferID desc;
+    
     function getContractMngtDateConstraints(TenderID: String, OfferID: String, CountryCode: String) returns ContractMngtDateConstraintsResponse;
     function getQuotationData(OfferID : String) returns String;
 }

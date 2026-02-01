@@ -16,8 +16,8 @@ entity LatestApprovalRequests as select from TransactionalData.PT_TMAPPRST as ap
     max(approvals.Statustime) as MaxStatusTime:DateTime
 }where approvals.Active = 1
 group by approvals.OfferId,
-    approvals.ApproverEmailID,
-    approvals.ApproverType;
+    approvals.ApproverType,
+    approvals.ApproverEmailID;
 
 entity ApprovalRequests as select from TransactionalData.PT_TMAPPRST as approvals
 inner join LatestApprovalRequests as latestApprovals
@@ -239,6 +239,7 @@ inner join LatestApprovalRequests as latestApprovals
     on approvals.OfferId = latestApprovals.OfferId 
     and approvals.Statustime = latestApprovals.MaxStatusTime 
     and approvals.ApproverType = latestApprovals.ApproverType
+    and approvals.ApproverEmailID = latestApprovals.ApproverEmailID
     and approvals.Active = 1
 left join OfferLatestApprovalStatus as offerLatestApprStatus
     on offerLatestApprStatus.OfferID = approvals.OfferId
@@ -1735,7 +1736,9 @@ left outer join MasterData.PricingPolicy as pricingPolicy
     ifnull(priceCondition.FreeGoods_Amount,0) as FreeGoods_Amount:Double,
      @Core.Computed: false
     ifnull(priceCondition.FreeGoods_Percentage,0) as FreeGoods_Percentage:Double,
-    priceCondition.NLPriceConditionType,
+    priceCondition.NLPriceConditionType_1,
+    priceCondition.NLPriceConditionType_2,
+    priceCondition.NLPriceConditionType_3,
     @Core.Computed: false
     ifnull(priceCondition.CurrentBasePrice, curentSection.Price0) as TWCurrentBasePrice: Decimal,
     @Core.Computed: false

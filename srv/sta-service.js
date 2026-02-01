@@ -169,6 +169,7 @@ module.exports = async (srv) => {
 		PriceConditionFOCView,
 		RelatedInstitutes,
 		CandidateInstitutes,
+		PolandOffersWithOnlyTMPending,
 		OfferProductsTableView
 	} = cds.entities("StandardAppService");
 
@@ -546,9 +547,13 @@ module.exports = async (srv) => {
         }
 		let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValues(req, 'CountryCode') || []; 
 		let instituteID =  req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'InstituteID');
+		let offerStatus =  req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'STATUS');
+		let isStatusAwaitingTMApproval = offerStatus?.toLowerCase()?.split(" ")?.join("")?.trim() === "awaitingtmapproval";
 		
 		// Deleting Institute filter in order to create custom filter logic
 		instituteID && ServiceHelper.deleteFilter(req, "InstituteID");
+		// Filter to show offers with only pending TM approval from the Awaiting Approval list.
+		countryCode?.[0] === 'PL' && isStatusAwaitingTMApproval && ServiceHelper.setWhereValue(req, "STATUS", "Awaiting Approval");
 
         req.query.SELECT.where && (tmvQuery.where(req.query.SELECT.where));
         //req.query.SELECT.limit && countryCode[0] !== 'TW' && (tmvQuery.limit(req.query.SELECT.limit));
@@ -626,6 +631,19 @@ module.exports = async (srv) => {
 		const cwid = req.user.id;
 		const userTerritories = await SELECT.from(UserTerritory).where({ UserID: cwid });
 		const instituteTerritory = await SELECT.from(InstituteTerritory);
+
+		if (
+			Array.isArray(countryCode) && 
+			countryCode.length > 0 && countryCode[0] === 'PL' && 
+			isStatusAwaitingTMApproval
+		) {
+			const polandOnlyTMApprTypePendingOffers = await SELECT.from(PolandOffersWithOnlyTMPending);
+			result = result.filter(item => {
+				const polandOnlyTMApprTypePendingOfferIndex = polandOnlyTMApprTypePendingOffers.findIndex(el => el.OfferID === item.OfferID);
+				return polandOnlyTMApprTypePendingOfferIndex >= 0;
+			})
+
+		}
 
 		// Taiwan doesn't have standart limit method tmvQuery.limit(req.query.SELECT.limit); instead of that returning empty array if offset and result lengts are same
 		if (
@@ -2219,35 +2237,36 @@ module.exports = async (srv) => {
 	}
 
 	async function handleNetherlandsPriceConditions(req) {
+		const promises = [];
 		const priceCondition = await SELECT.one.from(PriceCondition).where({
 			OfferID: req.data.OfferID,
 			ProductCode: req.data.ProductCode
 		});
 		const existingNLPriceConditions = await SELECT.from(NLPriceConditions).where({PriceCondition_ID: priceCondition.ID});
 
-		if (existingNLPriceConditions.length > 0) {
-			await Promise.all(req.data.NLPriceConditionType.map(pc => {
-				const mappedNLPriceCondition = mappedNLPriceConditions(pc, priceCondition.ID);
-				const nlPriceCondIndex = existingNLPriceConditions.findIndex(el => el.ContractDuration == pc.ContractDuration);
-				if (nlPriceCondIndex > -1) {
-					return UPDATE(NLPriceConditions)
-					.with(mappedNLPriceCondition)
-					.where({
-						ContractDuration: pc.ContractDuration,
-						PriceCondition_ID: priceCondition.ID
-					});
-				}else if (nlPriceCondIndex == -1 && pc.ContractDuration) {
-					return INSERT(mappedNLPriceCondition).into(NLPriceConditions);
-				}
-			}))
-		}else {
-			await Promise.all(req.data.NLPriceConditionType.map(pc => {
-				const mappedNLPriceCondition = mappedNLPriceConditions(pc, priceCondition.ID);
+		for(let i = 1; i <= 3; i++) {
+			const nlPriceCondIndex = existingNLPriceConditions.findIndex(el => el.ContractDuration == req.data[`Custom_Integer_${i}`]);
+			const mappedNLPriceCondition = mappedNLPriceConditions(req.data, i, priceCondition.ID);
+			if (nlPriceCondIndex > -1) {
+				promises.push(
+					UPDATE(NLPriceConditions)
+						.with(mappedNLPriceCondition)
+						.where({
+							ContractDuration: mappedNLPriceCondition.ContractDuration,
+							PriceCondition_ID: priceCondition.ID
+						})
+				)
+			}else {	
+				//no need to save price without contract duration
 				if (mappedNLPriceCondition.ContractDuration) {
-					return INSERT(mappedNLPriceCondition).into(NLPriceConditions);
+					promises.push(
+						INSERT(mappedNLPriceCondition).into(NLPriceConditions)
+					)
 				}
-			}))
+			}
 		}
+
+		await Promise.all(promises);
 	}
 
 	async function handlePriceConditionUpsert(priceCondition, mappedPriceCondition){
@@ -2262,12 +2281,12 @@ module.exports = async (srv) => {
 		}
 	}
 
-	const mappedNLPriceConditions = function(pc, PriceconditionID) {
+	const mappedNLPriceConditions = function(pc, i, PriceconditionID) {
 		return {
-			ContractDuration: pc.ContractDuration,
-			OfferPrice: pc.OfferPrice,
-			Discount: pc.Discount,
-			NetPrice: pc.NetPrice,
+			ContractDuration: pc[`NLPriceConditionType_${i}_ContractDuration`],
+			OfferPrice: pc[`NLPriceConditionType_${i}_OfferPrice`],
+			Discount: pc[`NLPriceConditionType_${i}_Discount`],
+			NetPrice: pc[`NLPriceConditionType_${i}_NetPrice`],
 			PriceCondition_ID: PriceconditionID
 		}
 	}
@@ -2887,17 +2906,17 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			for(let i = 1; i <= 3; i++) {
 				const existingCondition = nlPriceConditions.find(el => el.ContractDuration == item[`Custom_Integer_${i}`] && el.ID);
 				if (existingCondition) {
-					item.NLPriceConditionType[i] = existingCondition;
-				}else {
-					item.NLPriceConditionType[i] = {
-						ContractDuration: item[`Custom_Integer_${i}`],
-						OfferPrice: item.OfferPrice,
-						Discount: 0,
-						NetPrice: 0,
-					}
+					item[`NLPriceConditionType_${i}_ContractDuration`] = existingCondition.ContractDuration;
+					item[`NLPriceConditionType_${i}_OfferPrice`] = existingCondition.OfferPrice;
+					item[`NLPriceConditionType_${i}_Discount`] = existingCondition.Discount;
+					item[`NLPriceConditionType_${i}_NetPrice`] = existingCondition.NetPrice;
+				}else {	
+					item[`NLPriceConditionType_${i}_ContractDuration`] = item[`Custom_Integer_${i}`];
+					item[`NLPriceConditionType_${i}_OfferPrice`] = item.OfferPrice;
+					item[`NLPriceConditionType_${i}_Discount`] = 0;
+					item[`NLPriceConditionType_${i}_NetPrice`] = 0;
 				}
 			}
-			item.NLPriceConditionType = item.NLPriceConditionType.filter(el => el);
 			item.NetOfferPrice = await calculateNetOfferPrice(item);
 			item.NetPrice = item.NetOfferPrice * (1 - item.Deductions); 
 		};
@@ -4299,6 +4318,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
 		let instituteTerritory = await tx.run(SELECT.one.from(InstituteTerritory).where(whereInstituteId));
 		let userInfo = await tx.run(SELECT.one.from(PT_TMUSER).where({CWID: tx?.context?.req?.user?.id}));
+		let tender = await tx.run(SELECT.one.from(PT_TMTEND).where({TenderID: offer.TENDERID}));
 
 		//where statement
 		let whereApproverType = {
@@ -4391,7 +4411,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }));
 				}
 				productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
-				productCondition.NLPriceConditions = await tx.run(SELECT.from(NLPriceConditions).where({ PriceCondition_ID: productCondition.ID}));
+				productCondition.NLPriceConditions = await tx.run(SELECT.from(NLPriceConditions).where({ PriceCondition_ID: productCondition.ID, ContractDuration: {in: [tender.Custom_Integer_1, tender.Custom_Integer_2, tender.Custom_Integer_3]}}));
 				return productCondition;		
 			}));
 			/*end of ProductCondition information */
@@ -8235,7 +8255,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				return req.error({ code: 403, message: `Tender "${TenderID}" is not active. Only active tender can be copied.`, target: "PT_TMTEND"});
 			}
 
-			const latestTenderID = await SELECT.one.from(PT_TMTEND).columns('max(TenderID) as TenderID').where({ CountryCode: tender.CountryCode })
+			const latestTenderID = await SELECT.one.from(PT_TMTEND).columns('max(TenderID) as TenderID').where({ CountryCode: tender.CountryCode, TenderID: { 'not like': '%HIST%' } })
 			const offers = await SELECT.from(PT_TMOFRS).where({TenderID: TenderID, ActiveOffer: 1});
 			const offerIDs = offers.map(o => o.OfferID);
 			const offerProducts = offerIDs.length > 0 ?await SELECT.from(PT_TMOFPR).where({OfferID: {in: offerIDs}, Active: 1}) : [];
@@ -8286,6 +8306,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		newTender.TenderID = newTenderInformation.newTenderID;
 		newTender.TenderNo = newTenderInformation.newTenderNo
 		newTender.SubmittedOn = todaysDate;
+		newTender.FoldersCreated = null;
 
 		// mapping new offers
 		const newOffers = offers.map(offer => {
@@ -8299,6 +8320,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			newOffer.NewOfferDueDate = todaysDate;	
 			newOffer.TenderOfferNo = NEW_OFFER_ID.newTenderOfferNo;
 			newOffer.SubmittedOn = todaysDate;
+			newOffer.APPROVALS_SENT = 0;
 
 			return newOffer;
 		});
@@ -8325,6 +8347,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			newOfferProduct.OfferID = NEW_OFFER_ID.newOfferID;
 			newOfferProduct.SubmittedOn = todaysDate;
 			newOfferProduct.Active = 1;
+			newOfferProduct.SUPPLY_UPDATE = 0;
+			newOfferProduct.PAYMENT_UPDATE = 0;
+			newOfferProduct.VOLUME_UOM_UPDATE = 0;
 
 			return newOfferProduct;
 		});
@@ -8337,6 +8362,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			newProductPricing.TenderID = newTenderInformation.newTenderID;
 			newProductPricing.OfferID = NEW_OFFER_ID.newOfferID;
 			newProductPricing.SubmittedOn = todaysDate;
+			newProductPricing.PRICE_UPDATE = 0;
 
 			return newProductPricing;
 		});
