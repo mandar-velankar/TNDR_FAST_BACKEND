@@ -2105,6 +2105,7 @@ module.exports = async (srv) => {
 		}
 	);
 
+
 	/**
 	 * Upserts a price condition based on the provided request data.
 	 * If `req.data.PriceConditionID` exists, updates the existing price condition.
@@ -2532,7 +2533,7 @@ module.exports = async (srv) => {
 				NetPriceWithTax: req.data.NetPriceWithTax,
 				MaximumPrice: req.data.MaximumPrice,
 				Tax: req.data.Tax,
-				NetPrice: req.data.NetPriceWithoutTaxAfterDeductionRD || req.data.NetPriceWithoutTax,
+				NetPrice: req.data.NetPrice,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
 			"DescuentoComercial":{
@@ -2556,7 +2557,7 @@ module.exports = async (srv) => {
 				NetPriceWithTax: req.data.NetPriceWithTax,
 				MaximumPrice: req.data.MaximumPrice,
 				Tax: req.data.Tax,
-				NetPrice: req.data.NetPriceWithoutTaxAfterDeductionRD || req.data.NetPriceWithoutTax,
+				NetPrice: req.data.NetPrice,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
 			"PVL":{
@@ -2580,7 +2581,7 @@ module.exports = async (srv) => {
 				NetPriceWithTax: req.data.NetPriceWithTax,
 				MaximumPrice: req.data.MaximumPrice,
 				Tax: req.data.Tax,
-				NetPrice: req.data.NetPriceWithoutTaxAfterDeductionRD || req.data.NetPriceWithoutTax,
+				NetPrice: req.data.ConfidentialDiscount !==0 ? req.data.ConfidentialPrice : req.data.PVL,
 				PriceConditionClassification_ID: req.data.ClassificationID
 			},
 			"DescuentoEspecial":{
@@ -2604,31 +2605,15 @@ module.exports = async (srv) => {
 				NetPriceWithTax: req.data.NetPriceWithTax,
 				MaximumPrice: req.data.MaximumPrice,
 				Tax: req.data.Tax,
-				NetPrice: req.data.NetPriceWithoutTaxAfterDeductionRD || req.data.NetPriceWithoutTax,
+				NetPrice: 0,
 				PriceConditionClassification_ID: req.data.ClassificationID
 			},
 			"Rental":{
 				CountryCode : req.data.CountryCode,
 				OfferID: req.data.OfferID,
 				ProductCode: req.data.ProductCode,
-				PVL: req.data.PVL,
-				ConfidentialPrice: req.data.ConfidentialPrice,
-				ConfidentialDiscount: req.data.ConfidentialDiscount,
-				Discount: req.data.ESDiscount,
-				RoyalDecreePercentage_1: req.data.RoyalDecreePercentage_1,
-				RoyalDecree: req.data.RoyalDecree,
-				RoyalDecreeValue: req.data.RoyalDecreeValue,
-				RoyalDecreeIncl: req.data.RoyalDecreeIncl,
-				StandardDiscount: req.data.StandardDiscount,
-				AdditionalDiscount: req.data.AdditionalDiscount,
-				NetPriceWithoutTaxBeforeDeductionRD: req.data.NetPriceWithoutTaxBeforeDeductionRD,
-				NetPriceWithoutTaxAfterDeductionRD: req.data.NetPriceWithoutTaxAfterDeductionRD,
-				NetPriceWithTaxAfterDeductionRD: req.data.NetPriceWithTaxAfterDeductionRD,
-				NetPriceWithoutTax: req.data.NetPriceWithoutTax,
-				NetPriceWithTax: req.data.NetPriceWithTax,
 				MaximumPrice: req.data.MaximumPrice,
-				Tax: req.data.Tax,
-				NetPrice: req.data.NetPriceWithoutTaxAfterDeductionRD || req.data.NetPriceWithoutTax,
+				NetPrice: req.data.NetPrice,
 				MonthlyRentPerUnit: req.data.MonthlyRentPerUnit,
 				AnnualValue: req.data.AnnualValue,
 				PriceConditionClassification_ID: req.data.ClassificationID 
@@ -2697,6 +2682,15 @@ module.exports = async (srv) => {
 
 		const budgetRate = await SELECT.one.from(ExchangeRates).where(whereConditionBudgetRate);
 
+		if(req.data.CountryCode === 'ES'){
+			if(req.data.ConditionType === 'PVL'){
+				const discount = Number(req.data.ConfidentialDiscount);
+				req.data.NetPrice = discount > 0 ? req.data.ConfidentialPrice : req.data.PVL;
+			}else if(req.data.ConditionType === 'DescuentoEspecial'){
+				req.data.NetPrice = 0
+			}
+		}
+
 		const mappedPTTMBDPR = mapToPTTMBDPR({priceCondition:req.data, offer, user: req.user, cogs, spotRate, budgetRate, foc});
 
 		if(productPricing){
@@ -2723,11 +2717,11 @@ module.exports = async (srv) => {
 			FOCStep               : foc?.FreeGoodsOther_Step || null, 
 			FOCType               : priceCondition.CountryCode === 'PL' ? 'FOC 1' : foc?.ADD_INCLUDE === 'Included' ? 'FOC 1' : 'FOC 2', 
 			Discount              : priceCondition.CountryCode === 'PL' ? 0 : priceCondition.Discount, 
-			OfferPrice            : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.CountryCode === 'ES' ? priceCondition.NetPriceWithoutTaxAfterDeductionRD || priceCondition.NetPriceWithoutTax : priceCondition.OfferPrice, 
+			OfferPrice            : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.CountryCode === 'ES' ? priceCondition.NetPrice : priceCondition.OfferPrice, 
 			Deductions            : priceCondition.Deductions, 
 			StandardDiscount      : priceCondition.CountryCode === 'ES' ? priceCondition.StandardDiscount: 0, 
 			AdditionalDiscount    : priceCondition.CountryCode === 'ES' ? priceCondition.AdditionalDiscount: 0, 
-			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.CountryCode === 'ES' ? priceCondition.NetPriceWithoutTaxAfterDeductionRD || priceCondition.NetPriceWithoutTax : priceCondition.NetOfferPrice || priceCondition.OfferPrice, 
+			NetofferPrice         : priceCondition.CountryCode === 'TW' ? priceCondition.NetPrice : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.CountryCode === 'ES' ? priceCondition.NetPrice : priceCondition.NetOfferPrice || priceCondition.OfferPrice, 
 			BusinessCasePrice     : 0, 
 			// WholesalePrice        : null, 
 			COGS                  : cogs?.COGS || 0,
@@ -2739,7 +2733,7 @@ module.exports = async (srv) => {
 			// FOC_ABS_PCT_Bundled_1 : 0, 
 			FOCProduct_Bundled_1  : 0, 
 			ActiveTier            : 0, 
-			NetPrice              : priceCondition.CountryCode === 'TW' ? priceCondition.Price3 : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.CountryCode === 'ES' ? priceCondition.NetPriceWithoutTaxAfterDeductionRD || priceCondition.NetPriceWithoutTax : priceCondition.NetPrice, 
+			NetPrice              : priceCondition.CountryCode === 'TW' ? priceCondition.Price3 : priceCondition.CountryCode === 'PL' ? priceCondition.SpecialPrice : priceCondition.CountryCode === 'ES' ? priceCondition.NetPrice : priceCondition.NetPrice, 
 			NetPrice_OfPaid       : 0, 
 			PRICE_UPDATE          : offer?.APPROVALS_SENT, 
 			LotID                 : 1, 
@@ -7764,7 +7758,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		  RoyalDecree: "No",
 		  YD06: 0,
 		  RoyalDecreeValue: 0,
-		  RoyalDecreeIncl: true,
+		  RoyalDecreeIncl: false,
 		  YD30: 0,
 		  YD75: null,
 		  YP10: null,
@@ -7851,16 +7845,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			precioNeto = result.YP11;
 			precioNetoIncludesRD = true;
 			result.RoyalDecreeIncl = true;
+			result.RoyalDecree = 'Yes';
 		} else if (hasYP10) {
 			precioNeto = result.YP10;
-		}
-		if (!precioNetoIncludesRD && YD06 && precioNeto) {
-			result.RoyalDecreeValue = YD06 * precioNeto;
-		} else if (YD06 && YD02){
-			result.RoyalDecreeValue = basePrice * YD06;
-		}
-		else{
-			result.RoyalDecreeValue = 0;
 		}
 
 		const useConfidential = YP04 !== 0;
@@ -7872,6 +7859,14 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			} else {
 				result.YD75 = (basePrice - precioNeto) / basePrice;
 			}
+		}
+
+		if (!precioNetoIncludesRD && YD06 && precioNeto) {
+			result.RoyalDecreeValue = YD06 * precioNeto;
+		} else if (YD06 && YD02){
+			result.RoyalDecreeValue = basePrice * YD06;
+		} else{
+			result.RoyalDecreeValue = 0;
 		}
 	  
 		// Mapped values for NETPRICE fields
@@ -7898,10 +7893,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			result.ConditionType = "PrecioNeto";
 		} else if (YD02) {
 			result.SAPTAX = result.NETPRICEWITHOUTTAX && result.NETPRICEWITHOUTTAX !== 0 ? result.SAPTAX / result.NETPRICEWITHOUTTAX : 0;
+			result.RoyalDecreeIncl = false;
 			result.ConditionType = "DescuentoComercial";
 		} else if (YP00) {
 			const iawot = YD06 ? basePrice * (1 - result.YD06) : basePrice
 			result.SAPTAX = iawot && iawot !==0 ? result.SAPTAX / iawot : 0;
+			result.RoyalDecreeIncl = false;
 			result.ConditionType = "PVL";
 		} else {
 			result.ConditionType = null;
@@ -8711,254 +8708,264 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		return calculateConsolidatedProfitability(existingProfitabilities, calculatedProductProfitability, offer, products);
     }
 
-	function calculateProductProfitability (oSelectedOffer, aOfferProducts, aPriceConditionViews){
-		let oProductConditionView = null;
+	function calculateProductProfitability(oSelectedOffer, aOfferProducts, aPriceConditionViews) {
 		const calculatedProductsProfitability = [];
+		let oProductConditionView = null;
 
-		if(oSelectedOffer){
-			if (aOfferProducts && aOfferProducts.length > 0){
-				productProfitabilityData = aOfferProducts.filter(oProduct => oProduct.ActiveProduct !== 2)?.map(product => {
-
-					if(aPriceConditionViews && aPriceConditionViews.length > 0){
-						oProductConditionView = aPriceConditionViews.find(priceCondition => priceCondition.ProductCode === product.ProductCode && priceCondition.PriceConditionID !== null && priceCondition.ConditionType !== 'FOC' && priceCondition.ConditionType !== 'Rappel');
-					}
-
-					if((oSelectedOffer.Division !== 'Radiology' && oProductConditionView && oProductConditionView.ConditionType !== 'Rental') || (oSelectedOffer.Division === 'Radiology' && oProductConditionView && oProductConditionView.ConditionType !== 'Rental' && (product.ProductType !== 'Contrast Agent' && product.ProductType !== 'Consumable'))){
-						
-						/* Calculation A
-						Only applies for all price conditions, except for rental, having offer division different then Radiology */
-						let oPriceCondition = oProductConditionView;
-						
-						let sFOCType;
-						let sFOCBonus;
-						let netPrice = 0;
-
-						if(oPriceCondition){ 
-							let aFreeGoodsOther = aPriceConditionViews.filter(priceCondition => priceCondition.ConditionType === 'FOC' && priceCondition.ProductCode === product.ProductCode)[0];
-							if(aFreeGoodsOther && aFreeGoodsOther.FreeGoodsOther && aFreeGoodsOther.FreeGoodsOther.length > 0){
-								aFreeGoodsOther = aFreeGoodsOther.FreeGoodsOther.filter(freeGood => freeGood.ProductPackId === product.ProductCode);
-							}
-
-							sFOCType = oSelectedOffer.FOCType;
-							sFOCBonus = aFreeGoodsOther && aFreeGoodsOther.length > 0 ? +(aFreeGoodsOther[0].FOCBonus) : 0;
-							if (oProductConditionView.ConditionType === 'PVL'){
-								if(oSelectedOffer.InstituteType === "Private Account" || oSelectedOffer.InstituteType === "Cluster"){
-									netPrice = oProductConditionView.PriceConditionPVL;
-								} else {
-									netPrice = oProductConditionView.ConfidentialPrice;                                        
-								}
-
-							} else {
-								netPrice = oProductConditionView.NetPriceWithoutTaxAfterDeductionRD ? +oProductConditionView.NetPriceWithoutTaxAfterDeductionRD : +oProductConditionView.NetPriceWithoutTax;
-							}
-						}
-						let requestedVolume = product.RequestedVolume;
-						let cogs = oPriceCondition.COGS
-
-						let dPaidVolume = requestedVolume - ((sFOCType === 'FOC 1' ? sFOCBonus : 0));
-						let dTotalVolume = requestedVolume + ((sFOCType === 'FOC 2' ? sFOCBonus : 0));
-						let grossSales = netPrice * dPaidVolume;
-						let netPriceWithFoc = grossSales / dTotalVolume; //rounding
-						let grossProfit = grossSales - (cogs * dTotalVolume);
-						let grossMargin = grossSales ? (grossProfit / grossSales) : 0;
-
-						oPriceCondition.NetofferPrice = netPrice;
-						oPriceCondition.cogsUoM = cogs;
-						oPriceCondition.GrossSales = Number(grossSales);
-						oPriceCondition.NetPriceFOC = Number(netPriceWithFoc);
-						oPriceCondition.GrossProfit = Number(grossProfit);
-						oPriceCondition.GrossMargin = grossMargin;
-						oPriceCondition.Sales_NPV = grossSales;
-						oPriceCondition.Cost_NPV = Number(cogs);
-
-						calculatedProductsProfitability.push({
-							ProductCode: product.ProductCode,
-							...oPriceCondition
-						});
-
-					} else if(oSelectedOffer.Division === 'Radiology' && oProductConditionView && oProductConditionView.ConditionType === 'Rental'){
-						/* Calculation B
-							Only applies for all RENTAL price conditions, and offer division equals Radiology */
-						let dCost_Yi = [];
-						let dSales_Yi = [];
-						let oPriceCondition = aPriceConditionViews.filter(priceCondition => priceCondition.ProductCode === product.ProductCode)[0];                               
-						let dMonthlyRentPerUnit = oProductConditionView ? oProductConditionView.MonthlyRentPerUnit : 0;
-						let dAnnualValue = oProductConditionView ? oProductConditionView.AnnualValue : 0;
-						let dAnnualUnits = product.RequestedVolume;
-
-						let dStartMonth = Number(oSelectedOffer.ProfitabilityStartMnth);
-						let dDiscountRate = Number(oSelectedOffer.ProfitabilityDiscRate);
-						let dMaintenanceCost = Number(oSelectedOffer.ProfitabilityYrlyMntCost);
-						let dDurationAgreementYears = Number(oSelectedOffer.ProfitabilityAgrDur);
-						let cogs = oPriceCondition.COGS
-
-						let dCost_Y1 = cogs * (dAnnualUnits) * (12 - dStartMonth + 1) / (dDurationAgreementYears * 12) + dAnnualUnits * dMaintenanceCost * (12 - dStartMonth + 1) / 12;
-						let dSales_Y1 = (dAnnualValue / 12) * (12 - dStartMonth + 1);
-						
-						for(let i = 2; i <= dDurationAgreementYears; i++){
-							//should this return an array? 
-							dCost_Yi.push(cogs * dAnnualUnits / dDurationAgreementYears + dAnnualUnits * dMaintenanceCost);
-							dSales_Yi.push(dAnnualValue);
-						}
-						
-						let costY_lastyear = cogs * (dAnnualUnits) * (dStartMonth - 1) / (dDurationAgreementYears * 12) + dAnnualUnits * dMaintenanceCost * (dStartMonth - 1) / 12;
-						let salesY_lastyear = dAnnualValue / 12 * (dStartMonth - 1);
-					
-						let dCost_NPV = dCost_Y1;
-						let dSales_NPV = dSales_Y1;
-						
-						for(let i = 2; i <= (dDurationAgreementYears); i++){
-							dCost_NPV = dCost_NPV + dCost_Yi[i-2] / ((1 + dDiscountRate)**(i-1));
-							dSales_NPV = dSales_NPV + dSales_Yi[i-2] / ((1 + dDiscountRate)**(i-1));
-						}
-
-						let dCost_NPV_total = dCost_NPV + costY_lastyear / ((1 + dDiscountRate)**(dDurationAgreementYears));
-						let dSales_NPV_total = dSales_NPV + salesY_lastyear / ((1 + dDiscountRate)**(dDurationAgreementYears));
-					
-						let netOfferPrice = dMonthlyRentPerUnit;
-						let netPriceWithFoc = dMonthlyRentPerUnit;
-						let grossSales = dAnnualValue;
-						let grossProfit = dSales_NPV_total - dCost_NPV_total;
-						let grossMargin = dSales_NPV_total ? grossProfit / dSales_NPV_total : 0;
-
-						oPriceCondition.NetofferPrice = netOfferPrice;
-						oPriceCondition.cogsUoM = cogs;
-						oPriceCondition.GrossSales = Number(grossSales);
-						oPriceCondition.NetPriceFOC = Number(netPriceWithFoc);
-						oPriceCondition.GrossProfit = Number(grossProfit);
-						oPriceCondition.GrossMargin = grossMargin;
-						oPriceCondition.Sales_NPV = dSales_NPV;
-						oPriceCondition.Cost_NPV = dCost_NPV;
-
-						calculatedProductsProfitability.push({
-							ProductCode: product.ProductCode,
-							...oPriceCondition
-						});
-
-					} else if(oSelectedOffer.Division === 'Radiology' && oProductConditionView && oProductConditionView.ConditionType !== 'Rental' && (product.ProductType === 'Contrast Agent' || product.ProductType === 'Consumable')) {
-					
-						/* Calculation C
-						Only applies for all price conditions, except for rental, and offer division equals Radiology */
-						let dUnits = [];
-						let netPrice = 0;
-
-						let oPriceCondition = aPriceConditionViews.filter(priceCondition => priceCondition.ProductCode === product.ProductCode)[0];   
-						if (oProductConditionView.ConditionType === 'PVL'){
-								if(oSelectedOffer.InstituteType === "Private Account" || oSelectedOffer.InstituteType === "Cluster"){
-									netPrice = oProductConditionView.PriceConditionPVL;
-								} else {
-									netPrice = oProductConditionView.ConfidentialPrice;
-								}
-						} else {
-							netPrice = oProductConditionView.NetPriceWithoutTaxAfterDeductionRD ? +oProductConditionView.NetPriceWithoutTaxAfterDeductionRD : +oProductConditionView.NetPriceWithoutTax;
-						}
-						let dAnnualUnits = product.RequestedVolume;
-						let dAnnualValue = dAnnualUnits * netPrice;
-						let cogs = oPriceCondition.COGS
-						
-						let dStartMonth = Number(oSelectedOffer.ProfitabilityStartMnth);
-						let dDiscountRate = Number(oSelectedOffer.ProfitabilityDiscRate);
-						let dDurationAgreementYears = Number(oSelectedOffer.ProfitabilityAgrDur);
-						let dGrowthRate = Number(oSelectedOffer.ProfitabilityGrowthRate);
-
-						/* units per year */
-						dUnits.push(Math.round( (dAnnualUnits * (12 - dStartMonth + 1)) / 12 ));
-						dUnits.push(Math.round( dAnnualUnits * (1 + dGrowthRate) ));
-
-						for(let i = 3; i <= (dDurationAgreementYears); i++){
-							dUnits.push(Math.round( dUnits[i-2] * (1 + dGrowthRate) ));
-						}
-
-						dUnits.push(Math.round( dUnits[dDurationAgreementYears-1] * (1 + dGrowthRate) * (dStartMonth - 1) / (dDurationAgreementYears * 12) ));
-						/* end of units per year calculation */
-
-						let dCost_NPV = 0;
-						let dSales_NPV = 0;
-						
-						for(let i = 0; i <= (dDurationAgreementYears); i++){
-							dCost_NPV = dCost_NPV + dUnits[i] * cogs / ((1 + dDiscountRate )**i);
-							dSales_NPV = dSales_NPV + dUnits[i] * netPrice / ((1 + dDiscountRate )**i); 
-						}
-
-						let grossSales = dAnnualValue;
-						let grossProfit = dSales_NPV - dCost_NPV;
-						let grossMargin = dSales_NPV ? grossProfit / dSales_NPV : 0;
-
-						oPriceCondition.cogsUoM = cogs;
-						oPriceCondition.GrossSales = Number(grossSales);
-						oPriceCondition.NetofferPrice = netPrice;
-						oPriceCondition.NetPriceFOC = netPrice;
-						oPriceCondition.GrossProfit = Number(grossProfit);
-						oPriceCondition.GrossMargin = grossMargin;
-						oPriceCondition.Sales_NPV = dSales_NPV;
-						oPriceCondition.Cost_NPV = dCost_NPV;
-
-						calculatedProductsProfitability.push({
-							ProductCode: product.ProductCode,
-							...oPriceCondition
-						});
-					}
-				});
-				return calculatedProductsProfitability;
-			}
+		if (!oSelectedOffer || !Array.isArray(aOfferProducts)) {
+			return calculatedProductsProfitability;
 		}
+
+		aOfferProducts
+			.filter(p => p.ActiveProduct !== 2)
+			.forEach(product => {
+
+			oProductConditionView = aPriceConditionViews?.find(
+				pc =>
+				pc.ProductCode === product.ProductCode &&
+				pc.PriceConditionID !== null &&
+				pc.ConditionType !== 'FOC' &&
+				pc.ConditionType !== 'Rappel'
+			);
+
+			if (!oProductConditionView) return;
+
+			if (
+				(oSelectedOffer.Division !== 'Radiology' && oProductConditionView.ConditionType !== 'Rental') ||
+				(
+				oSelectedOffer.Division === 'Radiology' &&
+				oProductConditionView.ConditionType !== 'Rental' &&
+				product.ProductType !== 'Contrast Agent' &&
+				product.ProductType !== 'Consumable'
+				)
+			) {
+				const oPriceCondition = oProductConditionView;
+
+				let netPrice = 0;
+				let sFOCBonus = 0;
+
+				const focEntry = aPriceConditionViews?.find(
+				pc => pc.ConditionType === 'FOC' && pc.ProductCode === product.ProductCode
+				);
+
+				if (focEntry?.FreeGoodsOther?.length) {
+					const fg = focEntry.FreeGoodsOther.find(fg => fg.ProductPackId === product.ProductCode);
+					sFOCBonus = toNumber(fg?.FOCBonus);
+				}
+
+				if (oPriceCondition.ConditionType === 'PVL') {
+					netPrice =
+						oSelectedOffer.InstituteType === 'Private Account' ||
+						oSelectedOffer.InstituteType === 'Cluster'
+						? toNumber(oPriceCondition.PriceConditionPVL)
+						: toNumber(oPriceCondition.ConfidentialPrice);
+				} else {
+					netPrice = toNumber(
+						oPriceCondition.NetPriceWithoutTaxAfterDeductionRD ??
+						oPriceCondition.NetPriceWithoutTax
+					);
+				}
+
+				const requestedVolume = toNumber(product.RequestedVolume);
+				const cogs = toNumber(oPriceCondition.COGS);
+
+				const dPaidVolume = Math.max(0, requestedVolume - sFOCBonus);
+				const dTotalVolume = Math.max(0, requestedVolume + sFOCBonus);
+
+				const grossSales = netPrice * dPaidVolume;
+				const netPriceWithFoc = safeDivide(grossSales, dTotalVolume);
+				const grossProfit = grossSales - (cogs * dTotalVolume);
+				const grossMargin = safeDivide(grossProfit, grossSales);
+
+				Object.assign(oPriceCondition, {
+					NetofferPrice: netPrice,
+					cogsUoM: cogs,
+					GrossSales: grossSales,
+					NetPriceFOC: netPriceWithFoc,
+					GrossProfit: grossProfit,
+					GrossMargin: grossMargin,
+					Sales_NPV: grossSales,
+					Cost_NPV: cogs
+				});
+
+				calculatedProductsProfitability.push({
+					ProductCode: product.ProductCode,
+					...oPriceCondition
+				});
+			}
+			else if (
+				oSelectedOffer.Division === 'Radiology' &&
+				oProductConditionView.ConditionType === 'Rental'
+			) {
+				const oPriceCondition = oProductConditionView;
+
+				const dAnnualUnits = toNumber(product.RequestedVolume);
+				const cogs = toNumber(oPriceCondition.COGS);
+				const dStartMonth = toNumber(oSelectedOffer.ProfitabilityStartMnth);
+				const dDiscountRate = toNumber(oSelectedOffer.ProfitabilityDiscRate);
+				const dMaintenanceCost = toNumber(oSelectedOffer.ProfitabilityYrlyMntCost);
+				const dDurationAgreementYears = Math.max(1, toNumber(oSelectedOffer.ProfitabilityAgrDur));
+
+				const monthsFactor = Math.max(0, 12 - dStartMonth + 1);
+
+				const dCost_Y1 =
+				safeDivide(cogs * dAnnualUnits * monthsFactor, dDurationAgreementYears * 12) +
+				safeDivide(dAnnualUnits * dMaintenanceCost * monthsFactor, 12);
+
+				const dSales_Y1 =
+				safeDivide(toNumber(oProductConditionView.AnnualValue), 12) * monthsFactor;
+
+				let dCost_NPV = dCost_Y1;
+				let dSales_NPV = dSales_Y1;
+
+				for (let i = 2; i <= dDurationAgreementYears; i++) {
+					const factor = (1 + dDiscountRate) ** (i - 1);
+					dCost_NPV += safeDivide(cogs * dAnnualUnits, factor);
+					dSales_NPV += safeDivide(toNumber(oProductConditionView.AnnualValue), factor);
+				}
+
+				const grossProfit = dSales_NPV - dCost_NPV;
+				const grossMargin = safeDivide(grossProfit, dSales_NPV);
+
+				Object.assign(oPriceCondition, {
+					NetofferPrice: toNumber(oProductConditionView.MonthlyRentPerUnit),
+					cogsUoM: cogs,
+					GrossSales: toNumber(oProductConditionView.AnnualValue),
+					NetPriceFOC: toNumber(oProductConditionView.MonthlyRentPerUnit),
+					GrossProfit: grossProfit,
+					GrossMargin: grossMargin,
+					Sales_NPV: dSales_NPV,
+					Cost_NPV: dCost_NPV
+				});
+
+				calculatedProductsProfitability.push({
+					ProductCode: product.ProductCode,
+					...oPriceCondition
+				});
+			}
+			else if (
+				oSelectedOffer.Division === 'Radiology' &&
+				oProductConditionView.ConditionType !== 'Rental' &&
+				(product.ProductType === 'Contrast Agent' || product.ProductType === 'Consumable')
+			) {
+				const oPriceCondition = oProductConditionView;
+
+				const netPrice =
+				oPriceCondition.ConditionType === 'PVL'
+					? (
+						oSelectedOffer.InstituteType === 'Private Account' ||
+						oSelectedOffer.InstituteType === 'Cluster'
+						? toNumber(oPriceCondition.PriceConditionPVL)
+						: toNumber(oPriceCondition.ConfidentialPrice)
+					)
+					: toNumber(
+						oPriceCondition.NetPriceWithoutTaxAfterDeductionRD ??
+						oPriceCondition.NetPriceWithoutTax
+					);
+
+				const dAnnualUnits = toNumber(product.RequestedVolume);
+				const dAnnualValue = dAnnualUnits * netPrice;
+				const cogs = toNumber(oPriceCondition.COGS);
+				const dDiscountRate = toNumber(oSelectedOffer.ProfitabilityDiscRate);
+				const dDurationAgreementYears = Math.max(1, toNumber(oSelectedOffer.ProfitabilityAgrDur));
+				const dGrowthRate = toNumber(oSelectedOffer.ProfitabilityGrowthRate);
+
+				const dUnits = [];
+				dUnits.push(Math.round(dAnnualUnits * (12 - toNumber(oSelectedOffer.ProfitabilityStartMnth) + 1) / 12));
+				dUnits.push(Math.round(dAnnualUnits * (1 + dGrowthRate)));
+
+				for (let i = 3; i <= dDurationAgreementYears; i++) {
+					dUnits.push(Math.round(dUnits[i - 2] * (1 + dGrowthRate)));
+				}
+
+				let dCost_NPV = 0;
+				let dSales_NPV = 0;
+
+				for (let i = 0; i < dUnits.length; i++) {
+					const factor = (1 + dDiscountRate) ** i;
+					dCost_NPV += safeDivide(dUnits[i] * cogs, factor);
+					dSales_NPV += safeDivide(dUnits[i] * netPrice, factor);
+				}
+
+				const grossProfit = dSales_NPV - dCost_NPV;
+				const grossMargin = safeDivide(grossProfit, dSales_NPV);
+
+				Object.assign(oPriceCondition, {
+					cogsUoM: cogs,
+					GrossSales: dAnnualValue,
+					NetofferPrice: netPrice,
+					NetPriceFOC: netPrice,
+					GrossProfit: grossProfit,
+					GrossMargin: grossMargin,
+					Sales_NPV: dSales_NPV,
+					Cost_NPV: dCost_NPV
+				});
+
+				calculatedProductsProfitability.push({
+					ProductCode: product.ProductCode,
+					...oPriceCondition
+				});
+			}
+		});
+
+		return calculatedProductsProfitability;
 	}
 
-	function calculateConsolidatedProfitability (existingProfitabilities, calculatedProductProfitability, oSelectedOffer, aOfferProducts){
+
+	function calculateConsolidatedProfitability(existingProfitabilities, calculatedProductProfitability, oSelectedOffer, aOfferProducts) {
 		const oConsolidatedProfitability = initializeConsolidatedProfitability();
+		if (!oSelectedOffer || !Array.isArray(oConsolidatedProfitability)) return [];
 
-		if(oSelectedOffer){
-			var oCalculatedResultTotals = { GrossMargin: 0,
-											NetSales: 0,
-											COGS: 0,
-											Profitability: 0
-										}
+		const totals = {
+			GrossMargin: 0,
+			NetSales: 0,
+			COGS: 0
+		};
 
-			if(oConsolidatedProfitability && oConsolidatedProfitability.length > 0){
-				return oConsolidatedProfitability.map(consolidatedEntry => {
-					let oCalculatedResult = {};
+		return oConsolidatedProfitability.map(consolidatedEntry => {
+			let result = { GrossMargin: 0, NetSales: 0, COGS: 0, Profitability: 0 };
 
-					if(consolidatedEntry.ProductType === 'Contrast Agents' || consolidatedEntry.ProductType === 'Consumables' || consolidatedEntry.ProductType === 'Injectors'){
-						//calculate contract agents, consumables & injectors
-						let aProductsPerType = aOfferProducts.filter(product => product.ProductType === consolidatedEntry.ProductType.slice(0, -1) && product.ActiveProduct !== 2);
-						oCalculatedResult = getCalculatedProfitability(aProductsPerType, calculatedProductProfitability);
-					} else if(consolidatedEntry.ProductType !== 'Contrast Agents' && consolidatedEntry.ProductType !== 'Consumables' && consolidatedEntry.ProductType !== 'Injectors' && consolidatedEntry.ProductType !== 'Total'){
-						//calculate any other product type
-						let aProductsPerType = aOfferProducts.filter(product => (product.ProductType !== 'Contrast Agent' && product.ProductType !== 'Injector' && product.ProductType !== 'Total' && product.ProductType !== 'Consumable')  && product.ActiveProduct !== 2);
-						oCalculatedResult = getCalculatedProfitability(aProductsPerType, calculatedProductProfitability);
-					} else if(consolidatedEntry.ProductType === 'Total'){
-						//calculate totals
-						oCalculatedResult.GrossMargin = oCalculatedResultTotals.GrossMargin;
-						oCalculatedResult.NetSales = oCalculatedResultTotals.NetSales;
-						oCalculatedResult.COGS = oCalculatedResultTotals.COGS;
-						oCalculatedResult.Profitability = oCalculatedResultTotals.GrossMargin / oCalculatedResultTotals.NetSales;
-					}
+			if (consolidatedEntry.ProductType !== 'Total') {
+				const products = aOfferProducts.filter(p =>
+				p.ActiveProduct !== 2 &&
+				(
+				consolidatedEntry.ProductType === 'Contrast Agents'
+					? p.ProductType === 'Contrast Agent'
+					: consolidatedEntry.ProductType === 'Consumables'
+					? p.ProductType === 'Consumable'
+					: consolidatedEntry.ProductType === 'Injectors'
+					? p.ProductType === 'Injector'
+					: !['Contrast Agent', 'Consumable', 'Injector'].includes(p.ProductType)
+				)
+			);
 
-					if(consolidatedEntry.ProductType !== 'Total'){
-						//keep track of actual totals
-						oCalculatedResultTotals.GrossMargin = (Number(oCalculatedResultTotals.GrossMargin) + Number(oCalculatedResult.GrossMargin));
-						oCalculatedResultTotals.NetSales = (Number(oCalculatedResultTotals.NetSales) + Number(oCalculatedResult.NetSales));
-						oCalculatedResultTotals.COGS = (Number(oCalculatedResultTotals.COGS) + Number(oCalculatedResult.COGS));
-						//oCalculatedResultTotals.Profitability = oCalculatedResultTotals.Profitability + oCalculatedResult.Profitability;
-						//oCalculatedResultTotals.Profitability = oCalculatedResultTotals.GrossMargin / oCalculatedResultTotals.NetSales;
-					}
+				result = getCalculatedProfitability(products, calculatedProductProfitability);
 
-					const existingProfitabilityType = existingProfitabilities.find(dbProfitability => dbProfitability.ProductType === consolidatedEntry.ProductType);
-
-					return {
-						ID: existingProfitabilityType?.ID ? existingProfitabilityType?.ID : uuidv4(),
-						CountryCode: oSelectedOffer.CountryCode,
-						OfferId: oSelectedOffer.OfferID,
-						NPV_GrossMargin: oCalculatedResult.GrossMargin,
-						NPV_NetSales: oCalculatedResult.NetSales,
-						NPV_Cogs: oCalculatedResult.COGS,
-						Profitability: oCalculatedResult.Profitability,
-						ProductType: consolidatedEntry.ProductType,
-					};
-				});
+				totals.GrossMargin += toNumber(result.GrossMargin);
+				totals.NetSales += toNumber(result.NetSales);
+				totals.COGS += toNumber(result.COGS);
+			} else {
+				result.GrossMargin = totals.GrossMargin;
+				result.NetSales = totals.NetSales;
+				result.COGS = totals.COGS;
+				result.Profitability = safeDivide(totals.GrossMargin, totals.NetSales);
 			}
-		}
+
+			const existing = existingProfitabilities.find(p => p.ProductType === consolidatedEntry.ProductType);
+
+			return {
+				ID: existing?.ID ?? uuidv4(),
+				CountryCode: oSelectedOffer.CountryCode,
+				OfferId: oSelectedOffer.OfferID,
+				NPV_GrossMargin: toNumber(result.GrossMargin),
+				NPV_NetSales: toNumber(result.NetSales),
+				NPV_Cogs: toNumber(result.COGS),
+				Profitability: safeDivide(result.GrossMargin, result.NetSales),
+				ProductType: consolidatedEntry.ProductType
+			};
+		});
 	}
+
 
 	function initializeConsolidatedProfitability () {
 		return [
@@ -9020,7 +9027,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				}
 			}
 
-			profitability = npv_netsales ? npv_grossmargin / npv_netsales : 0;
+			profitability = npv_netsales !== 0 ? npv_grossmargin / npv_netsales : 0;
 		});
 
 		return {
@@ -9030,4 +9037,16 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			Profitability: Number(profitability)
 		}
 	}
+
+	const toNumber = (v, fallback = 0) => {
+		const n = Number(v);
+		return Number.isFinite(n) ? n : fallback;
+	};
+
+	const safeDivide = (num, den, fallback = 0) => {
+		num = toNumber(num);
+		den = toNumber(den);
+		return den !== 0 ? num / den : fallback;
+	};
+
 }
