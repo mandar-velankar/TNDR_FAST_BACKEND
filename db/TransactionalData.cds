@@ -939,10 +939,12 @@ entity OfferProductOfferStatus {
             ApproverList        : Association to many MasterData.CountryApprovers
                                       on  ApproverList.CountryCode  = CountryCode
                                       and ApproverList.ApproverType = ApproverType
-                                      and ApproverList.Division     = Division;
+                                      and ApproverList.Division     = Division
+                                      and ApproverList.Enabled      = true;
             ApproverTypes       : Association to many MasterData.ApproverTypes
                                       on  ApproverTypes.CountryCode  = CountryCode
-                                      and ApproverTypes.ApproverType = ApproverType;
+                                      and ApproverTypes.ApproverType = ApproverType
+                                      and ApproverTypes.Enabled      = true;
 };
 
 entity ExcelUpload:cuid {
