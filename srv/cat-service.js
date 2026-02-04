@@ -1994,7 +1994,8 @@ module.exports = (srv) => {
 
 		//where statement
 		let whereApproverType = {
-			CountryCode: offer.COUNTRYCODE
+			CountryCode: offer.COUNTRYCODE,
+			Enabled: true
 		}
 
 		//Get corresponding approvertypes
