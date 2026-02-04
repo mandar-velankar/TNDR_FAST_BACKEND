@@ -30,7 +30,7 @@ module.exports = (srv) => {
 		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices, MASTER_TENDER_TYPE,PT_TMPRDHIER,PT_TMCTRY
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
-		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView, BrandsInTender, OfferLatestApprovalStatus, MEAPreviousApprovalsFlags
+		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView, BrandsInTender, OfferLatestApprovalStatus, MEAPreviousApprovalsFlags, OfferStatus
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -4635,6 +4635,85 @@ module.exports = (srv) => {
         } catch (error) {
             console.error('Error in CountryRegisteredPrice READ');
 			return req.reject(403, error?.message||"Error in CountryRegisteredPrice READ");
+        }
+	});
+
+	/**
+	 * After-update handler for the PT_TMAPPRST entity.
+	 *
+	 * This handler is triggered after an UPDATE operation on PT_TMAPPRST. 
+	 * It performs the following actions:
+	 *   1. Validates that data exists.
+	 *   2. Fetches the related offer, offer products, country, and offer status.
+	 *   3. If the offer is in the MEA region and its status is neither 
+	 *      "Offer Created" nor "Awaiting Approval":
+	 *      - Resets previous approval-related flags in the PT_TMOFRS table.
+	 *      - Resets specific product-level flags in PT_TMOFPR for each offer product.
+	 *   4. Updates are performed concurrently using Promise.all.
+	 *
+	 * @async
+	 * @param {object|object[]} data - The updated record(s) for PT_TMAPPRST. Can be a single object or an array.
+	 * @param {object} req - The CAP request object, providing context and utilities like `reject`.
+	 * @returns {Promise<object|object[]>} Returns the original data if no action is needed or after updates are applied.
+	 * @throws {Error} Throws a 403 error via `req.reject` if any database operation fails.
+	 *
+	 * @example
+	 * // Automatically invoked by CAP after updating PT_TMAPPRST
+	 * await srv.after("UPDATE", "PT_TMAPPRST", handlerFunction);
+	 */
+	srv.after("UPDATE", "PT_TMAPPRST", async (data, req) => {
+		 try {
+            if (!data || (Array.isArray(data) && data.length === 0)) {
+				return data;
+			}
+
+			const {
+				OfferId
+			} = data;
+			const offer = await SELECT.one.from(PT_TMOFRS)
+			.where({
+				OfferID: OfferId
+			});
+			const offerProducts = await SELECT.from(PT_TMOFPR)
+			.where({
+				OfferID: OfferId
+			});
+			const country = await SELECT.one.from(PT_TMCTRY)
+			.where({
+				CountryCode: offer.CountryCode
+			});
+			const offerStatus = await SELECT.one.from(OfferStatus).where({
+				OFFER_ID: OfferId
+			});
+
+			const promises = [];
+
+			if (!offer || !country || !offerStatus) return data;
+
+			if (country.Region === 'MEA' && !["Offer Created", "Awaiting Approval"].includes(offerStatus.STATUS)) {
+				promises.push(UPDATE(PT_TMOFRS).with({
+					PreviousApprovalHasAddedProduct: false,
+					PreviousApprovalHasDeletedProduct: false,
+					PreviousApprovalHasDeclinedProduct: false,
+					PreviousApprovalHas_Deleted_DeclinedProduct: false,
+					PreviousApprovalHas_Deleted_Products_PTL: "",
+					ApprovalHasDeletedProduct_Previous_State: false,
+					ApprovalHasDeclinedProduct_Previous_State: false,
+					ApprovalHas_Deleted_DeclinedProduct_Previous_State: false,
+					ApprovalHas_Deleted_Products_PTL_Previous_State: ""
+				}).where({OfferID: OfferId}))
+
+				promises.push(...offerProducts.map(pr => UPDATE(PT_TMOFPR).with({
+					IsProductAddedForPreviousApproval: false,
+					MEAApprovalLatestUpdatedField: "",
+					hasUpdatedSupplyPaymentPriceValues: false,
+				}).where({OfferID: OfferId, ProductCode: pr.ProductCode})))
+
+				await Promise.all(promises);
+			}
+        } catch (error) {
+            console.error('Error in PT_TMAPPRST after UPDATE');
+			return req.reject(403, error?.message||"Error in PT_TMAPPRST after UPDATE");
         }
 	});
 }
