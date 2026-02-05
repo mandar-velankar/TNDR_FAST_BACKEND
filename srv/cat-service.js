@@ -3120,7 +3120,7 @@ module.exports = (srv) => {
 		whereCountry[0].ref[0] = 'CountryCode';
 		whereCountry[2].val = offerValidation.COUNTRYCODE;
 
-		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry));
+		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry).where({Enabled: true}));
 		let country = await tx.run(SELECT.one.from(PT_TMCTRY).where(whereCountry));
 		let initialOffer = await tx.run(SELECT.one.from(PT_TMOFRS).where({OfferID: offerValidation.OFFERID }));
 		let exchangeRate = await SELECT.one.from(ExchangeRates).where({CURRENCY_FROM: initialOffer?.Currency,
