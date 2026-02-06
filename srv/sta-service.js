@@ -3364,6 +3364,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		let countryProductPacks = await tx.run(SELECT.from(PT_TMCTPRDPCK).where({CountryCode: offerValidation.COUNTRYCODE, PRODUCTPACKID: offerProductPackIDs}));
 		let countryProductPackBUs = countryProductPacks.map(cp => cp.BU);
 
+		const isNewOffer = offerStatus.STATUS === 'Offer Created';
+		
+		countryApprovers = countryApprovers.filter(ca => {
+			// If it's a new offer, return only enabled users; otherwise, return everyone
+			return !isNewOffer || ca.Enabled;
+		});
+
 		if (!offerValidation.COUNTRYCODE) return results;
 
 		//get ApproverTypes
@@ -4326,14 +4333,24 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		let userInfo = await tx.run(SELECT.one.from(PT_TMUSER).where({CWID: tx?.context?.req?.user?.id}));
 		let tender = await tx.run(SELECT.one.from(PT_TMTEND).where({TenderID: offer.TENDERID}));
 
+		const offerStatus = await SELECT.one.from(OfferStatus).where({
+			OFFER_ID: offer.OFFERID
+		});
+
 		//where statement
 		let whereApproverType = {
-			CountryCode: offer.COUNTRYCODE,
-			Enabled: true
+			CountryCode: offer.COUNTRYCODE
 		}
 
 		//Get corresponding approvertypes
 		let aApproverTypes = await tx.run(SELECT.from(ApproverTypes).where(whereApproverType));
+
+		const isNewOffer = offerStatus.STATUS === 'Offer Created';
+		
+		aApproverTypes = aApproverTypes.filter(at => {
+			// If it's a new offer, return only enabled users; otherwise, return everyone
+			return !isNewOffer || at.Enabled;
+		});
 
 		results = aOfferProduct.map(async function (offerProduct) {
 			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
