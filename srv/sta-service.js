@@ -3358,11 +3358,18 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		whereCountry[0].ref[0] = 'CountryCode';
 		whereCountry[2].val = offerValidation.COUNTRYCODE;
 
-		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry));
+		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry).where({Enabled: true}));
 		let offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({OfferID: offerValidation.OFFERID}));
 		let offerProductPackIDs = offerProducts.map(pr => pr.ProductCode);
 		let countryProductPacks = await tx.run(SELECT.from(PT_TMCTPRDPCK).where({CountryCode: offerValidation.COUNTRYCODE, PRODUCTPACKID: offerProductPackIDs}));
 		let countryProductPackBUs = countryProductPacks.map(cp => cp.BU);
+
+		const isNewOffer = offerStatus.STATUS === 'Offer Created';
+		
+		countryApprovers = countryApprovers.filter(ca => {
+			// If it's a new offer, return only enabled users; otherwise, return everyone
+			return !isNewOffer || ca.Enabled;
+		});
 
 		if (!offerValidation.COUNTRYCODE) return results;
 
@@ -4326,6 +4333,10 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		let userInfo = await tx.run(SELECT.one.from(PT_TMUSER).where({CWID: tx?.context?.req?.user?.id}));
 		let tender = await tx.run(SELECT.one.from(PT_TMTEND).where({TenderID: offer.TENDERID}));
 
+		const offerStatus = await SELECT.one.from(OfferStatus).where({
+			OFFER_ID: offer.OFFERID
+		});
+
 		//where statement
 		let whereApproverType = {
 			CountryCode: offer.COUNTRYCODE
@@ -4333,6 +4344,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		//Get corresponding approvertypes
 		let aApproverTypes = await tx.run(SELECT.from(ApproverTypes).where(whereApproverType));
+
+		const isNewOffer = offerStatus.STATUS === 'Offer Created';
+		
+		aApproverTypes = aApproverTypes.filter(at => {
+			// If it's a new offer, return only enabled users; otherwise, return everyone
+			return !isNewOffer || at.Enabled;
+		});
 
 		results = aOfferProduct.map(async function (offerProduct) {
 			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
