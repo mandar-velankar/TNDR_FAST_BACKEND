@@ -3352,7 +3352,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		whereCountry[0].ref[0] = 'CountryCode';
 		whereCountry[2].val = offerValidation.COUNTRYCODE;
 
-		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry).where({Enabled: true}));
+		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry));
 		let offerProducts = await tx.run(SELECT.from(PT_TMOFPR).where({OfferID: offerValidation.OFFERID}));
 		let offerProductPackIDs = offerProducts.map(pr => pr.ProductCode);
 		let countryProductPacks = await tx.run(SELECT.from(PT_TMCTPRDPCK).where({CountryCode: offerValidation.COUNTRYCODE, PRODUCTPACKID: offerProductPackIDs}));
