@@ -1679,7 +1679,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                 std.RoyalDecreePercentage_1,
                 std.MonthlyRentPerUnit,
                 std.AnnualValue,
-                std.MarketIncentiveID
+                std.MarketIncentiveID,
+                std.BrandLevelRappel,
             };
     entity CCMPriceConditionView                   as select from TransactionalData.CCMPriceCondition{
         CountryCode,
@@ -1940,7 +1941,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             priceCondition.Settlement.ID as Settlement_ID: UUID,
             priceCondition.Settlement.Description as SettlementDescription: String,
             priceCondition.Tax,
-            priceCondition.MarketIncentiveID
+            priceCondition.MarketIncentiveID,
+            priceCondition.BrandLevelRappel
         }where tender.Active = 1 and tender.CountryCode = 'ES'
         group by 
             tender.CountryCode,
@@ -1967,7 +1969,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             priceCondition.Settlement.ID,
             priceCondition.Settlement.Description,
             priceCondition.Tax,
-            priceCondition.MarketIncentiveID; 
+            priceCondition.MarketIncentiveID,
+            priceCondition.BrandLevelRappel; 
 
 entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_TMTEND as tender 
     inner join TransactionalData.PT_TMOFRS as offer 

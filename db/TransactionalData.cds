@@ -601,6 +601,7 @@ entity PriceCondition: cuid, managed {
     MarketIncentiveID                   : String;
     QuotationPriceConditionCode         : String;
     IsYP11WithoutRD                     : Boolean default false;
+    BrandLevelRappel                    : String default 'No';
     RoyalDecreePercentage               : Association to MasterData.RoyalDecree on  RoyalDecreePercentage.ProductPackID = ProductCode
                                                                                 and RoyalDecreePercentage.ValidTo = '9999-12-31 00:00:00.000000000';
     CapBrazil                           : Association to MasterDataViews.MostRecentCapView on CapBrazil.ValidTo = '9999-12-31 00:00:00.000000000';
