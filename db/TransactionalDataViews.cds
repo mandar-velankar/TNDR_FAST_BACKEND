@@ -1797,7 +1797,8 @@ left outer join MasterData.PricingPolicy as pricingPolicy
         when product.UnitPerPack = 'Unit'
             then  pricingPolicy.Value / product.SKU.PACKFACTOR
         else ifnull(pricingPolicy.Value, 0)
-    end as PricingPolicyValue: Double
+    end as PricingPolicyValue: Double,
+    priceCondition.BrandLevelRappel,
 }where tender.Active = 1;
 //CR2
 entity TenderRappelView as select from TransactionalData.PT_TMTEND as tender 
