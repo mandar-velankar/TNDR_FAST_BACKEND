@@ -994,6 +994,7 @@ module.exports = (srv) => {
 						(!sku.ValidFrom || sku.ValidFrom <= validDate) && 
 						(!sku.ValidTo ||validDate <= sku.ValidTo)).map(el => el.SKUCode);
 
+				ed.PPP = ed.PPP ? parseFloat(ed.PPP) : 0;
 				ed.StartDate = ed.StartDate && ServiceHelper.forceExcelText(ServiceHelper.formatDate(ed.StartDate, '', 'DD-MM-YYYY'));
 				ed.EndDate = ed.EndDate && ServiceHelper.forceExcelText(ServiceHelper.formatDate(ed.EndDate, '', 'DD-MM-YYYY'));
 				ed.MaterialNumbers = ServiceHelper.forceExcelText(productValidSKUs.join(","));
@@ -1107,6 +1108,8 @@ module.exports = (srv) => {
 					(!sku.ValidTo || validDate <= sku.ValidTo)).map(el => el.SKUCode);
 
 			// Assuming 'Type' and 'Currency' fields are part of the item
+			item.WPPWithoutTax = item.WPPWithoutTax ? parseFloat(item.WPPWithoutTax) : 0;
+			item.PPP = item.PPP ? parseFloat(item.PPP) : 0;
 			item.Margin = formatPercentage(item.Margin);
 			item.CombinedWPPMarginNetPriceValues = item.Type === 'Margin' ? `Marge ${item.Margin}` : `Netto Prijs`;
 			item.EndDate = item.StartDate && ServiceHelper.formatDate(item.EndDate, 'DD/MM/YYYY');
