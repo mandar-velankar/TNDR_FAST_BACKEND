@@ -1991,7 +1991,7 @@ module.exports = (srv) => {
 		const initialOffer = await tx.run(SELECT.one.from(PT_TMOFRS).where({OfferID: offer.OFFERID }));
 		const offerLatestApprStatus = await tx.run(SELECT.from(OfferLatestApprovalStatus).where({OfferID: offer.OFFERID}));
 
-		const offerStatus = await SELECT.one.from(OfferStatus).where({
+		const offerStatus = await SELECT.one.from("CatalogService.OfferStatus").where({
 			OFFER_ID: offer.OFFERID
 		});
 
@@ -3129,7 +3129,7 @@ module.exports = (srv) => {
 		whereCountry[0].ref[0] = 'CountryCode';
 		whereCountry[2].val = offerValidation.COUNTRYCODE;
 
-		const offerStatus = await SELECT.one.from(OfferStatus).where({
+		const offerStatus = await SELECT.one.from("CatalogService.OfferStatus").where({
 			OFFER_ID: offerValidation.OFFERID
 		});
 
