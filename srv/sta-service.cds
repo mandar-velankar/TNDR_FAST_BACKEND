@@ -1871,7 +1871,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             priceCondition.Settlement.Description as SettlementDescription: String,
             priceCondition.Tax,
             priceCondition.MarketIncentiveID,
-            priceCondition.BrandLevelRappel
+            priceCondition.BrandLevelRappel,
+            productPacks.Product.HLEVEL4_CODE,
+            productPacks.Product.HLEVEL4_NAME
         }where tender.Active = 1 and tender.CountryCode = 'ES'
         group by 
             tender.CountryCode,
@@ -1899,7 +1901,9 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             priceCondition.Settlement.Description,
             priceCondition.Tax,
             priceCondition.MarketIncentiveID,
-            priceCondition.BrandLevelRappel; 
+            priceCondition.BrandLevelRappel,
+            productPacks.Product.HLEVEL4_CODE,
+            productPacks.Product.HLEVEL4_NAME; 
 
 entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_TMTEND as tender 
     inner join TransactionalData.PT_TMOFRS as offer 
