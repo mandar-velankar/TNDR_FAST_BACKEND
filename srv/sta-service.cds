@@ -1265,8 +1265,22 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             end as Inkoopgroep: String,
             inst.InstituteName,
             tender.TenderName,
-            selectedcontractduration.ContractStartDate as EffectiveDate : Date,
-            selectedcontractduration.ContractEndDate as ExpiryDate : Date,
+            case 
+                when 
+                    offerStatus.STATUS = 'Outcome Accepted' or 
+                    offerStatus.STATUS = 'Outcome Partially Accepted' or 
+                    offerStatus.STATUS = 'Outcome Rejected'
+                        then selectedcontractduration.ContractStartDate
+                else tender.Custom.Date_1
+            end as EffectiveDate: Date,
+            case 
+                when 
+                    offerStatus.STATUS = 'Outcome Accepted' or 
+                    offerStatus.STATUS = 'Outcome Partially Accepted' or 
+                    offerStatus.STATUS = 'Outcome Rejected'
+                        then selectedcontractduration.ContractEndDate
+                else ADD_MONTHS(tender.Custom.Date_1, 12)
+            end as ExpiryDate: Date,
             tender.BidDueDate,
             ifnull(childInst.STATUS, offerStatus.STATUS) as STATUS: String,
             tender.Custom.String_1 as ManagedBy : String,
