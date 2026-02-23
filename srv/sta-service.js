@@ -7468,7 +7468,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			PriceConditionCode                  : req.data.PriceConditionCode ? req.data.PriceConditionCode : standardTenderPriceConditionView?.PriceConditionCode,
 			LotID                               : 1,
 			MarketIncentiveID				  	: req.data.MarketIncentiveID ? req.data.MarketIncentiveID : standardTenderPriceConditionView?.MarketIncentiveID,
-			BrandLevelRappel					: req.data.BrandLevelRappel ? req.data.BrandLevelRappel : standardTenderPriceConditionView?.BrandLevelRappel,		
+			BrandLevelRappel					: req.data.BrandLevelRappel ?? standardTenderPriceConditionView?.BrandLevelRappel ?? 'No',		
 			Settlement_ID						: req.data.Settlement_ID ? req.data.Settlement_ID : standardTenderPriceConditionView?.Settlement_ID,
 			PriceConditionClassification_ID     : standardTenderPriceConditionView?.ClassificationID,
 		}
