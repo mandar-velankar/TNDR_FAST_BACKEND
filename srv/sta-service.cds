@@ -817,7 +817,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     key result.ProductCode, 
         result.Active,
         result.LotID,
-        product.SORTER
+        product.SORTER,
+        result.AwardedPrice * result.AwardedQty as TotalAwardedPrice: Double,
     };
 
     entity OfferProducts as projection on TransactionalData.PT_TMOFPR {
