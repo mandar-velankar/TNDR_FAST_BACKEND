@@ -1667,10 +1667,15 @@ left outer join MasterData.PricingPolicy as pricingPolicy
     @Core.Computed: false
     ifnull(priceCondition.Level1Discount1, 0) as Discount:Double,
     @Core.Computed: false
-    case   
-        when priceCondition.Level2Discount1 is null
-            then ifnull(offer.Distributor.CommissionRate,0) / 100
-        else priceCondition.Level2Discount1
+    case
+        when tender.CountryCode == 'ES' 
+            then 0
+                else 
+                    case   
+                        when priceCondition.Level2Discount1 is null
+                            then ifnull(offer.Distributor.CommissionRate,0) / 100
+                            else priceCondition.Level2Discount1
+                    end
     end as Deductions:Double,
     @Core.Computed: false
     ifnull(priceCondition.Price2, 0) as NetPrice:Decimal, 
