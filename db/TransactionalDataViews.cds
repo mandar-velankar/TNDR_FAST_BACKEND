@@ -1668,7 +1668,7 @@ left outer join MasterData.PricingPolicy as pricingPolicy
     ifnull(priceCondition.Level1Discount1, 0) as Discount:Double,
     @Core.Computed: false
     case
-        when tender.CountryCode == 'ES' 
+        when tender.CountryCode = 'ES' 
             then 0
                 else 
                     case   
