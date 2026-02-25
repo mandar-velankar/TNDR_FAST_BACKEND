@@ -82,7 +82,9 @@ service PriceAgreementService @(path: 'priceagreement') @(requires:['f_tndr_cag_
             pa.MasterPrices,
             pa.User,
             pa.OfferProduct.Offer.Division as Division,
-            list.MaterialsList
+            list.MaterialsList,
+            pa.IgnoredListPrice,
+            pa.IgnoredRetailPrice
     };
     entity Candidates as projection on PriceAgreementData.CandidatesView;
     entity CandidatePrices as projection on PriceAgreementData.CandidatePrices;
