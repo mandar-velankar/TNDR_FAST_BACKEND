@@ -1494,6 +1494,10 @@ module.exports = async (srv) => {
 					}
 					
 				}
+
+				if (req.data.CountryCode === "PK" && (req.data.ConditionType === 'PriceWithFOC' || req.data.ConditionType === 'DiscountWithFOC')) {
+					!req.data.Deductions && req.error({ code: 404, message: "Distributor Discount is required.", target: "Deductions" });
+				}
 			}
 			catch(error){
 				console.error('Error in validation of PriceCondition View before CREATE');
