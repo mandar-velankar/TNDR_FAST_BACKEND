@@ -494,6 +494,7 @@ entity FreeGoodsOther: cuid, managed {
     PotentialGeneratedSavings           : Decimal;
     RoyalDecree                         : String;
     ADD_INCLUDE                         : String;
+    FreeGoodsOther_STP_FOC_Percentage   : Double; // Applciable for PACAWI countries
     PriceCondition                      : Association to PriceCondition;
 }
 
