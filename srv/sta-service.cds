@@ -843,6 +843,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         left join TransactionalData.FreeGoodsOther as freegoods
                             on freegoods.PriceCondition.ID = priceCondition.ID
                             and freegoods.ProductPackId = priceCondition.ProductCode
+        left join MasterData.PT_TMCTRY as country
+            on country.CountryCode = result.CountryCode
     {
         result.TenderID,
         key result.OfferID,
@@ -876,7 +878,12 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             when freegoods.FreeGoodsOther_ABS_PCT = 'ABS'
                 then freegoods.FreeGoodsOther || ' '  || result.UoM || '(s)' || ' (' || freegoods.ADD_INCLUDE || ')'
             when freegoods.FreeGoodsOther_ABS_PCT = 'STP'
-                then freegoods.FreeGoodsOther || ' '  || result.UoM || '(s)' || ' for each ' || freegoods.FreeGoodsOther_Step || ' ' || result.UoM || '(s)' || ' purchased (' || freegoods.ADD_INCLUDE || ')'
+                then 
+                    case 
+                        when country.Region = 'PACAWI'
+                            then round(100 * freegoods.FreeGoodsOther_STP_FOC_Percentage, 2) || '%' || ' for each ' || freegoods.FreeGoodsOther_Step || ' ' || result.UoM || '(s)' || ' purchased (' || freegoods.ADD_INCLUDE || ')'
+                        else freegoods.FreeGoodsOther || ' '  || result.UoM || '(s)' || ' for each ' || freegoods.FreeGoodsOther_Step || ' ' || result.UoM || '(s)' || ' purchased (' || freegoods.ADD_INCLUDE || ')'
+                    end
         end as FOC:String,
         product.RequestedVolume as RequestedVolume: Integer,
         result.Custom.String_1 as Custom_String_1,

@@ -4320,6 +4320,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		let instituteTerritory = await tx.run(SELECT.one.from(InstituteTerritory).where(whereInstituteId));
 		let userInfo = await tx.run(SELECT.one.from(PT_TMUSER).where({CWID: tx?.context?.req?.user?.id}));
 		let tender = await tx.run(SELECT.one.from(PT_TMTEND).where({TenderID: offer.TENDERID}));
+		let country = await tx.run(SELECT.one.from(PT_TMCTRY).where(whereCountry));
 
 		//where statement
 		let whereApproverType = {
@@ -4527,7 +4528,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						FOCInfoText = `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT}(s) (${productFreeGoodsOther.ADD_INCLUDE})`
 						break;
 					case 'STP':
-						FOCInfoText = `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT}(s) for each ${productFreeGoodsOther.FreeGoodsOther_Step} ${offerProduct.UNIT}(s) purchased (${productFreeGoodsOther.ADD_INCLUDE})`
+						const bonus = country?.Region === 'PACAWI' ? `${ServiceHelper.formatNumber((productFreeGoodsOther?.FreeGoodsOther_STP_FOC_Percentage * 100), 2, 2)}%` : `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT}(s)`;
+						FOCInfoText = `${bonus} for each ${productFreeGoodsOther.FreeGoodsOther_Step} ${offerProduct.UNIT}(s) purchased (${productFreeGoodsOther.ADD_INCLUDE})`
 						break;
 					default:
 						break;
