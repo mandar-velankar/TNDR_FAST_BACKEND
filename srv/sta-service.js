@@ -4546,7 +4546,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						FOCInfoText = `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT}(s) (${productFreeGoodsOther.ADD_INCLUDE})`
 						break;
 					case 'STP':
-						const bonus = country?.Region === 'PACAWI' ? `${ServiceHelper.formatNumber((productFreeGoodsOther?.FreeGoodsOther_STP_FOC_Percentage * 100), 2, 2)}%` : `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT}(s)`;
+						const bonus = country?.Region === 'PACAWI' ? `${Math.round(productFreeGoodsOther?.FreeGoodsOther_STP_FOC_Percentage * 10000) / 100}%` : `${productFreeGoodsOther.FreeGoodsOther} ${offerProduct.UNIT}(s)`;
 						FOCInfoText = `${bonus} for each ${productFreeGoodsOther.FreeGoodsOther_Step} ${offerProduct.UNIT}(s) purchased (${productFreeGoodsOther.ADD_INCLUDE})`
 						break;
 					default:
