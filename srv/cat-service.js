@@ -2441,14 +2441,14 @@ module.exports = (srv) => {
 
 		let totalAmount = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY, 0);
 		// let totalAmountInWords = inWords(totalAmount, offer.CURRENCY);
-		let totalAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmount)} ${offer.CURRENCY} only`;
+		let totalAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmount, regionname)} ${offer.CURRENCY} only`;
 
 		let budgetRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.BUDGET_RATE }));
 		let spotRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.SPOT_RATE }));
 
 		let totalAmountVat = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY_VAT, 0);
 		// let totalAmountVatInWords = inWords(totalAmountVat, offer.CURRENCY);
-		let totalAmountVatInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmountVat)} ${offer.CURRENCY} only`;
+		let totalAmountVatInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmountVat, regionname)} ${offer.CURRENCY} only`;
 		let vatTotal = offerProductValidation.reduce((a, b) => a + b.VAT_TOTAL, 0);
 
 		//Division can be Pharma or Radiology, this determines division for country approvers
