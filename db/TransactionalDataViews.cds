@@ -880,7 +880,10 @@ inner join ApprovalRequests as approvalRequest
 	and approvalRequest.CountryCode = offer.CountryCode
     and approvalRequest.ApprovalStatus <> 'Cancelling'
     and approvalRequest.ApprovalStatus <> 'Rejected'
-    and approvalRequest.REQUIRED_ACTION = 'Approval'
+    and (
+        approvalRequest.REQUIRED_ACTION = 'Approval' or
+        approvalRequest.REQUIRED_ACTION = 'Notification'
+    )
     and approvalRequest.ApproverType <> 'Legal'
 inner join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory
     on offer.SellingCompany = signatory.LEGAL_ENTITY_CODE
@@ -905,7 +908,10 @@ inner join ApprovalRequests as approvalRequest
 	and approvalRequest.CountryCode = offer.CountryCode
     and approvalRequest.ApprovalStatus <> 'Cancelling'
     and approvalRequest.ApprovalStatus <> 'Rejected'
-    and approvalRequest.REQUIRED_ACTION = 'Approval'
+    and (
+        approvalRequest.REQUIRED_ACTION = 'Approval' or
+        approvalRequest.REQUIRED_ACTION = 'Notification'
+    )
     and approvalRequest.ApproverType <> 'Legal'
 inner join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory
     on offer.SellingCompany = signatory.LEGAL_ENTITY_CODE
@@ -1661,10 +1667,15 @@ left outer join MasterData.PricingPolicy as pricingPolicy
     @Core.Computed: false
     ifnull(priceCondition.Level1Discount1, 0) as Discount:Double,
     @Core.Computed: false
-    case   
-        when priceCondition.Level2Discount1 is null
-            then ifnull(offer.Distributor.CommissionRate,0) / 100
-        else priceCondition.Level2Discount1
+    case
+        when tender.CountryCode = 'ES' 
+            then 0
+                else 
+                    case   
+                        when priceCondition.Level2Discount1 is null
+                            then ifnull(offer.Distributor.CommissionRate,0) / 100
+                            else priceCondition.Level2Discount1
+                    end
     end as Deductions:Double,
     @Core.Computed: false
     ifnull(priceCondition.Price2, 0) as NetPrice:Decimal, 

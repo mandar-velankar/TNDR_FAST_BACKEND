@@ -1642,6 +1642,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         YP00,
         YP04,
         YP10,
+        YP11,
         YD75,
         YD06,
         YD02,
