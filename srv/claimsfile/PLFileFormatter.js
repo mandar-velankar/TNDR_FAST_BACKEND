@@ -281,10 +281,10 @@ module.exports = class PLFileFormatter extends BaseCountryFileFormatter {
 		let firstDate = new Date(this.excelDateToJSDate(salesData[0].DATASPRZEDAŻY));
 
 		// Get the first day of the month
-		let dateFrom = new Date(firstDate.getFullYear(), firstDate.getMonth(), 1);
+		let dateFrom = new Date(Date.UTC(firstDate.getFullYear(), firstDate.getMonth(), 1));
 		
 		// Get the last day of the month
-		let dateTo = new Date(firstDate.getFullYear(), firstDate.getMonth() + 1, 0);
+		let dateTo = new Date(Date.UTC(firstDate.getFullYear(), firstDate.getMonth() + 1, 0));
 		
 		// Format the dates to YYYY-MM-DD
 		let formatDate = (date) => date.toISOString().split('T')[0];
