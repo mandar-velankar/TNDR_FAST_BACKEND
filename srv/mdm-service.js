@@ -4,6 +4,7 @@ const moment = require('moment');
 const XLSXHelper = require("./utils/XLSXHelper");
 const Handlebars = require("handlebars");
 const ServiceHelper = require('./utils/ServiceHelper');
+const NumberHelper = require("./utils/NumberHelper");
 const { v4: uuidv4 } = require('uuid');
 
 module.exports = (srv) => {
@@ -999,6 +1000,7 @@ module.exports = (srv) => {
 				ed.EndDate = ed.EndDate && ServiceHelper.forceExcelText(ServiceHelper.formatDate(ed.EndDate, '', 'DD-MM-YYYY'));
 				ed.MaterialNumbers = ServiceHelper.forceExcelText(productValidSKUs.join(","));
 				ed.GOV_CODE = Number(ed.GOV_CODE) || "";
+				ed.PPP = ed.PPP && NumberHelper.roundDown(ed.PPP, 2);
 
 				if (ed.ACTIVERECORD === "No" && ed.RegistrationValidUntil && validDate <= ed.RegistrationValidUntil) { // display product if sku is valid or no skus found from db
 					return ed;
@@ -1117,6 +1119,8 @@ module.exports = (srv) => {
 			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'DD/MM/YYYY');
 			item.MaterialNumbers = ServiceHelper.forceExcelText(productValidSKUs.join(","));
 			item.GOV_CODE = Number(item.GOV_CODE) || "";
+			item.PPP = item.PPP && NumberHelper.roundDown(item.PPP, 2);
+			item.WPPWithoutTax = item.WPPWithoutTax && NumberHelper.roundUp(item.WPPWithoutTax, 2);
 
 			if (item.ACTIVERECORD === "No" && item.RegistrationValidUntil && validDate <= item.RegistrationValidUntil) { // display product if sku is valid or no skus found from db
 				return item;
