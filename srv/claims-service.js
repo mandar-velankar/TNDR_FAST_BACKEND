@@ -307,7 +307,13 @@ module.exports = (srv) => {
 		 */
 		try {
 			let CWID = res.user.id;
-			const file = await SELECT.one.from(SalesReportFile).where({DistributorID: req.DistributorID});
+			const file = await SELECT.one.from(SalesReportFile).where({
+				DistributorID: req.DistributorID,
+				CountryCode: req.CountryCode,
+				FileName: req.FileName,
+				FileType: req.FileType,
+				FilePeriod: req.FilePeriod,
+			});
 
 			if (!file) {
 				res.warn(400, "The file appears to be corrupted. Please check the file and upload a valid SalesReport file." );
