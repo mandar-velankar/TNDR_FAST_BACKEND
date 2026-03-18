@@ -5215,7 +5215,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const countryApprovers = await tx.run(SELECT.from(CountryApprovers).where({"CountryCode": offer.COUNTRYCODE, "Division": product.DIVISION, "BU": ctryProductPack.BU}));
 		const productThreshold = product.UNIT === "Unit" ? product.REQUESTED_VOLUME / productPack[0].PACKFACTOR : product.QTY_THRESHOLD
 
-		if(policy && priceCondition) {
+		if(policy && priceCondition && ['Radiology', 'Consumer Health'].includes(product.DIVISION)) {
 			if (offer.AffiliateOffer) {
 				const apprTypesToBeRemoved = [];
 				aApproverTypes.map(function (oApproverType) {
@@ -5271,6 +5271,47 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			}
 			results.IN_POLICY = true
 		}
+
+		if (product.DIVISION === 'Pharma' && priceCondition) {
+			if (priceCondition.Level1Discount1 <= 0.05) {
+				aApproverTypes.map(function (oApproverType) {
+					switch (oApproverType.ApproverType) {
+						case 'Finance Approver':
+							oApproverType.ValidationType = 3
+							break;
+						case 'Order-to-Cash-Ready':
+						case 'C2C':
+						case 'SCM':
+							oApproverType.ValidationType = 2
+							break;
+						default:
+							oApproverType.ValidationType = 1
+					}
+				});
+			}else {
+				aApproverTypes.map(function (oApproverType) {
+					switch (oApproverType.ApproverType) {
+						case 'Finance Approver':
+							oApproverType.ValidationType = 3
+							oApproverType.Hierarchy = 1
+							break;
+						case 'Country Commercial Lead':
+							oApproverType.ValidationType = 3
+							oApproverType.Hierarchy = 2
+							break;
+						case 'Order-to-Cash-Ready':
+						case 'C2C':
+						case 'SCM':
+							oApproverType.ValidationType = 2
+							break;
+						default:
+							oApproverType.ValidationType = 1
+					}
+				});
+			}
+			results.IN_POLICY = true
+		}
+
 		return results;
 		
 	}
