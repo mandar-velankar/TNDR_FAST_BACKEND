@@ -3461,11 +3461,12 @@ inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCo
     standardTenderHistory.NegotiationPrice
 }where standardTenderHistory.OUTCOME = 'Won' and standardTenderHistory.CountryCode = 'TW'
 union select from TransactionalDataViews.StandardTenderHistory as standardTenderHistory
-inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 
-                                                and standardTenderHistory.INSTITUTE_ID = maxCreationDate.INSTITUTE_ID
-                                                and standardTenderHistory.CreationDate = maxCreationDate.MaxCreationDate
 inner join MasterData.PT_TMINSHIER as hier1 on standardTenderHistory.INSTITUTE_ID = hier1.InstituteID
 inner join MasterData.PT_TMINSHIER as hier2 on hier1.ParentInstituteID = hier2.ParentInstituteID
+inner join MaxCreationDateParent as maxCreationDate 
+    on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 
+   and hier2.ParentInstituteID = maxCreationDate.INSTITUTE_ID
+   and standardTenderHistory.CreationDate = maxCreationDate.MaxCreationDate
 {
     key standardTenderHistory.ProductCode,
     key hier2.ParentInstituteID as INSTITUTE_ID: Integer,
@@ -3495,6 +3496,21 @@ entity MaxCreationDate as select from TransactionalDataViews.StandardTenderHisto
     Max(CreationDate) as MaxCreationDate: Date
 } where OUTCOME = 'Won' and CountryCode = 'TW' and EffectiveDate <= CURRENT_DATE
 group by ProductCode, INSTITUTE_ID;
+
+entity MaxCreationDateParent as select from TransactionalDataViews.StandardTenderHistory as sth
+inner join MasterData.PT_TMINSHIER as hier1 
+    on sth.INSTITUTE_ID = hier1.InstituteID
+inner join MasterData.PT_TMINSHIER as hier2 
+    on hier1.ParentInstituteID = hier2.ParentInstituteID
+{
+    key sth.ProductCode,
+    key hier2.ParentInstituteID as INSTITUTE_ID: Integer,
+    max(sth.CreationDate) as MaxCreationDate: Date
+}
+where sth.OUTCOME = 'Won'
+  and sth.CountryCode = 'TW'
+  and sth.EffectiveDate <= CURRENT_DATE
+group by sth.ProductCode, hier2.ParentInstituteID;
 
 entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 
