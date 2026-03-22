@@ -132,7 +132,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         inner join AdminData.PT_TMUSER as ModifyedByUser on ModifyedByUser.UserID = tender.modifiedBy
         left join TransactionalData.PT_TMOFRS as offer on offer.TenderID = tender.TenderID
         left join TransactionalDataViews.BrandsInTender as brands on brands.OFFERID = offer.OfferID
-        left join TransactionalData.PT_TMQUTO as quotation on quotation.OfferID = offer.OfferID and quotation.Active = 1 {
+        left join TransactionalData.PT_TMQUTO as quotation on quotation.OfferID = offer.OfferID and quotation.Active = 1 
+        left join PACAWICalculatedAwardedTotalPrices as pacaWIAwardedTotalPrice on pacaWIAwardedTotalPrice.OfferID = offer.OfferID and pacaWIAwardedTotalPrice.CountryCode = offer.CountryCode {
         tender.CountryCode,
         key tender.TenderID,
         tender.Classification,
@@ -167,7 +168,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         ifnull(quotation.ExpiryDate, ADD_DAYS(ADD_YEARS(CURRENT_DATE, 1), 1)) as ExpiryDate:Date,
         tender.Custom.String_1 as Custom_String_1,
         tender.Custom.Date_1 as Custom_Date_1,
-        offer.Custom.String_1 as Offer_Custom_String_1
+        offer.Custom.String_1 as Offer_Custom_String_1,
+        pacaWIAwardedTotalPrice.TotalAwardedPrice as TotalAwardedPrice: Double
     }where tender.Active = 1 and ifnull(offer.Active, 1) = 1
     group By tender.CountryCode,
         tender.TenderID,
@@ -198,7 +200,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         quotation.ExpiryDate,
         tender.Custom.String_1,
         tender.Custom.Date_1,
-        offer.Custom.String_1;
+        offer.Custom.String_1,
+        pacaWIAwardedTotalPrice.TotalAwardedPrice;
 
     @cds.redirection.target
     entity InstitutesView as select from MasterData.PT_TMINST as inst
@@ -817,7 +820,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     key result.ProductCode, 
         result.Active,
         result.LotID,
-        product.SORTER
+        product.SORTER,
+        result.AwardedPrice * result.AwardedQty as TotalAwardedPrice: Double,
     };
 
     entity OfferProducts as projection on TransactionalData.PT_TMOFPR {
@@ -839,6 +843,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         left join TransactionalData.FreeGoodsOther as freegoods
                             on freegoods.PriceCondition.ID = priceCondition.ID
                             and freegoods.ProductPackId = priceCondition.ProductCode
+        left join MasterData.PT_TMCTRY as country
+            on country.CountryCode = result.CountryCode
     {
         result.TenderID,
         key result.OfferID,
@@ -872,7 +878,12 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             when freegoods.FreeGoodsOther_ABS_PCT = 'ABS'
                 then freegoods.FreeGoodsOther || ' '  || result.UoM || '(s)' || ' (' || freegoods.ADD_INCLUDE || ')'
             when freegoods.FreeGoodsOther_ABS_PCT = 'STP'
-                then freegoods.FreeGoodsOther || ' '  || result.UoM || '(s)' || ' for each ' || freegoods.FreeGoodsOther_Step || ' ' || result.UoM || '(s)' || ' purchased (' || freegoods.ADD_INCLUDE || ')'
+                then 
+                    case 
+                        when country.Region = 'PACAWI'
+                            then round(100 * freegoods.FreeGoodsOther_STP_FOC_Percentage, 2) || '%' || ' for each ' || freegoods.FreeGoodsOther_Step || ' ' || result.UoM || '(s)' || ' purchased (' || freegoods.ADD_INCLUDE || ')'
+                        else freegoods.FreeGoodsOther || ' '  || result.UoM || '(s)' || ' for each ' || freegoods.FreeGoodsOther_Step || ' ' || result.UoM || '(s)' || ' purchased (' || freegoods.ADD_INCLUDE || ')'
+                    end
         end as FOC:String,
         product.RequestedVolume as RequestedVolume: Integer,
         result.Custom.String_1 as Custom_String_1,
@@ -2168,4 +2179,18 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
     
     function getContractMngtDateConstraints(TenderID: String, OfferID: String, CountryCode: String) returns ContractMngtDateConstraintsResponse;
     function getQuotationData(OfferID : String) returns String;
+
+    entity PACAWICalculatedAwardedTotalPrices as select from TransactionalData.PT_TMOFRS as offer
+        inner join TransactionalData.PT_TMOFPR as product
+            on product.OfferID = offer.OfferID
+        inner join TransactionalData.PT_TMTRRES as result
+            on result.OfferID = offer.OfferID
+            and result.ProductCode = product.ProductCode
+            and result.Outcome = 'Won' {
+        key offer.CountryCode,
+        key offer.OfferID,
+        sum(result.AwardedPrice * result.AwardedQty) as TotalAwardedPrice: Double
+    }where offer.Tender.Country.Region = 'PACAWI'
+    group by offer.CountryCode,
+        offer.OfferID;   
 }

@@ -3759,7 +3759,12 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
             when foc.FreeGoodsOther_ABS_PCT = 'ABS'
                 then foc.FreeGoodsOther || ' '  || product.UnitPerPack
             when foc.FreeGoodsOther_ABS_PCT = 'STP'
-                then foc.FreeGoodsOther || ' '  || product.UnitPerPack
+                then
+                    case 
+                        when tender.Country.Region = 'PACAWI'
+                            then round(100 * foc.FreeGoodsOther_STP_FOC_Percentage, 2) || '%'
+                        else foc.FreeGoodsOther || ' '  || product.UnitPerPack
+                    end
         end as Bonus:String,
         foc.FreeGoodsOther_Step as MinOrderQty,
         foc.FreeGoodsOther_ABS_PCT as Type,
@@ -3777,7 +3782,9 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
         foc.FreeGoodsOther,
         foc.FreeGoodsOther_Step,
         foc.FreeGoodsOther_ABS_PCT,
-        foc.ADD_INCLUDE;
+        foc.ADD_INCLUDE,
+        FreeGoodsOther_STP_FOC_Percentage,
+        tender.Country.Region;
 
     entity ContractDurationBase as select from TransactionalData.NLPriceConditions as nlpc
         inner join TransactionalData.PriceCondition as pc
