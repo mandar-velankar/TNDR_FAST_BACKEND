@@ -5215,21 +5215,21 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const productThreshold = product.UNIT === "Unit" ? product.REQUESTED_VOLUME / productPack[0].PACKFACTOR : product.QTY_THRESHOLD
 
 		if(policy && priceCondition && ['Radiology', 'Consumer Health'].includes(product.DIVISION)) {
-			if (offer.AffiliateOffer) {
-				const apprTypesToBeRemoved = [];
-				aApproverTypes.map(function (oApproverType) {
-					if (oApproverType.ApproverType !== "Order-to-Cash-Ready") {
-						oApproverType.ValidationType = 1;
-					}
-					const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
-					if (currentCtryApprType === -1 ) {
-						apprTypesToBeRemoved.push(oApproverType.ApproverType)
-					}
-				});
-				const orderToCashReadyIndex = apprTypesToBeRemoved.findIndex(el => el === "Order-to-Cash-Ready");
-				apprTypesToBeRemoved.splice(orderToCashReadyIndex, 1);
-				updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
-			}else {
+			// if (offer.AffiliateOffer) {
+			// 	const apprTypesToBeRemoved = [];
+			// 	aApproverTypes.map(function (oApproverType) {
+			// 		if (oApproverType.ApproverType !== "Order-to-Cash-Ready") {
+			// 			oApproverType.ValidationType = 1;
+			// 		}
+			// 		const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
+			// 		if (currentCtryApprType === -1 ) {
+			// 			apprTypesToBeRemoved.push(oApproverType.ApproverType)
+			// 		}
+			// 	});
+			// 	const orderToCashReadyIndex = apprTypesToBeRemoved.findIndex(el => el === "Order-to-Cash-Ready");
+			// 	apprTypesToBeRemoved.splice(orderToCashReadyIndex, 1);
+			// 	updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
+			// }else {
 				if (priceCondition.Level1Discount1 < policy.Value) {
 					if (product.REQUESTED_VOLUME < productThreshold) {
 						const apprTypesToBeRemoved = [];
@@ -5267,7 +5267,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
 					}
 				}
-			}
+			// }
 			results.IN_POLICY = true
 		}
 
