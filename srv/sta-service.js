@@ -5218,22 +5218,22 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const countryApprovers = await tx.run(SELECT.from(CountryApprovers).where({"CountryCode": offer.COUNTRYCODE, "Division": product.DIVISION, "BU": ctryProductPack.BU}));
 		const productThreshold = product.UNIT === "Unit" ? product.REQUESTED_VOLUME / productPack[0].PACKFACTOR : product.QTY_THRESHOLD
 
-		if(policy && priceCondition) {
-			if (offer.AffiliateOffer) {
-				const apprTypesToBeRemoved = [];
-				aApproverTypes.map(function (oApproverType) {
-					if (oApproverType.ApproverType !== "Order-to-Cash-Ready") {
-						oApproverType.ValidationType = 1;
-					}
-					const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
-					if (currentCtryApprType === -1 ) {
-						apprTypesToBeRemoved.push(oApproverType.ApproverType)
-					}
-				});
-				const orderToCashReadyIndex = apprTypesToBeRemoved.findIndex(el => el === "Order-to-Cash-Ready");
-				apprTypesToBeRemoved.splice(orderToCashReadyIndex, 1);
-				updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
-			}else {
+		if(policy && priceCondition && ['Radiology', 'Consumer Health'].includes(product.DIVISION)) {
+			// if (offer.AffiliateOffer) {
+			// 	const apprTypesToBeRemoved = [];
+			// 	aApproverTypes.map(function (oApproverType) {
+			// 		if (oApproverType.ApproverType !== "Order-to-Cash-Ready") {
+			// 			oApproverType.ValidationType = 1;
+			// 		}
+			// 		const currentCtryApprType = countryApprovers.findIndex(ca => ca.ApproverType === oApproverType.ApproverType);
+			// 		if (currentCtryApprType === -1 ) {
+			// 			apprTypesToBeRemoved.push(oApproverType.ApproverType)
+			// 		}
+			// 	});
+			// 	const orderToCashReadyIndex = apprTypesToBeRemoved.findIndex(el => el === "Order-to-Cash-Ready");
+			// 	apprTypesToBeRemoved.splice(orderToCashReadyIndex, 1);
+			// 	updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
+			// }else {
 				if (priceCondition.Level1Discount1 < policy.Value) {
 					if (product.REQUESTED_VOLUME < productThreshold) {
 						const apprTypesToBeRemoved = [];
@@ -5271,9 +5271,50 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						updateApproverTypesListForPakistan(aApproverTypes, apprTypesToBeRemoved);
 					}
 				}
+			// }
+			results.IN_POLICY = true
+		}
+
+		if (product.DIVISION === 'Pharma' && priceCondition) {
+			if (priceCondition.Level1Discount1 <= 0.05) {
+				aApproverTypes.map(function (oApproverType) {
+					switch (oApproverType.ApproverType) {
+						case 'Finance Approver':
+							oApproverType.ValidationType = 3
+							break;
+						case 'Order-to-Cash-Ready':
+						case 'C2C':
+						case 'SCM':
+							oApproverType.ValidationType = 2
+							break;
+						default:
+							oApproverType.ValidationType = 1
+					}
+				});
+			}else {
+				aApproverTypes.map(function (oApproverType) {
+					switch (oApproverType.ApproverType) {
+						case 'Finance Approver':
+							oApproverType.ValidationType = 3
+							oApproverType.Hierarchy = 1
+							break;
+						case 'Country Commercial Lead':
+							oApproverType.ValidationType = 3
+							oApproverType.Hierarchy = 2
+							break;
+						case 'Order-to-Cash-Ready':
+						case 'C2C':
+						case 'SCM':
+							oApproverType.ValidationType = 2
+							break;
+						default:
+							oApproverType.ValidationType = 1
+					}
+				});
 			}
 			results.IN_POLICY = true
 		}
+
 		return results;
 		
 	}
