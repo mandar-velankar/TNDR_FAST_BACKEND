@@ -8321,7 +8321,10 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				return req.error({ code: 403, message: `Tender "${TenderID}" is not active. Only active tender can be copied.`, target: "PT_TMTEND"});
 			}
 
-			const latestTenderID = await SELECT.one.from(PT_TMTEND).columns('max(TenderID) as TenderID').where({ CountryCode: tender.CountryCode, TenderID: { 'not like': '%HIST%' } })
+			const latestTenderID = await SELECT.one.from(PT_TMTEND)
+				.columns('max(TenderID) as TenderID')
+				.where({ CountryCode: tender.CountryCode, TenderID: { 'not like': '%HIST%' } })
+				.where({ TenderID: { 'not like': '%CCM%' } })
 			const offers = await SELECT.from(PT_TMOFRS).where({TenderID: TenderID, ActiveOffer: 1});
 			const offerIDs = offers.map(o => o.OfferID);
 			const offerProducts = offerIDs.length > 0 ?await SELECT.from(PT_TMOFPR).where({OfferID: {in: offerIDs}, Active: 1}) : [];
