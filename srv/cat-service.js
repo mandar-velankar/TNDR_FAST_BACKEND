@@ -3353,7 +3353,7 @@ module.exports = (srv) => {
 				FLOW_ID: (!d.FLOW_ID) ? "" : d.FLOW_ID,
 				DIVISION: d.Division,
 				COUNTRYNAME: d.CountryName,
-				HIERARCHY: d.ApproverTypes[0].Hierarchy,
+				HIERARCHY: d.ApproverTypes && d.ApproverTypes.length > 0 ? d.ApproverTypes[0].Hierarchy : 1,
 				Nucleus: countryApprover?.Nucleus || ""
 			}
 		})
