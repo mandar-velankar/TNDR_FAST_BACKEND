@@ -2485,7 +2485,7 @@ module.exports = (srv) => {
         let uniqueSample = Array.from(new Set(samplesItemsToUnique));
 
         if (samplesNotZero.length === offerProductValidation.length && uniqueSample.length == 1) {
-
+			uniqueSample[0] = uniqueSample[0] ? uniqueSample[0] : 0;
             samplesRemark = uniqueSample[0].toString().concat(" samples will be delivered for all products as per the tender terms and conditions.");
         }
         else if (uniqueSample.length >= 1) {
