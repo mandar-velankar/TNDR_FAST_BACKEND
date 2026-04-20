@@ -2485,7 +2485,7 @@ module.exports = (srv) => {
         let uniqueSample = Array.from(new Set(samplesItemsToUnique));
 
         if (samplesNotZero.length === offerProductValidation.length && uniqueSample.length == 1) {
-
+			uniqueSample[0] = uniqueSample[0] ? uniqueSample[0] : 0;
             samplesRemark = uniqueSample[0].toString().concat(" samples will be delivered for all products as per the tender terms and conditions.");
         }
         else if (uniqueSample.length >= 1) {
@@ -3817,16 +3817,16 @@ module.exports = (srv) => {
 	});
 
 	srv.on('READ', 'ApprovalApprovers', async (req) => {
-		try{
+		// try{
 		// const tx = cds.transaction(req);
 		const tx = cds.tx(req);
 		let results = await buildWorkflowApprovalApprovers(tx);
 		return results;
-		}
-		catch(error){
-			console.error('Error in ApprovalApprovers READ');
-            return req.reject(403, error?.message||"Error in ApprovalApprovers");
-		}
+		// }
+		// catch(error){
+		// 	console.error('Error in ApprovalApprovers READ');
+        //     return req.reject(403, error?.message||"Error in ApprovalApprovers");
+		// }
 	});
 	//http://localhost:4004/v2/tender/Attachment('AE-16-100-1049-BPH-11')/content
 	srv.on('READ', 'Attachment', async (req, next) => {
