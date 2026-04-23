@@ -7882,7 +7882,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	  
 		// Assign the condition values
 		const YP00 = conditions["YP00"]?.ConditionAmount || 0;
-		const YP04 = conditions["YP04"] ? Math.abs(conditions["YP04"].ConditionRateValue) / 100 : 0;
+		const YP04 = conditions["YP04"]? Math.abs(conditions["YP04"].ConditionAmount) : 0;
+		//const YP04 = conditions["YP04"]? Math.abs(conditions["YP04"].ConditionRateValue) / 100 : 0;
 		const YP10 = conditions["YP10"]?.ConditionAmount ?? null;
 		const YP11 = conditions["YP11"]?.ConditionAmount ?? null;
 		const YD02 = conditions["YD02"] ? Math.abs(conditions["YD02"].ConditionRateValue) / 100 : 0;
@@ -7891,10 +7892,14 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const YD30 = conditions["YD30"]?.ConditionAmount ?? 0;
 	  
 		
-
+		/** YP04 coming via OrderSimulate is neither confidential discount nor confidential price. 
+		 * It is the reduction amount from YP00. 
+		 * However we are still using YP04 as a 'ConfidentialDiscount' on CurrentPricing Section on UI, 
+		 * as adding separate field for 'ConfidentialDiscount' could potentially cause regressions*/
 		result.YP00 = YP00 ? UoM === 'Pack' ? (YP00 / 10000) : (YP00 / 10000 / packFactor) : 0;
-		result.YP04 = YP04;
-		result.ConfidentialPrice = YP04 ? result.YP00 * (1 - YP04) : result.YP00;
+		YP04 = YP04 ? UoM === 'Pack' ? (YP04 / 10000) : (YP04 / 10000 / packFactor) : 0;
+		result.YP04 = (YP04 / result.YP00);
+		result.ConfidentialPrice = YP04 ? result.YP00 - YP04 : result.YP00;
 		result.YD02 = YD02;
 		result.RoyalDecree = YD06 ? "Yes" : "No";
 		result.YD06 = YD06;
