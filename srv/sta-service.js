@@ -7882,7 +7882,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	  
 		// Assign the condition values
 		const YP00 = conditions["YP00"]?.ConditionAmount || 0;
-		const YP04 = conditions["YP04"]? Math.abs(conditions["YP04"].ConditionAmount) : 0;
+		let YP04 = conditions["YP04"]? Math.abs(conditions["YP04"].ConditionAmount) : 0;
 		//const YP04 = conditions["YP04"]? Math.abs(conditions["YP04"].ConditionRateValue) / 100 : 0;
 		const YP10 = conditions["YP10"]?.ConditionAmount ?? null;
 		const YP11 = conditions["YP11"]?.ConditionAmount ?? null;
