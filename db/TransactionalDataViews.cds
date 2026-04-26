@@ -3938,7 +3938,7 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
                         count(approvals.ApprovalStatus) > 0
                         then
                             case 
-                                when sum(case when approvals.ApprovalStatus = 'Rejected' then 1 else 0 end) > 0
+                                when sum(case when approvals.ApprovalStatus in ('Rejected', 'Cancelled', 'Cancelling') then 1 else 0 end) > 0
                                 then 2
                                 else 1
                             end
