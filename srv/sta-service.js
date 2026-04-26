@@ -7886,7 +7886,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	  
 		// Assign the condition values
 		const YP00 = conditions["YP00"]?.ConditionAmount || 0;
-		const YP04 = conditions["YP04"] ? Math.abs(conditions["YP04"].ConditionRateValue) / 100 : 0;
+		let YP04 = conditions["YP04"]? Math.abs(conditions["YP04"].ConditionAmount) : 0;
+		//const YP04 = conditions["YP04"]? Math.abs(conditions["YP04"].ConditionRateValue) / 100 : 0;
 		const YP10 = conditions["YP10"]?.ConditionAmount ?? null;
 		const YP11 = conditions["YP11"]?.ConditionAmount ?? null;
 		const YD02 = conditions["YD02"] ? Math.abs(conditions["YD02"].ConditionRateValue) / 100 : 0;
@@ -7895,10 +7896,14 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const YD30 = conditions["YD30"]?.ConditionAmount ?? 0;
 	  
 		
-
+		/** YP04 coming via OrderSimulate is neither confidential discount nor confidential price. 
+		 * It is the reduction amount from YP00. 
+		 * However we are still using YP04 as a 'ConfidentialDiscount' on CurrentPricing Section on UI, 
+		 * as adding separate field for 'ConfidentialDiscount' could potentially cause regressions*/
 		result.YP00 = YP00 ? UoM === 'Pack' ? (YP00 / 10000) : (YP00 / 10000 / packFactor) : 0;
-		result.YP04 = YP04;
-		result.ConfidentialPrice = YP04 ? result.YP00 * (1 - YP04) : result.YP00;
+		YP04 = YP04 ? UoM === 'Pack' ? (YP04 / 10000) : (YP04 / 10000 / packFactor) : 0;
+		result.YP04 = (YP04 / result.YP00);
+		result.ConfidentialPrice = YP04 ? result.YP00 - YP04 : result.YP00;
 		result.YD02 = YD02;
 		result.RoyalDecree = YD06 ? "Yes" : "No";
 		result.YD06 = YD06;
@@ -8000,134 +8005,73 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		return req.reply("Contract Start and End Date Updated Successfully");
   	});
 	  
-	  
 	srv.on("createAllFastConditionContracts", async (req) => {
 		const tx = cds.tx(req);
-		const {OfferID: offerID, ContractStartDate, ContractEndDate } = req.data;
+		const { OfferID: offerID, ContractStartDate, ContractEndDate } = req.data;
 		const toStr = (v) => v != null ? String(v) : null;
 		const toInt = (v) => v === "Yes" ? 1 : v === "No" ? 0 : parseInt(v) || 0;
 		const toDecimal = (v) => v != null ? Number(v) : null;
 		const today = new Date().toISOString().split("T")[0];
 
-    try {
-		const awardedProducts = await tx.run(SELECT.from(AwardedProducts).where({ OfferID: offerID }));
-		const wonProducts = awardedProducts.filter((p) => p.Outcome === "Won");
-		const existingfastConditionContract = await ConditionContract.run(SELECT.one.from(FastConditionContracts).where({OfferID: offerID}));
-		let existingConditionContracts = [];
-		if(existingfastConditionContract){
-			existingConditionContracts = await ConditionContract.run(SELECT.from(CCMContract).where({FastConditionContracts_ID: existingfastConditionContract.ID})) || [];
-		}
-
-		if (wonProducts.length === 0) {
-			return req.error(404, 'No products with outcome "Won" found for the given OfferID');
-		}
-
-		const payloads = [];
-		const fastCCMContractId = uuidv4();
-
-		const filteredWonProducts = wonProducts.filter(wonProduct => {
-			return !(existingConditionContracts?.some(existing => existing.ProductCode == wonProduct.ProductCode));
-		}).map(wp => {
-			wp.ContractStartDate = wp.ContractStartDate ? wp.ContractStartDate : ContractStartDate;
-			wp.ContractEndDate = wp.ContractEndDate ? wp.ContractEndDate : ContractEndDate;
-			return wp;
-		});
-
-		if (filteredWonProducts.length === 0) {
-			return req.error(404, 'No New products with outcome "Won" found for the given OfferID');
-		}
-
-		const [rootRow] = await tx.run(SELECT.from(FastConditionContractsView).where({OfferID: offerID}));
-
-		let extension = false;
-		let extensionPeriod = 0;
-
-		if (rootRow.ContractType === "Commercial Agreement") {
-			extension = true;
-			extensionPeriod = 12;
-			// const start = new Date(filteredWonProducts[0].ContractStartDate);
-			// const end = new Date(filteredWonProducts[0].ContractEndDate);
-
-			// let years = end.getFullYear() - start.getFullYear();
-			// let months = end.getMonth() - start.getMonth();
-			// let days = end.getDate() - start.getDate();
-
-			// extensionPeriod = years * 12 + months;
-
-			// // If the end day is greater than or equal to the start day, count it as a full month
-			// if (days >= 0) {
-			// 	extensionPeriod += 1;
-			// }
-		}
-
-		let payload = {
-			ID: fastCCMContractId,
-			TenderID: toStr(rootRow.TenderID),
-			OfferID: toStr(offerID),
-			CountryCode: toStr(rootRow.CountryCode),
-			InstituteID: toInt(rootRow.InstituteID),
-			InstituteName: toStr(rootRow.InstituteName),
-			DistributorID: toInt(rootRow.DistributorID),
-			ContractStartDate: toStr(filteredWonProducts[0].ContractStartDate),
-			ContractEndDate: toStr(filteredWonProducts[0].ContractEndDate),
-			ContractType: toStr(rootRow.ContractType),
-			CustomerID: toStr(rootRow.CustomerID),
-			Division: toStr(rootRow.Division),
-			Reference: toStr(rootRow.Reference),
-			Status: "New Contract",
-			Owner: toStr(rootRow.Owner),
-			OwnerName: toStr(rootRow.OwnerName),
-			OwnerEmail: toStr(rootRow.OwnerEmail),
-			BrandFilter: null,
-			ProductFilter: null,
-			Extension: extension,
-			ExtensionPeriod: toStr(extensionPeriod),
-			SAPID: toStr(rootRow.SAPID),
-			ExternalID: toStr(rootRow.ExternalID),
-			hasNewMaterialNumber: false,
-			hasActiveContracts: false,
-			hasUpdatedPVL: false,
-			hasUpdatedConfidentialPrice: false,
-			hasNetPriceAbovePVL: false,
-			hasNetPriceBelowFloorPrice: false,
-			hasExpiringSoonContracts: false,
-			hasExpiredContracts: false,
-			hasCancelledContracts: false,
-			hasNewContracts: true,
-			CCMContract: []
-		};
-
-		for (const product of filteredWonProducts) {
-
-			const ccmContractId = uuidv4();
-			const ccmCustomerId = uuidv4();
-
-			const [contractRow] = await tx.run(SELECT.from(ConditionContractsView).where({ OfferID: offerID, ProductCode: product.ProductCode }));
-			if (!contractRow) continue;
-
-			const customerHierarchyRows = await tx.run(SELECT.from(CandidateInstitutes).where({ BaseInstituteID: contractRow.InstituteID, RelationType: 'CHILD'}));
-
-			const materialRows = await tx.run(SELECT.from(CCMMaterilsView).where({ ProductCode: product.ProductCode }));
-
-			const [invoiceRow] = await tx.run(SELECT.from(PriceConditionInvoiceView).where({ OfferID: offerID, ProductCode:product.ProductCode }));
-
-			let focRows = [];
-
-			if (invoiceRow && invoiceRow.PriceConditionID) {
-				focRows = await tx.run(SELECT.from(PriceConditionFOCView).where({PriceConditionID: invoiceRow.PriceConditionID}));
+		try {
+			const awardedProducts = await tx.run(SELECT.from(AwardedProducts).where({ OfferID: offerID }));
+			const wonProducts = awardedProducts.filter((p) => p.Outcome === "Won");
+			const existingfastConditionContract = await ConditionContract.run(SELECT.one.from(FastConditionContracts).where({ OfferID: offerID }));
+			let existingConditionContracts = [];
+			if (existingfastConditionContract) {
+				existingConditionContracts = await ConditionContract.run(SELECT.from(CCMContract).where({ FastConditionContracts_ID: existingfastConditionContract.ID })) || [];
 			}
 
-			const [rebateRow] = await tx.run(SELECT.from(PriceConditionRebateView).where({ OfferID: offerID, ProductCode:product.ProductCode }));
-
-			let discountRows = [];
-			let marketIncentiveInfo = null;
-
-			if (rebateRow && rebateRow.PriceConditionID) {
-				discountRows = await tx.run(SELECT.from(PriceConditionDiscountConditionsView).where({PriceConditionID: rebateRow.PriceConditionID}));
-				marketIncentiveInfo = await tx.run(SELECT.one.from(MarketIncentive).where({MarketIncentiveID: rebateRow.MarketIncentiveID, CountryCode: rebateRow.CountryCode}));
+			if (wonProducts.length === 0) {
+				return req.error(404, 'No products with outcome "Won" found for the given OfferID');
 			}
 
-			const ccmContract = {
+			const fastCCMContractId = uuidv4();
+
+			const filteredWonProducts = wonProducts.filter(wonProduct => {
+				return !(existingConditionContracts?.some(existing => existing.ProductCode == wonProduct.ProductCode));
+			}).map(wp => {
+				wp.ContractStartDate = wp.ContractStartDate ? wp.ContractStartDate : ContractStartDate;
+				wp.ContractEndDate = wp.ContractEndDate ? wp.ContractEndDate : ContractEndDate;
+				return wp;
+			});
+
+			if (filteredWonProducts.length === 0) {
+				return req.error(404, 'No New products with outcome "Won" found for the given OfferID');
+			}
+
+			const [rootRow] = await tx.run(SELECT.from(FastConditionContractsView).where({ OfferID: offerID }));
+
+			let extension = false;
+			let extensionPeriod = 0;
+
+			if (rootRow.ContractType === "Commercial Agreement") {
+				extension = true;
+				extensionPeriod = 12;
+			}
+
+			// Helper function to build a single contract object
+			const buildCCMContract = async (product, contractRow, ccmContractId, ccmCustomerId) => {
+				const customerHierarchyRows = await tx.run(SELECT.from(CandidateInstitutes).where({ BaseInstituteID: contractRow.InstituteID, RelationType: 'CHILD' }));
+				const materialRows = await tx.run(SELECT.from(CCMMaterilsView).where({ ProductCode: product.ProductCode }));
+				const [invoiceRow] = await tx.run(SELECT.from(PriceConditionInvoiceView).where({ OfferID: offerID, ProductCode: product.ProductCode }));
+
+				let focRows = [];
+				if (invoiceRow && invoiceRow.PriceConditionID) {
+					focRows = await tx.run(SELECT.from(PriceConditionFOCView).where({ PriceConditionID: invoiceRow.PriceConditionID }));
+				}
+
+				const [rebateRow] = await tx.run(SELECT.from(PriceConditionRebateView).where({ OfferID: offerID, ProductCode: product.ProductCode }));
+
+				let discountRows = [];
+				let marketIncentiveInfo = null;
+
+				if (rebateRow && rebateRow.PriceConditionID) {
+					discountRows = await tx.run(SELECT.from(PriceConditionDiscountConditionsView).where({ PriceConditionID: rebateRow.PriceConditionID }));
+					marketIncentiveInfo = await tx.run(SELECT.one.from(MarketIncentive).where({ MarketIncentiveID: rebateRow.MarketIncentiveID, CountryCode: rebateRow.CountryCode }));
+				}
+
+				return {
 					ID: ccmContractId,
 					ProductCode: toStr(contractRow.ProductCode),
 					CountryCode: toStr(contractRow.CountryCode),
@@ -8170,8 +8114,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							ParentInstituteID: toStr(contractRow.InstituteID),
 							CustomerID: toStr(row.CustomerID ?? contractRow.CustomerID),
 							ParentCustomerID: toStr(contractRow.CustomerID),
-							InstituteName:toStr(row.InstituteName ?? contractRow.InstituteName),
-							ParentInstituteName:toStr(contractRow.InstituteName),
+							InstituteName: toStr(row.InstituteName ?? contractRow.InstituteName),
+							ParentInstituteName: toStr(contractRow.InstituteName),
 							AssortmentReference: toStr(rootRow.External_InstituteId),
 							Excluded: false,
 							CCMContractID: ccmContractId,
@@ -8217,7 +8161,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						RentalPrice: toDecimal(invoiceRow.RentalPrice),
 						MonthlyRentPerUnit: toDecimal(invoiceRow.MonthlyRentPerUnit),
 						AnnualValue: toDecimal(invoiceRow.AnnualValue),
-						PriceConditionCode:toStr(invoiceRow.PriceConditionCode),
+						PriceConditionCode: toStr(invoiceRow.PriceConditionCode),
 						CCMContract_ID: ccmContractId,
 						validFrom: today,
 						validTo: "9999-12-31"
@@ -8235,7 +8179,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						RefundDate: toStr(rebateRow.RefundDate),
 						PriceConditionCode: toStr(rebateRow.PriceConditionCode),
 						MarketIncentiveID: toStr(rebateRow.MarketIncentiveID),
-						MarketIncentiveDescription: toStr(marketIncentiveInfo.Description),
+						MarketIncentiveDescription: toStr(marketIncentiveInfo?.Description),
 						CCMContract_ID: ccmContractId,
 						validFrom: today,
 						validTo: "9999-12-31",
@@ -8264,40 +8208,82 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						validTo: "9999-12-31"
 					})),
 				};
+			};
 
+			// ============ NEW FAST Contract ============
+			if (existingConditionContracts.length === 0) {
+				// Step 1: Insert parent FastConditionContract once
+				const parentPayload = {
+					ID: fastCCMContractId,
+					TenderID: toStr(rootRow.TenderID),
+					OfferID: toStr(offerID),
+					CountryCode: toStr(rootRow.CountryCode),
+					InstituteID: toInt(rootRow.InstituteID),
+					InstituteName: toStr(rootRow.InstituteName),
+					DistributorID: toInt(rootRow.DistributorID),
+					ContractStartDate: toStr(filteredWonProducts[0].ContractStartDate),
+					ContractEndDate: toStr(filteredWonProducts[0].ContractEndDate),
+					ContractType: toStr(rootRow.ContractType),
+					CustomerID: toStr(rootRow.CustomerID),
+					Division: toStr(rootRow.Division),
+					Reference: toStr(rootRow.Reference),
+					Status: "New Contract",
+					Owner: toStr(rootRow.Owner),
+					OwnerName: toStr(rootRow.OwnerName),
+					OwnerEmail: toStr(rootRow.OwnerEmail),
+					BrandFilter: null,
+					ProductFilter: null,
+					Extension: extension,
+					ExtensionPeriod: toStr(extensionPeriod),
+					SAPID: toStr(rootRow.SAPID),
+					ExternalID: toStr(rootRow.ExternalID),
+					hasNewMaterialNumber: false,
+					hasActiveContracts: false,
+					hasUpdatedPVL: false,
+					hasUpdatedConfidentialPrice: false,
+					hasNetPriceAbovePVL: false,
+					hasNetPriceBelowFloorPrice: false,
+					hasExpiringSoonContracts: false,
+					hasExpiredContracts: false,
+					hasCancelledContracts: false,
+					hasNewContracts: true,
+				};
 
-			payload.CCMContract.push(ccmContract);
-		}
-
-		if (payload.length === 0) {
-			return req.error(400, "No valid contract payloads could be built.");
-		}
-
-		if(existingConditionContracts.length === 0){
-			await ConditionContract.run(INSERT.into(FastConditionContracts).entries(payload));
-		}else{
-			const contracts = payload.CCMContract;
-			const onlyChildrenPayloads = Array.isArray(contracts) ? contracts : contracts ? [contracts] : [];
-			if (onlyChildrenPayloads.length === 0) {
-				return req.error(400, "No new Contract to insert under existing FAST Contract.");
+				await ConditionContract.run(INSERT.into(FastConditionContracts).entries(parentPayload));
 			}
-			for (const child of onlyChildrenPayloads) {
-				await ConditionContract.run(INSERT.into(CCMContract).entries(child));
+
+			// Step 2: Insert CCMContract entries ONE AT A TIME (remote service requirement)
+			for (const product of filteredWonProducts) {
+			const ccmContractId = uuidv4();
+			const ccmCustomerId = uuidv4();
+
+			try {
+				const [contractRow] = await tx.run(SELECT.from(ConditionContractsView).where({ OfferID: offerID, ProductCode: product.ProductCode }));
+				if (!contractRow) {
+				throw new Error(`Contract row not found for product ${product.ProductCode}`);
+				}
+
+				const ccmContract = await buildCCMContract(product, contractRow, ccmContractId, ccmCustomerId);
+				await ConditionContract.run(INSERT.into(CCMContract).entries(ccmContract));
+				
+				console.log(`✓ Inserted product ${product.ProductCode}`);
+			} catch (err) {
+				// Don't continue
+				console.error(`✗ Failed at product ${product.ProductCode}:`, err.message);
+				throw new Error(`Contract creation stopped: ${product.ProductCode} failed. Check logs and retry.`);
 			}
+			}
+
+			return req.reply({
+				message: `FAST condition contract created successfully with ${filteredWonProducts.length} products.`,
+				fastCCMContractId: existingConditionContracts.length === 0 ? fastCCMContractId : existingfastConditionContract.ID
+			});
+
+		} catch (err) {
+			console.error("Contract creation failed:", err);
+			return req.error(500, "Internal error during contract creation.");
 		}
-
-		return req.reply({
-			message: `FAST condition contract created successfully.`,
-			fastCCMContractId: existingConditionContracts.length === 0 ? fastCCMContractId : existingfastConditionContract.ID
-		});
-
-    } catch (err) {
-      console.error(err);
-      return req.error(500, "Internal error during contract creation.");
-    }
-
-	
-  });
+	});
 
   srv.on("getFastContractForOffer", async (req) => {
 	
