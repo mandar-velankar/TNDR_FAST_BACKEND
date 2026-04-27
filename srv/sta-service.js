@@ -2555,6 +2555,7 @@ module.exports = async (srv) => {
 				RoyalDecree: req.data.RoyalDecree,
 				RoyalDecreeValue: req.data.RoyalDecreeValue,
 				RoyalDecreeIncl: req.data.RoyalDecreeIncl,
+				PriceConditionCode: req.data.PriceConditionCode,
 				StandardDiscount: req.data.StandardDiscount,
 				AdditionalDiscount: req.data.AdditionalDiscount,
 				NetPriceWithoutTaxBeforeDeductionRD: req.data.NetPriceWithoutTaxBeforeDeductionRD,
