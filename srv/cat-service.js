@@ -1858,7 +1858,7 @@ module.exports = (srv) => {
 
 		if (isOfferReApproved) {
 			aApproverTypes.map(async function (oApproverType) {
-				const notRecordedPendingApproval = notRecordedPendingApprovals.find(nrpa => nrpa === oApproverType.ApproverType);
+				const notRecordedPendingApproval = notRecordedPendingApprovals.find(nrpa => nrpa.ApproverType === oApproverType.ApproverType);
 				if (notRecordedPendingApproval && oApproverType.ValidationType === 1) {
 					oApproverType.ValidationType = notRecordedPendingApproval.REQUIRED_ACTION === "Approval" ? 3 : 2;
 					oApproverType.Hierarchy = notRecordedPendingApproval.Hierarchy;
@@ -2043,7 +2043,7 @@ module.exports = (srv) => {
 				productcode: offerProduct.ProductCode
 			})
 
-			const notRecordedPendingApprovals = await SELECT.one.from(IdentifyNotRecordedPendingApprovals).where({
+			const notRecordedPendingApprovals = await SELECT.from(IdentifyNotRecordedPendingApprovals).where({
 				OfferId: offer.OFFERID
 			});
 
