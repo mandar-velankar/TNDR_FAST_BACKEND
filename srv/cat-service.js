@@ -30,7 +30,7 @@ module.exports = (srv) => {
 		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices, MASTER_TENDER_TYPE,PT_TMPRDHIER,PT_TMCTRY
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
-		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView, BrandsInTender, OfferLatestApprovalStatus, MEAPreviousApprovalsFlags, OfferStatus
+		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView, BrandsInTender, OfferLatestApprovalStatus, MEAPreviousApprovalsFlags, OfferStatus, IdentifyNotRecordedPendingApprovals
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -1614,7 +1614,7 @@ module.exports = (srv) => {
 		return results;
 	}
 
-	function buildProductValidationForType19(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags) {//MEA
+	function buildProductValidationForType19(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals) {//MEA
 		const everyProductLatestFieldEmpty = aOfferProduct.every(pr => !pr.MEA_APPROVAL_LATEST_UPDATED_FIELD);
 		const latestUpdatedField = offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? product.MEA_APPROVAL_LATEST_UPDATED_FIELD : product.MEA_APPROVAL_LATEST_UPDATED_FIELD_PREVIOUS_STATE || "";
 		const deleted_state= offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? initialOffer.PreviousApprovalHasDeletedProduct : initialOffer.ApprovalHasDeletedProduct_Previous_State;
@@ -1856,6 +1856,16 @@ module.exports = (srv) => {
 			
 		});
 
+		if (isOfferReApproved) {
+			aApproverTypes.map(async function (oApproverType) {
+				const notRecordedPendingApproval = notRecordedPendingApprovals.find(nrpa => nrpa === oApproverType.ApproverType);
+				if (notRecordedPendingApproval && oApproverType.ValidationType === 1) {
+					oApproverType.ValidationType = notRecordedPendingApproval.REQUIRED_ACTION === "Approval" ? 3 : 2;
+					oApproverType.Hierarchy = notRecordedPendingApproval.Hierarchy;
+				}
+			})
+		}
+
 		let results = {
 			//In Policy flag
 			IN_POLICY: true
@@ -1918,7 +1928,7 @@ module.exports = (srv) => {
 			
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 		if (offer.APPROVAL_TYPE === 1 || offer.APPROVAL_TYPE === 2) {//Default
@@ -1949,7 +1959,7 @@ module.exports = (srv) => {
 			productValidation = await buildProductValidationForType12(tx, product, aApproverTypes)
         }
 		else if (offer.APPROVAL_TYPE === 19) {//Applicable for MEA
-			productValidation = buildProductValidationForType19(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags)
+			productValidation = buildProductValidationForType19(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals)
 		}
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
@@ -2033,8 +2043,13 @@ module.exports = (srv) => {
 				productcode: offerProduct.ProductCode
 			})
 
+			const notRecordedPendingApprovals = await SELECT.one.from(IdentifyNotRecordedPendingApprovals).where({
+				OfferId: offer.OFFERID
+			});
+
+
 			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
-			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags);
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals);
 			
 			//Get corresponding ProductPricing
 			const whereProductPricing = {
