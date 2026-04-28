@@ -3990,3 +3990,25 @@ where
 group by
   OfferId,
   productcode;
+
+entity IdentifyNotRecordedPendingApprovals as select from TransactionalData.PT_TMAPPRST as approvals
+    inner join MaxOfferApprovalStatusTime as maxApprTime
+        on maxApprTime.OfferId = approvals.OfferId {
+            key approvals.OfferId,
+            key approvals.ApproverEmailID,
+            key approvals.ApproverType,
+                approvals.CountryCode,
+                approvals.ApprovalStatus,
+                approvals.ApproverName,
+                approvals.Hierarchy,
+                approvals.REQUIRED_ACTION
+} where approvals.ApprovalStatus in ('Waiting', 'Processing')
+and approvals.Statustime <> maxApprTime.MaxStatusTime
+group by approvals.OfferId,
+        approvals.ApproverEmailID,
+        approvals.ApproverType,
+        approvals.CountryCode,
+        approvals.ApprovalStatus,
+        approvals.ApproverName,
+        approvals.Hierarchy,
+        approvals.REQUIRED_ACTION;
