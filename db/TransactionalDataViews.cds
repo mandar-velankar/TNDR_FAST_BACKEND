@@ -1803,6 +1803,7 @@ left outer join MasterData.PricingPolicy as pricingPolicy
     priceCondition.MonthlyRentPerUnit,
     priceCondition.AnnualValue,
     priceCondition.MarketIncentiveID,
+    priceCondition.QuotationPriceConditionCode,
     @Core.Computed: false
     case 
         when product.UnitPerPack = 'Unit'
