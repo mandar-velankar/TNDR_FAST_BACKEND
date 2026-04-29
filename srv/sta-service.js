@@ -5059,7 +5059,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				NLStaticField2: 'NA',
 				PL_VolumeInPacks: PL_VolumeInPacks,
 				PNM_VALUE		: PNM_VALUE,
-				MaxNetPricePerPack  : productConditionstmp[0] && (productConditionstmp[0].Price1 * offerProduct.PACKSIZE) || 0
+				MaxNetPricePerPack  : productConditionstmp[0] && (productConditionstmp[0].Price1 * offerProduct.PACKSIZE) || 0,
+				PRICECONDITION_CODE: productConditionstmp[0] && productConditionstmp[0].QuotationPriceConditionCode
 			}
 		});
 		let resolvedResults = await Promise.all(results);
