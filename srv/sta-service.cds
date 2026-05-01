@@ -1600,22 +1600,14 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             dc.NetPriceWithTax, 
             pc.Tax
     }where pc.ConditionType = 'Rappel';
+
+    entity MainPriceCondition as select from TransactionalDataViews.StandardTenderPriceConditionView {
+        *
+    }
+    where isMain = true
+    and PriceConditionID is not null;
     entity PriceConditionRappelView as Select from TransactionalDataViews.StandardTenderPriceConditionView as std
-        left outer join (
-            select from TransactionalDataViews.StandardTenderPriceConditionView {
-                CountryCode,
-                OfferID,
-                ProductCode,
-                ConfidentialPrice,
-                PVL,
-                RoyalDecree,
-                Tax,
-                PriceConditionID,
-                isMain
-            }
-            where isMain = true
-            and PriceConditionID is not null
-        ) as main
+        left outer join MainPriceCondition as main
             on std.CountryCode = main.CountryCode
             and std.OfferID = main.OfferID
             and std.ProductCode = main.ProductCode{
