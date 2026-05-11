@@ -5873,6 +5873,21 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 							usString = usString.replace(/\$/g,'.');   
 							return  usString;                  
 						},
+						numberEU3: (input) => {  
+							if(Number(input) === 0 || input === null  ){
+								return "0,000";
+							}          
+							var usString;
+							if(typeof input === 'string'){
+								usString = Number(input.replace(/\,/g,'')).toLocaleString('en-US',{ minimumFractionDigits: 3, maximumFractionDigits: 3 });
+							} else {
+								usString = input.toLocaleString('en-US',{ minimumFractionDigits: 3, maximumFractionDigits: 3 });
+							}
+							usString = usString.replace(/\,/g,'$');
+							usString = usString.replace(/\./g,',');  
+							usString = usString.replace(/\$/g,'.');   
+							return  usString;                  
+						},
 						numberNL: (input) => {  
 							if(Number(input) === 0 || input === null  ){
 								return "0,00";
