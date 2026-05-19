@@ -4441,6 +4441,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				}
 				productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
 				productCondition.NLPriceConditions = await tx.run(SELECT.from(NLPriceConditions).where({ PriceCondition_ID: productCondition.ID, ContractDuration: {in: [tender.Custom_Integer_1, tender.Custom_Integer_2, tender.Custom_Integer_3]}}));
+				productCondition.DiscountCondition && productCondition.DiscountCondition.length > 0 && productCondition.DiscountCondition.forEach(dc => {
+					dc.Discount = !isNaN(parseFloat(dc.Discount)) ? parseFloat(dc.Discount * 100)?.toFixed(3) : 0;
+				})
 				return productCondition;		
 			}));
 			/*end of ProductCondition information */
