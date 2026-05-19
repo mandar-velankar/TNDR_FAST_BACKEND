@@ -9129,4 +9129,19 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		return den !== 0 ? num / den : fallback;
 	};
 
+	srv.after('READ', 'TenderMasterInstituteView', data => {
+		try {
+			if (data && Array.isArray(data) && data.length > 0) {
+				data.unshift({
+					InstituteID: "All",
+					InstituteName: "All",
+					CustomerID: "All"
+				});
+			}
+		} catch (error) {
+			console.error('Error in TenderMasterInstituteView READ');
+			return req.reject(403, error?.message || "Error in TenderMasterInstituteView READ");
+		}
+	});
+
 }
