@@ -2189,5 +2189,14 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
         sum(result.AwardedPrice * result.AwardedQty) as TotalAwardedPrice: Double
     }where offer.Tender.Country.Region = 'PACAWI'
     group by offer.CountryCode,
-        offer.OfferID;   
+        offer.OfferID; 
+
+    entity TenderMasterInstituteView as select from MasterData.PT_TMINST {
+        key InstituteID,
+        key CountryCode,
+            InstituteName,
+            CustomerID,
+            InstituteType
+    } where ActiveRecord = 'Yes' and InstituteType <> 'Ship-To'
+        order by InstituteName asc;
 }
