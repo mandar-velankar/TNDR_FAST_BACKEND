@@ -389,8 +389,6 @@ module.exports = async (srv) => {
 			countryProductsList = countryProducts.filter(x => x.BRAND_ID === entityBrand.BRAND_ID);
 			if (directBrand && countryProductsList.length !== 0) {
 				countryProductsList.forEach((countryProduct) => {
-					const activeSKUs = productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID && product.ActiveRecord === "Yes");
-					if(activeSKUs.length === 0) return; // skip products without active SKU
 
 					results.push({
 						COUNTRY_CODE: entityBrand.COUNTRY_CODE,
@@ -410,7 +408,7 @@ module.exports = async (srv) => {
 						COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
 						DIVISION: countryProduct.DIVISION,
 						PACKFACTOR: countryProduct.PACK_SIZE,                        
-						SKUS: Array.from(activeSKUs.map((product) => { return product.SKUCode})).join(", ")
+						SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID && product.ActiveRecord === "Yes").map((product) => { return product.SKUCode})).join(", ")
 					});
 				});
 			}
@@ -424,8 +422,6 @@ module.exports = async (srv) => {
 			countryProductsList = countryProducts.filter(x => x.BRAND_ID === entityBrand.BRAND_ID);
 			if (distributorBrand && countryProductsList.length !== 0) {
 				countryProductsList.forEach((countryProduct) => {
-					const activeSKUs = productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID && product.ActiveRecord === "Yes");
-					if(activeSKUs.length === 0) return; // skip products without active SKU
 
 					instituteIds.forEach(instituteId => {
 						results.push({
@@ -446,7 +442,7 @@ module.exports = async (srv) => {
 							COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
 							COGS: countryProduct.COGS,
 							PACKFACTOR: countryProduct.PACK_SIZE,
-							SKUS: Array.from(activeSKUs.map((product) => { return product.SKUCode})).join(", ")
+							SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID && product.ActiveRecord === "Yes").map((product) => { return product.SKUCode})).join(", ")
 						});
 					});
 				});
