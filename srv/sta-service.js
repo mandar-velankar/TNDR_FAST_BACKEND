@@ -389,8 +389,6 @@ module.exports = async (srv) => {
 			countryProductsList = countryProducts.filter(x => x.BRAND_ID === entityBrand.BRAND_ID);
 			if (directBrand && countryProductsList.length !== 0) {
 				countryProductsList.forEach((countryProduct) => {
-					const activeSKUs = productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID && product.ActiveRecord === "Yes");
-					if(activeSKUs.length === 0) return; // skip products without active SKU
 
 					results.push({
 						COUNTRY_CODE: entityBrand.COUNTRY_CODE,
@@ -410,7 +408,7 @@ module.exports = async (srv) => {
 						COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
 						DIVISION: countryProduct.DIVISION,
 						PACKFACTOR: countryProduct.PACK_SIZE,                        
-						SKUS: Array.from(activeSKUs.map((product) => { return product.SKUCode})).join(", ")
+						SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID && product.ActiveRecord === "Yes").map((product) => { return product.SKUCode})).join(", ")
 					});
 				});
 			}
@@ -424,8 +422,6 @@ module.exports = async (srv) => {
 			countryProductsList = countryProducts.filter(x => x.BRAND_ID === entityBrand.BRAND_ID);
 			if (distributorBrand && countryProductsList.length !== 0) {
 				countryProductsList.forEach((countryProduct) => {
-					const activeSKUs = productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID && product.ActiveRecord === "Yes");
-					if(activeSKUs.length === 0) return; // skip products without active SKU
 
 					instituteIds.forEach(instituteId => {
 						results.push({
@@ -446,7 +442,7 @@ module.exports = async (srv) => {
 							COUNTRY_OF_ORIGIN: countryProduct.COUNTRY_OF_ORIGIN,
 							COGS: countryProduct.COGS,
 							PACKFACTOR: countryProduct.PACK_SIZE,
-							SKUS: Array.from(activeSKUs.map((product) => { return product.SKUCode})).join(", ")
+							SKUS: Array.from(productSKUs.filter((product) => product.ProductPackID === countryProduct.PRODUCT_ID && product.ActiveRecord === "Yes").map((product) => { return product.SKUCode})).join(", ")
 						});
 					});
 				});
@@ -1543,6 +1539,24 @@ module.exports = async (srv) => {
 					}
 				}	
 			}
+			
+			if (req.event === 'CREATE' && req.data.OfferID) {
+				const startTime = Date.now();
+				console.log(`[AwardedProducts_BEFORE_CREATE] START - OfferID: ${req.data.OfferID} - ${new Date().toISOString()}`);
+
+				const submittedQoutation = await SELECT.one.from(PT_TMQUTO).where({
+					OfferID: req.data.OfferID,
+					Active: 1,
+				});
+				
+				if (!submittedQoutation) {
+					console.error(`[AwardedProducts_BEFORE_CREATE] VALIDATION FAILED - Offer not submitted - OfferID: ${req.data.OfferID} - Submitted: ${offerValidation.Submitted} - ${Date.now() - startTime}ms`);
+					return req.reject(400, "Quotation must be submitted before creating awarded products. Please click 'Submit Quotation' button.");
+				}
+				
+				console.log(`[AwardedProducts_BEFORE_CREATE] VALIDATION PASSED - OfferID: ${req.data.OfferID} - ${Date.now() - startTime}ms`);
+			}
+			
 			delete req.data.FreeGoodsOther;
 			delete req.data.FreeGoodsOther_ABS_PCT;
 			delete req.data.FreeGoodsOther_Step;
@@ -1574,17 +1588,31 @@ module.exports = async (srv) => {
 	});
 
 	const upsertAwardedProduct = async function(req){
-
-		const offerProduct = await SELECT.one.from(PT_TMOFPR).where({
-			OfferID: req.data.OfferID,
-			ProductCode: req.data.ProductCode,
-			LotID: req.data.LotID
-		});
-		const awardedProduct = await SELECT.one.from(PT_TMTRRES).where({
-			OfferID: req.data.OfferID,
-			ProductCode: req.data.ProductCode,
-			LotID: req.data.LotID
-		});
+		const startTime = Date.now();
+		const offerID = req.data.OfferID;
+		const productCode = req.data.ProductCode;
+		
+		console.log(`[upsertAwardedProduct] START - OfferID: ${offerID}, ProductCode: ${productCode} - ${new Date().toISOString()}`);
+		
+		try {
+			const offerProduct = await SELECT.one.from(PT_TMOFPR).where({
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				LotID: req.data.LotID
+			});
+			
+			if (!offerProduct) {
+				console.warn(`[upsertAwardedProduct] Offer product not found - OfferID: ${offerID}, ProductCode: ${productCode} - ${Date.now() - startTime}ms`);
+			}
+			
+			const awardedProduct = await SELECT.one.from(PT_TMTRRES).where({
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				LotID: req.data.LotID
+			});
+			
+			const isUpdate = !!awardedProduct;
+			console.log(`[upsertAwardedProduct] ${isUpdate ? 'UPDATE' : 'INSERT'} - OfferID: ${offerID}, ProductCode: ${productCode} - ${Date.now() - startTime}ms`);
 
 
 
@@ -1669,8 +1697,10 @@ module.exports = async (srv) => {
 					ProductCode: offerProduct.ProductCode,
 					LotID: offerProduct.LotID
 			})
+			console.log(`[upsertAwardedProduct] UPDATE SUCCESS - OfferID: ${offerID}, ProductCode: ${productCode} - ${Date.now() - startTime}ms`);
 		}else{
 			await INSERT.into(PT_TMTRRES).entries(mappedAwardedProduct);
+			console.log(`[upsertAwardedProduct] INSERT SUCCESS - OfferID: ${offerID}, ProductCode: ${productCode} - ${Date.now() - startTime}ms`);
 		}
 
 
@@ -1678,8 +1708,11 @@ module.exports = async (srv) => {
 			OfferID: req.data.OfferID
 		});
 
+		console.log(`[upsertAwardedProduct] Found ${existingAwardedProducts.length} existing awarded products for OfferID: ${offerID} - ${Date.now() - startTime}ms`);
+
 		if (req.data.CountryCode === "NL" || req.data.CountryCode === "PL") {
 			await updateResultRecordedOutcomeOfferStatuses(req, existingAwardedProducts);
+			console.log(`[upsertAwardedProduct] NL/PL status update completed - ${Date.now() - startTime}ms`);
 		}else {
 			const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
 			const hasAwardPriceUpdateOutcome = existingAwardedProducts.some(prod => prod.Outcome === "Award Price Update");
@@ -1688,10 +1721,16 @@ module.exports = async (srv) => {
 	
 			if (req.data.CountryCode === "TW" && awardedProductsHaveOutcome && !hasAwardPriceUpdateOutcome) {
 				await sendTWResultsRecordedNotification(req);
+				console.log(`[upsertAwardedProduct] TW notification sent - ${Date.now() - startTime}ms`);
 			}
 		}
 		
+		console.log(`[upsertAwardedProduct] COMPLETE - OfferID: ${offerID} - Total time: ${Date.now() - startTime}ms`);
+	} catch (error) {
+		console.error(`[upsertAwardedProduct] ERROR - ${error.message} - OfferID: ${offerID}, ProductCode: ${productCode} - ${Date.now() - startTime}ms`);
+		throw error;
 	}
+}
 
 	const updateResultRecordedOutcomeOfferStatuses = async function (req, existingAwardedProducts) {
 		const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
