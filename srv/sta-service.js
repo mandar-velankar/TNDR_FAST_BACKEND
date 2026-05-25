@@ -1451,7 +1451,7 @@ module.exports = async (srv) => {
 
 			product.Custom_String_1 =
 				`${allContracts
-					.map(c => `${c.FastConditionContractID};${c.OfferID};${c.CCMContractID};${c.ProductCode}`)
+					.map(c => `${c.FastConditionContractID};${c.ContractNumber}-${c.OfferID};${c.CCMContractID};${c.ProductCode}`)
 					.join(",")}`;
 
 			product.Custom_String_2 = allContracts.map(c => c.ContractType).join(",");
@@ -1543,6 +1543,24 @@ module.exports = async (srv) => {
 					}
 				}	
 			}
+			
+			if (req.event === 'CREATE' && req.data.OfferID) {
+				const startTime = Date.now();
+				console.log(`[AwardedProducts_BEFORE_CREATE] START - OfferID: ${req.data.OfferID} - ${new Date().toISOString()}`);
+
+				const submittedQoutation = await SELECT.one.from(PT_TMQUTO).where({
+					OfferID: req.data.OfferID,
+					Active: 1,
+				});
+				
+				if (!submittedQoutation) {
+					console.error(`[AwardedProducts_BEFORE_CREATE] VALIDATION FAILED - Offer not submitted - OfferID: ${req.data.OfferID} - Submitted: ${offerValidation.Submitted} - ${Date.now() - startTime}ms`);
+					return req.reject(400, "Quotation must be submitted before creating awarded products. Please click 'Submit Quotation' button.");
+				}
+				
+				console.log(`[AwardedProducts_BEFORE_CREATE] VALIDATION PASSED - OfferID: ${req.data.OfferID} - ${Date.now() - startTime}ms`);
+			}
+			
 			delete req.data.FreeGoodsOther;
 			delete req.data.FreeGoodsOther_ABS_PCT;
 			delete req.data.FreeGoodsOther_Step;
@@ -1574,17 +1592,31 @@ module.exports = async (srv) => {
 	});
 
 	const upsertAwardedProduct = async function(req){
-
-		const offerProduct = await SELECT.one.from(PT_TMOFPR).where({
-			OfferID: req.data.OfferID,
-			ProductCode: req.data.ProductCode,
-			LotID: req.data.LotID
-		});
-		const awardedProduct = await SELECT.one.from(PT_TMTRRES).where({
-			OfferID: req.data.OfferID,
-			ProductCode: req.data.ProductCode,
-			LotID: req.data.LotID
-		});
+		const startTime = Date.now();
+		const offerID = req.data.OfferID;
+		const productCode = req.data.ProductCode;
+		
+		console.log(`[upsertAwardedProduct] START - OfferID: ${offerID}, ProductCode: ${productCode} - ${new Date().toISOString()}`);
+		
+		try {
+			const offerProduct = await SELECT.one.from(PT_TMOFPR).where({
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				LotID: req.data.LotID
+			});
+			
+			if (!offerProduct) {
+				console.warn(`[upsertAwardedProduct] Offer product not found - OfferID: ${offerID}, ProductCode: ${productCode} - ${Date.now() - startTime}ms`);
+			}
+			
+			const awardedProduct = await SELECT.one.from(PT_TMTRRES).where({
+				OfferID: req.data.OfferID,
+				ProductCode: req.data.ProductCode,
+				LotID: req.data.LotID
+			});
+			
+			const isUpdate = !!awardedProduct;
+			console.log(`[upsertAwardedProduct] ${isUpdate ? 'UPDATE' : 'INSERT'} - OfferID: ${offerID}, ProductCode: ${productCode} - ${Date.now() - startTime}ms`);
 
 
 
@@ -1669,8 +1701,10 @@ module.exports = async (srv) => {
 					ProductCode: offerProduct.ProductCode,
 					LotID: offerProduct.LotID
 			})
+			console.log(`[upsertAwardedProduct] UPDATE SUCCESS - OfferID: ${offerID}, ProductCode: ${productCode} - ${Date.now() - startTime}ms`);
 		}else{
 			await INSERT.into(PT_TMTRRES).entries(mappedAwardedProduct);
+			console.log(`[upsertAwardedProduct] INSERT SUCCESS - OfferID: ${offerID}, ProductCode: ${productCode} - ${Date.now() - startTime}ms`);
 		}
 
 
@@ -1678,8 +1712,11 @@ module.exports = async (srv) => {
 			OfferID: req.data.OfferID
 		});
 
+		console.log(`[upsertAwardedProduct] Found ${existingAwardedProducts.length} existing awarded products for OfferID: ${offerID} - ${Date.now() - startTime}ms`);
+
 		if (req.data.CountryCode === "NL" || req.data.CountryCode === "PL") {
 			await updateResultRecordedOutcomeOfferStatuses(req, existingAwardedProducts);
+			console.log(`[upsertAwardedProduct] NL/PL status update completed - ${Date.now() - startTime}ms`);
 		}else {
 			const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
 			const hasAwardPriceUpdateOutcome = existingAwardedProducts.some(prod => prod.Outcome === "Award Price Update");
@@ -1688,10 +1725,16 @@ module.exports = async (srv) => {
 	
 			if (req.data.CountryCode === "TW" && awardedProductsHaveOutcome && !hasAwardPriceUpdateOutcome) {
 				await sendTWResultsRecordedNotification(req);
+				console.log(`[upsertAwardedProduct] TW notification sent - ${Date.now() - startTime}ms`);
 			}
 		}
 		
+		console.log(`[upsertAwardedProduct] COMPLETE - OfferID: ${offerID} - Total time: ${Date.now() - startTime}ms`);
+	} catch (error) {
+		console.error(`[upsertAwardedProduct] ERROR - ${error.message} - OfferID: ${offerID}, ProductCode: ${productCode} - ${Date.now() - startTime}ms`);
+		throw error;
 	}
+}
 
 	const updateResultRecordedOutcomeOfferStatuses = async function (req, existingAwardedProducts) {
 		const awardedProductsHaveOutcome = existingAwardedProducts.every(prod => prod.Outcome && prod.Outcome !== '');
@@ -4441,6 +4484,9 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 				}
 				productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
 				productCondition.NLPriceConditions = await tx.run(SELECT.from(NLPriceConditions).where({ PriceCondition_ID: productCondition.ID, ContractDuration: {in: [tender.Custom_Integer_1, tender.Custom_Integer_2, tender.Custom_Integer_3]}}));
+				productCondition.DiscountCondition && productCondition.DiscountCondition.length > 0 && productCondition.DiscountCondition.forEach(dc => {
+					dc.Discount = !isNaN(parseFloat(dc.Discount)) ? parseFloat(dc.Discount * 100)?.toFixed(3) : 0;
+				})
 				return productCondition;		
 			}));
 			/*end of ProductCondition information */
@@ -9124,5 +9170,20 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		den = toNumber(den);
 		return den !== 0 ? num / den : fallback;
 	};
+
+	srv.after('READ', 'TenderMasterInstituteView', data => {
+		try {
+			if (data && Array.isArray(data) && data.length > 0) {
+				data.unshift({
+					InstituteID: "All",
+					InstituteName: "All",
+					CustomerID: "All"
+				});
+			}
+		} catch (error) {
+			console.error('Error in TenderMasterInstituteView READ');
+			return req.reject(403, error?.message || "Error in TenderMasterInstituteView READ");
+		}
+	});
 
 }

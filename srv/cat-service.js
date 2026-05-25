@@ -2091,6 +2091,9 @@ module.exports = (srv) => {
 					foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }))
 				});
                 productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
+				productCondition.DiscountCondition && productCondition.DiscountCondition.length > 0 && productCondition.DiscountCondition.forEach(dc => {
+					dc.Discount = !isNaN(parseFloat(dc.Discount)) ? parseFloat(dc.Discount * 100)?.toFixed(3) : 0;
+				})
                 return productCondition;
             }));
             /*end of ProductCondition information */
