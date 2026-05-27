@@ -1802,7 +1802,7 @@ module.exports = (srv) => {
 		if (declined_state || deleted_state) {
 			supply = 2;
 			regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 2 : meaPreviousApprovalsFlags?.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1;
-			nucleus = offer.TENDER_CHANNEL === "Direct" ? 1 : 2; 
+			nucleus = 2; 
 			creditManager = 1;
 			legal = ["Private", "NGO-NPO", "Semi-Governmental"].includes(offer.INSTITUTE_TYPE) ? 2 : meaPreviousApprovalsFlags?.LEGAL_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;
 			controlling = meaPreviousApprovalsFlags?.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1;

@@ -881,10 +881,23 @@ inner join ApprovalRequests as approvalRequest
     and approvalRequest.ApprovalStatus <> 'Cancelling'
     and approvalRequest.ApprovalStatus <> 'Rejected'
     and (
-        approvalRequest.REQUIRED_ACTION = 'Approval' or
-        approvalRequest.REQUIRED_ACTION = 'Notification'
+        approvalRequest.REQUIRED_ACTION = 'Approval'
+        or (
+
+            approvalRequest.REQUIRED_ACTION = 'Notification'
+
+            and not exists (
+                select 1 as dummy from ApprovalRequests as ar2
+                where ar2.TenderID = offer.TenderID
+                    and ar2.OfferId = offer.OfferID
+                    and ar2.CountryCode = offer.CountryCode
+                    and ar2.ApprovalStatus <> 'Cancelling'
+                    and ar2.ApprovalStatus <> 'Rejected'
+                    and ar2.ApproverType <> 'Legal'
+                    and ar2.REQUIRED_ACTION = 'Approval'
+            )
+        )
     )
-    and approvalRequest.ApproverType <> 'Legal'
 inner join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory
     on offer.SellingCompany = signatory.LEGAL_ENTITY_CODE
     and offer.CountryCode = signatory.COUNTRY_CODE
@@ -909,8 +922,22 @@ inner join ApprovalRequests as approvalRequest
     and approvalRequest.ApprovalStatus <> 'Cancelling'
     and approvalRequest.ApprovalStatus <> 'Rejected'
     and (
-        approvalRequest.REQUIRED_ACTION = 'Approval' or
-        approvalRequest.REQUIRED_ACTION = 'Notification'
+        approvalRequest.REQUIRED_ACTION = 'Approval'
+        or (
+
+            approvalRequest.REQUIRED_ACTION = 'Notification'
+
+            and not exists (
+                select 1 as dummy from ApprovalRequests as ar2
+                where ar2.TenderID = offer.TenderID
+                    and ar2.OfferId = offer.OfferID
+                    and ar2.CountryCode = offer.CountryCode
+                    and ar2.ApprovalStatus <> 'Cancelling'
+                    and ar2.ApprovalStatus <> 'Rejected'
+                    and ar2.ApproverType <> 'Legal'
+                    and ar2.REQUIRED_ACTION = 'Approval'
+            )
+        )
     )
     and approvalRequest.ApproverType <> 'Legal'
 inner join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory
