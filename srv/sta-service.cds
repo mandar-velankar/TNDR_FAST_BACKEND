@@ -156,6 +156,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         offer.InternalBidDueDate,
         tender.BidDueDate,
         max(brands.BRANDID) as BrandID:String,
+        STRING_AGG(brands.BRANDID, ',') as OfferBrandIDs:String,
         tender.createdAt,
         tender.modifiedBy,
         tender.modifiedAt, 
