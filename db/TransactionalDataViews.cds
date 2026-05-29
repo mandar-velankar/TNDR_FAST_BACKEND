@@ -897,6 +897,7 @@ inner join ApprovalRequests as approvalRequest
                     and ar2.ApprovalStatus <> 'Rejected'
                     and ar2.ApproverType <> 'Legal'
                     and ar2.REQUIRED_ACTION = 'Approval'
+                    and ar2.Statustime = maxStatusTime.MaxStatusTime
             )
         )
     )
@@ -942,6 +943,7 @@ inner join ApprovalRequests as approvalRequest
                     and ar2.ApprovalStatus <> 'Rejected'
                     and ar2.ApproverType <> 'Legal'
                     and ar2.REQUIRED_ACTION = 'Approval'
+                    and ar2.Statustime = maxStatusTime.MaxStatusTime
             )
         )
     )
