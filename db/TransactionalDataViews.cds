@@ -874,6 +874,8 @@ left outer join MasterData.PricingPolicy as pricingPolicy
 }where offerProduct.Active = 1 and offerProduct.Offer.Active = 1 and offerProduct.Offer.Tender.Active = 1 and offerProduct.ActiveProduct = 1;
 
 entity OfferSignatory1 as select from TransactionalData.PT_TMOFRS as offer
+inner join MaxOfferApprovalStatusTime as maxStatusTime
+	on maxStatusTime.OfferId = offer.OfferID
 inner join ApprovalRequests as approvalRequest
     on  approvalRequest.TenderID = offer.TenderID
 	and approvalRequest.OfferId = offer.OfferID
@@ -881,10 +883,26 @@ inner join ApprovalRequests as approvalRequest
     and approvalRequest.ApprovalStatus <> 'Cancelling'
     and approvalRequest.ApprovalStatus <> 'Rejected'
     and (
-        approvalRequest.REQUIRED_ACTION = 'Approval' or
-        approvalRequest.REQUIRED_ACTION = 'Notification'
+        approvalRequest.REQUIRED_ACTION = 'Approval'
+        or (
+
+            approvalRequest.REQUIRED_ACTION = 'Notification'
+
+            and not exists (
+                select 1 as dummy from ApprovalRequests as ar2
+                where ar2.TenderID = offer.TenderID
+                    and ar2.OfferId = offer.OfferID
+                    and ar2.CountryCode = offer.CountryCode
+                    and ar2.ApprovalStatus <> 'Cancelling'
+                    and ar2.ApprovalStatus <> 'Rejected'
+                    and ar2.ApproverType <> 'Legal'
+                    and ar2.REQUIRED_ACTION = 'Approval'
+                    and ar2.Statustime = maxStatusTime.MaxStatusTime
+            )
+        )
     )
     and approvalRequest.ApproverType <> 'Legal'
+    and maxStatusTime.MaxStatusTime = approvalRequest.Statustime
 inner join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory
     on offer.SellingCompany = signatory.LEGAL_ENTITY_CODE
     and offer.CountryCode = signatory.COUNTRY_CODE
@@ -902,6 +920,8 @@ left outer join TransactionalData.PT_TMQUTO as quotation
 } group by offer.OfferID;
 
 entity OfferSignatory2 as select from TransactionalData.PT_TMOFRS as offer
+inner join MaxOfferApprovalStatusTime as maxStatusTime
+	on maxStatusTime.OfferId = offer.OfferID
 inner join ApprovalRequests as approvalRequest
     on  approvalRequest.TenderID = offer.TenderID
 	and approvalRequest.OfferId = offer.OfferID
@@ -909,10 +929,26 @@ inner join ApprovalRequests as approvalRequest
     and approvalRequest.ApprovalStatus <> 'Cancelling'
     and approvalRequest.ApprovalStatus <> 'Rejected'
     and (
-        approvalRequest.REQUIRED_ACTION = 'Approval' or
-        approvalRequest.REQUIRED_ACTION = 'Notification'
+        approvalRequest.REQUIRED_ACTION = 'Approval'
+        or (
+
+            approvalRequest.REQUIRED_ACTION = 'Notification'
+
+            and not exists (
+                select 1 as dummy from ApprovalRequests as ar2
+                where ar2.TenderID = offer.TenderID
+                    and ar2.OfferId = offer.OfferID
+                    and ar2.CountryCode = offer.CountryCode
+                    and ar2.ApprovalStatus <> 'Cancelling'
+                    and ar2.ApprovalStatus <> 'Rejected'
+                    and ar2.ApproverType <> 'Legal'
+                    and ar2.REQUIRED_ACTION = 'Approval'
+                    and ar2.Statustime = maxStatusTime.MaxStatusTime
+            )
+        )
     )
     and approvalRequest.ApproverType <> 'Legal'
+    and maxStatusTime.MaxStatusTime = approvalRequest.Statustime
 inner join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory
     on offer.SellingCompany = signatory.LEGAL_ENTITY_CODE
     and offer.CountryCode = signatory.COUNTRY_CODE
