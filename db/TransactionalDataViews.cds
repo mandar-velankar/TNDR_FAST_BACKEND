@@ -912,11 +912,28 @@ inner join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory
 left outer join TransactionalData.PT_TMQUTO as quotation
     on offer.OfferID = quotation.OfferID
     and quotation.AS1 = signatory.AUTHORIZED_SIGNATORY
+left outer join MEAAuthorizedIssuedBySignatory as meaSignatory
+    on meaSignatory.OfferID = offer.OfferID
 {
     offer.OfferID,
-    max(ifnull(quotation.AS1, signatory.AUTHORIZED_SIGNATORY)) as AUTHORIZED_SIGNATORY:String,
-    max(ifnull(quotation.Signatory1.NAME, signatory.NAME)) as NAME:String,
-    max(ifnull(quotation.Signatory1.TITLE, signatory.TITLE)) as TITLE:String
+    max(
+        ifnull(
+            meaSignatory.AUTHORIZED_SIGNATORY,
+            ifnull(quotation.AS1, signatory.AUTHORIZED_SIGNATORY)
+        )
+    ) as AUTHORIZED_SIGNATORY : String,
+    max(
+        ifnull(
+            meaSignatory.NAME,
+            ifnull(quotation.Signatory1.NAME, signatory.NAME)
+        )
+    ) as NAME : String,
+    max(
+        ifnull(
+            meaSignatory.TITLE,
+            ifnull(quotation.Signatory1.TITLE, signatory.TITLE)
+        )
+    ) as TITLE : String
 } group by offer.OfferID;
 
 entity OfferSignatory2 as select from TransactionalData.PT_TMOFRS as offer
@@ -4050,3 +4067,29 @@ group by approvals.OfferId,
         approvals.ApproverName,
         approvals.Hierarchy,
         approvals.REQUIRED_ACTION;
+
+entity MEAAuthorizedIssuedBySignatory as
+    select from TransactionalData.PT_TMOFRS as offer
+        inner join MaxOfferApprovalStatusTime as maxStatusTime
+            on maxStatusTime.OfferId = offer.OfferID
+        inner join ApprovalRequests as ar
+            on ar.OfferId = offer.OfferID
+            and ar.CountryCode = offer.CountryCode
+            and ar.ApproverType = 'Regional Business'
+            and ar.ApprovalStatus not in ('Cancelling', 'Rejected')
+        inner join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory
+            on signatory.NAME = ar.ApproverName
+            and signatory.LEGAL_ENTITY_CODE = offer.SellingCompany
+            and signatory.COUNTRY_CODE = offer.CountryCode
+            and signatory.SIGNATORY = 1
+            and (signatory.DIVISION = offer.Division or signatory.DIVISION = 'Both')
+            and maxStatusTime.MaxStatusTime = ar.Statustime
+{
+    key offer.OfferID,
+    signatory.AUTHORIZED_SIGNATORY,
+    signatory.NAME,
+    signatory.TITLE
+}
+where
+    offer.Tender.Country.Region = 'MEA'
+    and offer.Tender.TenderChannel = 'Direct';
