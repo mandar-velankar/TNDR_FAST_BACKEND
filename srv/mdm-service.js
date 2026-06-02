@@ -4,6 +4,7 @@ const moment = require('moment');
 const XLSXHelper = require("./utils/XLSXHelper");
 const Handlebars = require("handlebars");
 const ServiceHelper = require('./utils/ServiceHelper');
+const NumberHelper = require("./utils/NumberHelper");
 const { v4: uuidv4 } = require('uuid');
 
 module.exports = (srv) => {
@@ -994,11 +995,12 @@ module.exports = (srv) => {
 						(!sku.ValidFrom || sku.ValidFrom <= validDate) && 
 						(!sku.ValidTo ||validDate <= sku.ValidTo)).map(el => el.SKUCode);
 
-				ed.PPP = ServiceHelper.forceExcelText(formatNLPPPPrices(ed.PPP));
+				ed.PPP = ed.PPP ? parseFloat(ed.PPP) : 0;
 				ed.StartDate = ed.StartDate && ServiceHelper.forceExcelText(ServiceHelper.formatDate(ed.StartDate, '', 'DD-MM-YYYY'));
 				ed.EndDate = ed.EndDate && ServiceHelper.forceExcelText(ServiceHelper.formatDate(ed.EndDate, '', 'DD-MM-YYYY'));
 				ed.MaterialNumbers = ServiceHelper.forceExcelText(productValidSKUs.join(","));
 				ed.GOV_CODE = Number(ed.GOV_CODE) || "";
+				ed.PPP = ed.PPP && NumberHelper.roundDown(ed.PPP, 2);
 
 				if (ed.ACTIVERECORD === "No" && ed.RegistrationValidUntil && validDate <= ed.RegistrationValidUntil) { // display product if sku is valid or no skus found from db
 					return ed;
@@ -1108,8 +1110,8 @@ module.exports = (srv) => {
 					(!sku.ValidTo || validDate <= sku.ValidTo)).map(el => el.SKUCode);
 
 			// Assuming 'Type' and 'Currency' fields are part of the item
-			item.PPP = ServiceHelper.forceExcelText(ServiceHelper.formatCurrency(item.PPP, 'nl-NL', 2, 2, true));
-			item.WPPWithoutTax = ServiceHelper.forceExcelText(ServiceHelper.formatCurrency(Number(item.WPPWithoutTax), 'nl-NL', 2, 2, false));
+			item.WPPWithoutTax = item.WPPWithoutTax ? parseFloat(item.WPPWithoutTax) : 0;
+			item.PPP = item.PPP ? parseFloat(item.PPP) : 0;
 			item.Margin = formatPercentage(item.Margin);
 			item.CombinedWPPMarginNetPriceValues = item.Type === 'Margin' ? `Marge ${item.Margin}` : `Netto Prijs`;
 			item.EndDate = item.StartDate && ServiceHelper.formatDate(item.EndDate, 'DD/MM/YYYY');
@@ -1117,6 +1119,8 @@ module.exports = (srv) => {
 			item.minEndDate = item.minEndDate && ServiceHelper.formatDate(item.minEndDate, '', 'DD/MM/YYYY');
 			item.MaterialNumbers = ServiceHelper.forceExcelText(productValidSKUs.join(","));
 			item.GOV_CODE = Number(item.GOV_CODE) || "";
+			item.PPP = item.PPP && NumberHelper.roundDown(item.PPP, 2);
+			item.WPPWithoutTax = item.WPPWithoutTax && NumberHelper.roundUp(item.WPPWithoutTax, 2);
 
 			if (item.ACTIVERECORD === "No" && item.RegistrationValidUntil && validDate <= item.RegistrationValidUntil) { // display product if sku is valid or no skus found from db
 				return item;

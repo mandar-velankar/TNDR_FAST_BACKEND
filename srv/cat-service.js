@@ -30,7 +30,7 @@ module.exports = (srv) => {
 		PT_TMINST, CountryApprovers, ApproverTypes, MASTER_COUNTRY_CHANNELS, PT_TMPRDPCK, CountryPreApprovedPrices, AccountPreApprovedPrices, PT_TMSKUPRDPCK, RoyalDecree, MasterPrices, MASTER_TENDER_TYPE,PT_TMPRDHIER,PT_TMCTRY
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 	const {
-		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView, BrandsInTender, OfferLatestApprovalStatus, MEAPreviousApprovalsFlags
+		OfferConsolidation, OfferProductConsolidation, ApprovalRequests, ProductPricingView, PriceConditionView, TenderHistorySpain, PriceConditionBrazilView, BrandsInTender, OfferLatestApprovalStatus, MEAPreviousApprovalsFlags, OfferStatus, IdentifyNotRecordedPendingApprovals
 	} = cds.entities("com.bayer.SXTENDER.TransactionalDataViews");
 	const {
 		PT_TMTEND, 
@@ -1614,7 +1614,7 @@ module.exports = (srv) => {
 		return results;
 	}
 
-	function buildProductValidationForType19(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags) {//MEA
+	function buildProductValidationForType19(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals) {//MEA
 		const everyProductLatestFieldEmpty = aOfferProduct.every(pr => !pr.MEA_APPROVAL_LATEST_UPDATED_FIELD);
 		const latestUpdatedField = offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? product.MEA_APPROVAL_LATEST_UPDATED_FIELD : product.MEA_APPROVAL_LATEST_UPDATED_FIELD_PREVIOUS_STATE || "";
 		const deleted_state= offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? initialOffer.PreviousApprovalHasDeletedProduct : initialOffer.ApprovalHasDeletedProduct_Previous_State;
@@ -1856,6 +1856,16 @@ module.exports = (srv) => {
 			
 		});
 
+		if (isOfferReApproved) {
+			aApproverTypes.map(async function (oApproverType) {
+				const notRecordedPendingApproval = notRecordedPendingApprovals.find(nrpa => nrpa.ApproverType === oApproverType.ApproverType);
+				if (notRecordedPendingApproval && oApproverType.ValidationType === 1) {
+					oApproverType.ValidationType = notRecordedPendingApproval.REQUIRED_ACTION === "Approval" ? 3 : 2;
+					oApproverType.Hierarchy = notRecordedPendingApproval.Hierarchy;
+				}
+			})
+		}
+
 		let results = {
 			//In Policy flag
 			IN_POLICY: true
@@ -1918,7 +1928,7 @@ module.exports = (srv) => {
 			
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 		if (offer.APPROVAL_TYPE === 1 || offer.APPROVAL_TYPE === 2) {//Default
@@ -1949,7 +1959,7 @@ module.exports = (srv) => {
 			productValidation = await buildProductValidationForType12(tx, product, aApproverTypes)
         }
 		else if (offer.APPROVAL_TYPE === 19) {//Applicable for MEA
-			productValidation = buildProductValidationForType19(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags)
+			productValidation = buildProductValidationForType19(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals)
 		}
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
@@ -1991,14 +2001,24 @@ module.exports = (srv) => {
 		const initialOffer = await tx.run(SELECT.one.from(PT_TMOFRS).where({OfferID: offer.OFFERID }));
 		const offerLatestApprStatus = await tx.run(SELECT.from(OfferLatestApprovalStatus).where({OfferID: offer.OFFERID}));
 
+		const offerStatus = await SELECT.one.from("CatalogService.OfferStatus").where({
+			OFFER_ID: offer?.OFFERID
+		});
 
 		//where statement
 		let whereApproverType = {
-			CountryCode: offer.COUNTRYCODE
+			CountryCode: offer?.COUNTRYCODE
 		}
 
 		//Get corresponding approvertypes
 		let aApproverTypes = await tx.run(SELECT.from(ApproverTypes).where(whereApproverType));
+
+		const isNewOffer = offerStatus?.STATUS === 'Offer Created';
+		
+		aApproverTypes = aApproverTypes.filter(at => {
+			// If it's a new offer, return only enabled users; otherwise, return everyone
+			return !isNewOffer || at.Enabled;
+		});
 
 		results = aOfferProduct.map(async function (offerProduct) {
 			const offerProductPack = offerProductPacks.find(pck => pck.PRODUCTPACKID === offerProduct.ProductCode);
@@ -2023,8 +2043,13 @@ module.exports = (srv) => {
 				productcode: offerProduct.ProductCode
 			})
 
+			const notRecordedPendingApprovals = await SELECT.from(IdentifyNotRecordedPendingApprovals).where({
+				OfferId: offer.OFFERID
+			});
+
+
 			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
-			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags);
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals);
 			
 			//Get corresponding ProductPricing
 			const whereProductPricing = {
@@ -2066,6 +2091,9 @@ module.exports = (srv) => {
 					foc.ProductPack = await tx.run(SELECT.from(PT_TMPRDPCK).where({ PRODUCTPACKID: foc.ProductPackId, ACTIVERECORD: 'Yes' }))
 				});
                 productCondition.PriceConditionClassification = await tx.run(SELECT.one.from(PriceConditionClassification).where({ ID: productCondition.PriceConditionClassification_ID }));
+				productCondition.DiscountCondition && productCondition.DiscountCondition.length > 0 && productCondition.DiscountCondition.forEach(dc => {
+					dc.Discount = !isNaN(parseFloat(dc.Discount)) ? parseFloat(dc.Discount * 100)?.toFixed(3) : 0;
+				})
                 return productCondition;
             }));
             /*end of ProductCondition information */
@@ -2431,14 +2459,14 @@ module.exports = (srv) => {
 
 		let totalAmount = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY, 0);
 		// let totalAmountInWords = inWords(totalAmount, offer.CURRENCY);
-		let totalAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmount)} ${offer.CURRENCY} only`;
+		let totalAmountInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmount, regionname)} ${offer.CURRENCY} only`;
 
 		let budgetRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.BUDGET_RATE }));
 		let spotRate = Math.min.apply(Math, offerProductValidation.map((d) => { return d.SPOT_RATE }));
 
 		let totalAmountVat = offerProductValidation.reduce((a, b) => a + b.GROSS_SALES_OFFER_CURRENCY_VAT, 0);
 		// let totalAmountVatInWords = inWords(totalAmountVat, offer.CURRENCY);
-		let totalAmountVatInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmountVat)} ${offer.CURRENCY} only`;
+		let totalAmountVatInWords = `${NumberHelper.formatNumberToText(tender.CountryCode,totalAmountVat, regionname)} ${offer.CURRENCY} only`;
 		let vatTotal = offerProductValidation.reduce((a, b) => a + b.VAT_TOTAL, 0);
 
 		//Division can be Pharma or Radiology, this determines division for country approvers
@@ -2475,7 +2503,7 @@ module.exports = (srv) => {
         let uniqueSample = Array.from(new Set(samplesItemsToUnique));
 
         if (samplesNotZero.length === offerProductValidation.length && uniqueSample.length == 1) {
-
+			uniqueSample[0] = uniqueSample[0] ? uniqueSample[0] : 0;
             samplesRemark = uniqueSample[0].toString().concat(" samples will be delivered for all products as per the tender terms and conditions.");
         }
         else if (uniqueSample.length >= 1) {
@@ -3119,12 +3147,23 @@ module.exports = (srv) => {
 		whereCountry[0].ref[0] = 'CountryCode';
 		whereCountry[2].val = offerValidation.COUNTRYCODE;
 
+		const offerStatus = await SELECT.one.from("CatalogService.OfferStatus").where({
+			OFFER_ID: offerValidation?.OFFERID
+		});
+
 		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry));
 		let country = await tx.run(SELECT.one.from(PT_TMCTRY).where(whereCountry));
 		let initialOffer = await tx.run(SELECT.one.from(PT_TMOFRS).where({OfferID: offerValidation.OFFERID }));
 		let exchangeRate = await SELECT.one.from(ExchangeRates).where({CURRENCY_FROM: initialOffer?.Currency,
 			CURRENCY_TO: 'EUR',
 			X_TYPE: 'Budget'
+		});
+
+		const isNewOffer = offerStatus?.STATUS === 'Offer Created';
+
+		countryApprovers = countryApprovers.filter(ca => {
+			// If it's a new offer, return only enabled users; otherwise, return everyone
+			return !isNewOffer || ca.Enabled;
 		});
 
 
@@ -3332,7 +3371,7 @@ module.exports = (srv) => {
 				FLOW_ID: (!d.FLOW_ID) ? "" : d.FLOW_ID,
 				DIVISION: d.Division,
 				COUNTRYNAME: d.CountryName,
-				HIERARCHY: d.ApproverTypes[0].Hierarchy,
+				HIERARCHY: d.ApproverTypes && d.ApproverTypes.length > 0 ? d.ApproverTypes[0].Hierarchy : 1,
 				Nucleus: countryApprover?.Nucleus || ""
 			}
 		})
@@ -4635,6 +4674,85 @@ module.exports = (srv) => {
         } catch (error) {
             console.error('Error in CountryRegisteredPrice READ');
 			return req.reject(403, error?.message||"Error in CountryRegisteredPrice READ");
+        }
+	});
+
+	/**
+	 * After-update handler for the PT_TMAPPRST entity.
+	 *
+	 * This handler is triggered after an UPDATE operation on PT_TMAPPRST. 
+	 * It performs the following actions:
+	 *   1. Validates that data exists.
+	 *   2. Fetches the related offer, offer products, country, and offer status.
+	 *   3. If the offer is in the MEA region and its status is neither 
+	 *      "Offer Created" nor "Awaiting Approval":
+	 *      - Resets previous approval-related flags in the PT_TMOFRS table.
+	 *      - Resets specific product-level flags in PT_TMOFPR for each offer product.
+	 *   4. Updates are performed concurrently using Promise.all.
+	 *
+	 * @async
+	 * @param {object|object[]} data - The updated record(s) for PT_TMAPPRST. Can be a single object or an array.
+	 * @param {object} req - The CAP request object, providing context and utilities like `reject`.
+	 * @returns {Promise<object|object[]>} Returns the original data if no action is needed or after updates are applied.
+	 * @throws {Error} Throws a 403 error via `req.reject` if any database operation fails.
+	 *
+	 * @example
+	 * // Automatically invoked by CAP after updating PT_TMAPPRST
+	 * await srv.after("UPDATE", "PT_TMAPPRST", handlerFunction);
+	 */
+	srv.after("UPDATE", "PT_TMAPPRST", async (data, req) => {
+		 try {
+            if (!data || (Array.isArray(data) && data.length === 0)) {
+				return data;
+			}
+
+			const {
+				OfferId
+			} = data;
+			const offer = await SELECT.one.from(PT_TMOFRS)
+			.where({
+				OfferID: OfferId
+			});
+			const offerProducts = await SELECT.from(PT_TMOFPR)
+			.where({
+				OfferID: OfferId
+			});
+			const country = await SELECT.one.from(PT_TMCTRY)
+			.where({
+				CountryCode: offer.CountryCode
+			});
+			const offerStatus = await SELECT.one.from(OfferStatus).where({
+				OFFER_ID: OfferId
+			});
+
+			const promises = [];
+
+			if (!offer || !country || !offerStatus) return data;
+
+			if (country.Region === 'MEA' && !["Offer Created", "Awaiting Approval"].includes(offerStatus.STATUS)) {
+				promises.push(UPDATE(PT_TMOFRS).with({
+					PreviousApprovalHasAddedProduct: false,
+					PreviousApprovalHasDeletedProduct: false,
+					PreviousApprovalHasDeclinedProduct: false,
+					PreviousApprovalHas_Deleted_DeclinedProduct: false,
+					PreviousApprovalHas_Deleted_Products_PTL: "",
+					ApprovalHasDeletedProduct_Previous_State: false,
+					ApprovalHasDeclinedProduct_Previous_State: false,
+					ApprovalHas_Deleted_DeclinedProduct_Previous_State: false,
+					ApprovalHas_Deleted_Products_PTL_Previous_State: ""
+				}).where({OfferID: OfferId}))
+
+				promises.push(...offerProducts.map(pr => UPDATE(PT_TMOFPR).with({
+					IsProductAddedForPreviousApproval: false,
+					MEAApprovalLatestUpdatedField: "",
+					hasUpdatedSupplyPaymentPriceValues: false,
+				}).where({OfferID: OfferId, ProductCode: pr.ProductCode})))
+
+				await Promise.all(promises);
+			}
+        } catch (error) {
+            console.error('Error in PT_TMAPPRST after UPDATE');
+			return req.reject(403, error?.message||"Error in PT_TMAPPRST after UPDATE");
         }
 	});
 }

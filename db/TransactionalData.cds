@@ -593,6 +593,7 @@ entity PriceCondition: cuid, managed {
     RoyalDecreePercentage_1             : Double;
     MarketIncentiveID                   : String;
     BrandLevelRappel                    : String default 'No';
+    QuotationPriceConditionCode         : String;
     RoyalDecreePercentage               : Association to MasterData.RoyalDecree on  RoyalDecreePercentage.ProductPackID = ProductCode
                                                                                 and RoyalDecreePercentage.ValidTo = '9999-12-31 00:00:00.000000000';
     CapBrazil                           : Association to MasterDataViews.MostRecentCapView on CapBrazil.ValidTo = '9999-12-31 00:00:00.000000000';
@@ -941,10 +942,12 @@ entity OfferProductOfferStatus {
             ApproverList        : Association to many MasterData.CountryApprovers
                                       on  ApproverList.CountryCode  = CountryCode
                                       and ApproverList.ApproverType = ApproverType
-                                      and ApproverList.Division     = Division;
+                                      and ApproverList.Division     = Division
+                                      and ApproverList.Enabled      = true;
             ApproverTypes       : Association to many MasterData.ApproverTypes
                                       on  ApproverTypes.CountryCode  = CountryCode
-                                      and ApproverTypes.ApproverType = ApproverType;
+                                      and ApproverTypes.ApproverType = ApproverType
+                                      and ApproverTypes.Enabled      = true;
 };
 
 entity ExcelUpload:cuid {

@@ -143,6 +143,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.Institute.InstituteName,
         tender.Institute.InstituteID,
         tender.Institute.InstituteType,
+        tender.Institute.CustomerID,
         key offer.OfferID,
         offer.OfferValue.VALUE,
         case 
@@ -155,6 +156,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         offer.InternalBidDueDate,
         tender.BidDueDate,
         max(brands.BRANDID) as BrandID:String,
+        STRING_AGG(brands.BRANDID, ',') as OfferBrandIDs:String,
         tender.createdAt,
         tender.modifiedBy,
         tender.modifiedAt, 
@@ -180,6 +182,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.Institute.InstituteName,
         tender.Institute.InstituteID,
         tender.Institute.InstituteType,
+        tender.Institute.CustomerID,
         offer.OfferID,
         offer.OfferValue.VALUE,
         offer.OfferStatus.STATUS,     
@@ -1276,8 +1279,22 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             end as Inkoopgroep: String,
             inst.InstituteName,
             tender.TenderName,
-            selectedcontractduration.ContractStartDate as EffectiveDate : Date,
-            selectedcontractduration.ContractEndDate as ExpiryDate : Date,
+            case 
+                when 
+                    offerStatus.STATUS = 'Outcome Accepted' or 
+                    offerStatus.STATUS = 'Outcome Partially Accepted' or 
+                    offerStatus.STATUS = 'Outcome Rejected'
+                        then selectedcontractduration.ContractStartDate
+                else tender.Custom.Date_1
+            end as EffectiveDate: Date,
+            case 
+                when 
+                    offerStatus.STATUS = 'Outcome Accepted' or 
+                    offerStatus.STATUS = 'Outcome Partially Accepted' or 
+                    offerStatus.STATUS = 'Outcome Rejected'
+                        then selectedcontractduration.ContractEndDate
+                else ADD_MONTHS(tender.Custom.Date_1, 12)
+            end as ExpiryDate: Date,
             tender.BidDueDate,
             ifnull(childInst.STATUS, offerStatus.STATUS) as STATUS: String,
             tender.Custom.String_1 as ManagedBy : String,
@@ -1584,13 +1601,17 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             dc.NetPriceWithTax, 
             pc.Tax
     }where pc.ConditionType = 'Rappel';
+
+    entity MainPriceCondition as select from TransactionalDataViews.StandardTenderPriceConditionView {
+        *
+    }
+    where isMain = true
+    and PriceConditionID is not null;
     entity PriceConditionRappelView as Select from TransactionalDataViews.StandardTenderPriceConditionView as std
-        left outer join TransactionalDataViews.StandardTenderPriceConditionView as main
+        left outer join MainPriceCondition as main
             on std.CountryCode = main.CountryCode
             and std.OfferID = main.OfferID
-            and std.ProductCode = main.ProductCode
-            and main.isMain = true
-            and main.PriceConditionID is not null{
+            and std.ProductCode = main.ProductCode{
                 key std.TenderID,
                 key std.OfferID,
                 key std.ProductCode,
@@ -1706,8 +1727,14 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             and product.ActiveProduct = 1 
         inner join MasterData.PT_TMINST as institute 
             on tender.InstituteID = institute.InstituteID
+        inner join MasterData.PT_TMPRDPCK as prdpck 
+            on prdpck.PRODUCTPACKID = product.ProductCode
+            and prdpck.ACTIVERECORD = 'Yes'
+        inner join MasterData.PT_TMPRDHIER as prdhier
+        	on prdhier.HLEVEL6_CODE = prdpck.HLEVEL6_CODE
         left join TransactionalDataViews.BrandsInTender as brands 
             on brands.OFFERID = offer.OfferID
+            and brands.BRANDID = prdhier.HLEVEL4_CODE
     {
         tender.TenderID,
         key offer.OfferID,
@@ -1716,16 +1743,15 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         product.Price.OfferPrice,
         product.SKU.PRODUCTPACKNAME as ProductPackName:String,
         product.UnitPerPack as UoM:String,
-        max(brands.BRANDID) as BrandID:String,
-        max(brands.BRANDNAME) as BrandName:String,
+        brands.BRANDID as BrandID:String,
+        brands.BRANDNAME as BrandName:String,
         product.SKU.PACKFACTOR,
         institute.InstituteID,
         institute.InstituteName,
         institute.CustomerID,
         institute.InstituteType,
         product.SKUCountry.EAN
-    }where tender.CountryCode = 'ES'
-    group by tender.TenderID, offer.OfferID, product.CountryCode, product.ProductCode, product.Price.OfferPrice, product.SKU.PRODUCTPACKNAME, product.UnitPerPack, institute.InstituteID, institute.InstituteName, institute.CustomerID, institute.InstituteType, product.SKUCountry.EAN, product.SKU.PACKFACTOR;
+    }where tender.CountryCode = 'ES';
 
     entity CCMMaterilsView as select from TransactionalData.PT_TMOFPR as product 
         inner join MasterData.PT_TMSKUPRDPCK as skuprdpck 
@@ -2185,5 +2211,14 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
         sum(result.AwardedPrice * result.AwardedQty) as TotalAwardedPrice: Double
     }where offer.Tender.Country.Region = 'PACAWI'
     group by offer.CountryCode,
-        offer.OfferID;   
+        offer.OfferID; 
+
+    entity TenderMasterInstituteView as select from MasterData.PT_TMINST {
+        key InstituteID,
+        key CountryCode,
+            InstituteName,
+            CustomerID,
+            InstituteType
+    } where ActiveRecord = 'Yes' and InstituteType <> 'Ship-To'
+        order by InstituteName asc;
 }

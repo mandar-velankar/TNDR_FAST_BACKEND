@@ -880,7 +880,10 @@ inner join ApprovalRequests as approvalRequest
 	and approvalRequest.CountryCode = offer.CountryCode
     and approvalRequest.ApprovalStatus <> 'Cancelling'
     and approvalRequest.ApprovalStatus <> 'Rejected'
-    and approvalRequest.REQUIRED_ACTION = 'Approval'
+    and (
+        approvalRequest.REQUIRED_ACTION = 'Approval' or
+        approvalRequest.REQUIRED_ACTION = 'Notification'
+    )
     and approvalRequest.ApproverType <> 'Legal'
 inner join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory
     on offer.SellingCompany = signatory.LEGAL_ENTITY_CODE
@@ -905,7 +908,10 @@ inner join ApprovalRequests as approvalRequest
 	and approvalRequest.CountryCode = offer.CountryCode
     and approvalRequest.ApprovalStatus <> 'Cancelling'
     and approvalRequest.ApprovalStatus <> 'Rejected'
-    and approvalRequest.REQUIRED_ACTION = 'Approval'
+    and (
+        approvalRequest.REQUIRED_ACTION = 'Approval' or
+        approvalRequest.REQUIRED_ACTION = 'Notification'
+    )
     and approvalRequest.ApproverType <> 'Legal'
 inner join MasterData.COUNTRY_LEGAL_ENTITY_SIGNATORIES as signatory
     on offer.SellingCompany = signatory.LEGAL_ENTITY_CODE
@@ -1797,6 +1803,7 @@ left outer join MasterData.PricingPolicy as pricingPolicy
     priceCondition.MonthlyRentPerUnit,
     priceCondition.AnnualValue,
     priceCondition.MarketIncentiveID,
+    priceCondition.QuotationPriceConditionCode,
     @Core.Computed: false
     case 
         when product.UnitPerPack = 'Unit'
@@ -3162,6 +3169,7 @@ left outer join TransactionalData.PriceCondition as priceCondition
             PL_VolumeInPacks                    : Double;
             PNM_VALUE                           : Double;
             MaxNetPricePerPack                          : Double;
+            PRICECONDITION_CODE                 : String;
             FreeGoodsOther                              : Association to many TransactionalData.FreeGoodsOther
                                                             on FreeGoodsOther.ProductPackId = $self.PRODUCTID
                                                             and FreeGoodsOther.ProductPricing.OfferID = $self.OFFER_ID;
@@ -3456,11 +3464,12 @@ inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCo
     standardTenderHistory.NegotiationPrice
 }where standardTenderHistory.OUTCOME = 'Won' and standardTenderHistory.CountryCode = 'TW'
 union select from TransactionalDataViews.StandardTenderHistory as standardTenderHistory
-inner join MaxCreationDate as maxCreationDate on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 
-                                                and standardTenderHistory.INSTITUTE_ID = maxCreationDate.INSTITUTE_ID
-                                                and standardTenderHistory.CreationDate = maxCreationDate.MaxCreationDate
 inner join MasterData.PT_TMINSHIER as hier1 on standardTenderHistory.INSTITUTE_ID = hier1.InstituteID
 inner join MasterData.PT_TMINSHIER as hier2 on hier1.ParentInstituteID = hier2.ParentInstituteID
+inner join MaxCreationDateParent as maxCreationDate 
+    on standardTenderHistory.ProductCode = maxCreationDate.ProductCode 
+   and hier2.ParentInstituteID = maxCreationDate.INSTITUTE_ID
+   and standardTenderHistory.CreationDate = maxCreationDate.MaxCreationDate
 {
     key standardTenderHistory.ProductCode,
     key hier2.ParentInstituteID as INSTITUTE_ID: Integer,
@@ -3490,6 +3499,21 @@ entity MaxCreationDate as select from TransactionalDataViews.StandardTenderHisto
     Max(CreationDate) as MaxCreationDate: Date
 } where OUTCOME = 'Won' and CountryCode = 'TW' and EffectiveDate <= CURRENT_DATE
 group by ProductCode, INSTITUTE_ID;
+
+entity MaxCreationDateParent as select from TransactionalDataViews.StandardTenderHistory as sth
+inner join MasterData.PT_TMINSHIER as hier1 
+    on sth.INSTITUTE_ID = hier1.InstituteID
+inner join MasterData.PT_TMINSHIER as hier2 
+    on hier1.ParentInstituteID = hier2.ParentInstituteID
+{
+    key sth.ProductCode,
+    key hier2.ParentInstituteID as INSTITUTE_ID: Integer,
+    max(sth.CreationDate) as MaxCreationDate: Date
+}
+where sth.OUTCOME = 'Won'
+  and sth.CountryCode = 'TW'
+  and sth.EffectiveDate <= CURRENT_DATE
+group by sth.ProductCode, hier2.ParentInstituteID;
 
 entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender  
         inner join MasterData.PT_TMINST as inst 
@@ -3917,7 +3941,7 @@ entity zuelligExtract as select from TransactionalData.PT_TMTEND as tender
                         count(approvals.ApprovalStatus) > 0
                         then
                             case 
-                                when sum(case when approvals.ApprovalStatus = 'Rejected' then 1 else 0 end) > 0
+                                when sum(case when approvals.ApprovalStatus in ('Rejected', 'Cancelled', 'Cancelling') then 1 else 0 end) > 0
                                 then 2
                                 else 1
                             end
@@ -3969,3 +3993,25 @@ where
 group by
   OfferId,
   productcode;
+
+entity IdentifyNotRecordedPendingApprovals as select from TransactionalData.PT_TMAPPRST as approvals
+    inner join MaxOfferApprovalStatusTime as maxApprTime
+        on maxApprTime.OfferId = approvals.OfferId {
+            key approvals.OfferId,
+            key approvals.ApproverEmailID,
+            key approvals.ApproverType,
+                approvals.CountryCode,
+                approvals.ApprovalStatus,
+                approvals.ApproverName,
+                approvals.Hierarchy,
+                approvals.REQUIRED_ACTION
+} where approvals.ApprovalStatus in ('Waiting', 'Processing')
+and approvals.Statustime <> maxApprTime.MaxStatusTime
+group by approvals.OfferId,
+        approvals.ApproverEmailID,
+        approvals.ApproverType,
+        approvals.CountryCode,
+        approvals.ApprovalStatus,
+        approvals.ApproverName,
+        approvals.Hierarchy,
+        approvals.REQUIRED_ACTION;
