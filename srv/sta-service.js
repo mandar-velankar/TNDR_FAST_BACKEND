@@ -1497,6 +1497,10 @@ module.exports = async (srv) => {
 					}
 					
 				}
+
+				if (req.data.CountryCode === "PK" && (req.data.ConditionType === 'PriceWithFOC' || req.data.ConditionType === 'DiscountWithFOC')) {
+					!req.data.Deductions && req.error({ code: 404, message: "Distributor Discount is required.", target: "Deductions" });
+				}
 			}
 			catch(error){
 				console.error('Error in validation of PriceCondition View before CREATE');
@@ -3407,7 +3411,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		let countryProductPacks = await tx.run(SELECT.from(PT_TMCTPRDPCK).where({CountryCode: offerValidation.COUNTRYCODE, PRODUCTPACKID: offerProductPackIDs}));
 		let countryProductPackBUs = countryProductPacks.map(cp => cp.BU);
 
-		const isNewOffer = offerStatus.STATUS === 'Offer Created';
+		const isNewOffer = offerStatus?.STATUS === 'Offer Created';
 		
 		countryApprovers = countryApprovers.filter(ca => {
 			// If it's a new offer, return only enabled users; otherwise, return everyone
@@ -4378,18 +4382,18 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		let country = await tx.run(SELECT.one.from(PT_TMCTRY).where(whereCountry));
 
 		const offerStatus = await SELECT.one.from(OfferStatus).where({
-			OFFER_ID: offer.OFFERID
+			OFFER_ID: offer?.OFFERID
 		});
 
 		//where statement
 		let whereApproverType = {
-			CountryCode: offer.COUNTRYCODE
+			CountryCode: offer?.COUNTRYCODE
 		}
 
 		//Get corresponding approvertypes
 		let aApproverTypes = await tx.run(SELECT.from(ApproverTypes).where(whereApproverType));
 
-		const isNewOffer = offerStatus.STATUS === 'Offer Created';
+		const isNewOffer = offerStatus?.STATUS === 'Offer Created';
 		
 		aApproverTypes = aApproverTypes.filter(at => {
 			// If it's a new offer, return only enabled users; otherwise, return everyone
@@ -7596,7 +7600,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			RefundDate                          : req.data.RefundDate ? req.data.RefundDate : standardTenderPriceConditionView?.RefundDate,
 			PriceConditionCode                  : req.data.PriceConditionCode ? req.data.PriceConditionCode : standardTenderPriceConditionView?.PriceConditionCode,
 			LotID                               : 1,
-			MarketIncentiveID				  	: req.data.MarketIncentiveID ? req.data.MarketIncentiveID : standardTenderPriceConditionView?.MarketIncentiveID,		
+			MarketIncentiveID				  	: req.data.MarketIncentiveID ? req.data.MarketIncentiveID : standardTenderPriceConditionView?.MarketIncentiveID,
+			BrandLevelRappel					: req.data.BrandLevelRappel ?? standardTenderPriceConditionView?.BrandLevelRappel ?? 'No',		
 			Settlement_ID						: req.data.Settlement_ID ? req.data.Settlement_ID : standardTenderPriceConditionView?.Settlement_ID,
 			PriceConditionClassification_ID     : standardTenderPriceConditionView?.ClassificationID,
 		}
@@ -8236,7 +8241,10 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						RefundDate: toStr(rebateRow.RefundDate),
 						PriceConditionCode: toStr(rebateRow.PriceConditionCode),
 						MarketIncentiveID: toStr(rebateRow.MarketIncentiveID),
-						MarketIncentiveDescription: toStr(marketIncentiveInfo?.Description),
+						MarketIncentiveDescription: toStr(marketIncentiveInfo.Description),
+						BrandLevelRappel: toStr(rebateRow.BrandLevelRappel),
+						HLEVEL4_CODE: toStr(rebateRow.HLEVEL4_CODE),
+						HLEVEL4_NAME: toStr(rebateRow.HLEVEL4_NAME),
 						CCMContract_ID: ccmContractId,
 						validFrom: today,
 						validTo: "9999-12-31",
