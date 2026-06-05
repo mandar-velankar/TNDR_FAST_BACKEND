@@ -592,6 +592,7 @@ entity PriceCondition: cuid, managed {
     ConfidentialDiscount                : Double;
     RoyalDecreePercentage_1             : Double;
     MarketIncentiveID                   : String;
+    BrandLevelRappel                    : String default 'No';
     QuotationPriceConditionCode         : String;
     RoyalDecreePercentage               : Association to MasterData.RoyalDecree on  RoyalDecreePercentage.ProductPackID = ProductCode
                                                                                 and RoyalDecreePercentage.ValidTo = '9999-12-31 00:00:00.000000000';

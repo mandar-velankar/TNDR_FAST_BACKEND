@@ -960,6 +960,8 @@ entity FASTCoreCustomersBase as select from SAP.FASTCoreCustomerMaster as custom
 		on CustData.parent.ID = customer.ID
 	left join SAP.CustSalesArrgmnt as CustSalesArrgmnt
 		on CustSalesArrgmnt.parentCustData.ID = CustData.ID
+	left join SAP.CustPartnrFuncs as CustPartnrFuncs
+		on CustPartnrFuncs.parentCustSalesArrgmnt.ID = CustSalesArrgmnt.ID
 	left join MasterData.CustomerGroups as customerGroup
 		on customerGroup.CGR1 = CustSalesArrgmnt.CustomerDefinedGroupCode
 		and customerGroup.CGR2 = CustSalesArrgmnt.FirstAdditionalCustomerDefinedGroupCode {
@@ -986,10 +988,12 @@ entity FASTCoreCustomersBase as select from SAP.FASTCoreCustomerMaster as custom
 	customerGroup.CGR2 as CGG2_Code,
 	customerGroup.CG2_Description,
 	customerGroup.FastInstituteType,
+	CustPartnrFuncs.PartyRoleCode,
 	row_number() over(
 		partition by customer.InternalID
 		order by customer.createdAt desc
-	) as RN: Integer
+	) as RN: Integer,
+	count(CustPartnrFuncs.ID) over(partition by customer.InternalID) as CustPartnrFuncsCount: Integer
 }
 where AddrnfoData.Addr.PostalAddr.CountryCode = 'ES'
 	and CustSalesArrgmnt.SalesOrganisationID = 'QFHC';
@@ -1017,7 +1021,11 @@ entity FASTCoreCustomersView as select from FASTCoreCustomersBase {
 	CG1_Description,
 	CGG2_Code,
 	CG2_Description,
-	FastInstituteType
+	case 
+		when CustPartnrFuncsCount = 1 and PartyRoleCode = 'WE' then 'Ship-To'
+		when CustPartnrFuncsCount > 1 then FastInstituteType
+		else FastInstituteType
+	end as FastInstituteType: String
 } where RN = 1
 group by ID,
 	InternalID,
@@ -1041,5 +1049,7 @@ group by ID,
 	CG1_Description,
 	CGG2_Code,
 	CG2_Description,
-	FastInstituteType;
+	FastInstituteType,
+	CustPartnrFuncsCount,
+	PartyRoleCode;
 

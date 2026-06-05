@@ -1279,8 +1279,22 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             end as Inkoopgroep: String,
             inst.InstituteName,
             tender.TenderName,
-            selectedcontractduration.ContractStartDate as EffectiveDate : Date,
-            selectedcontractduration.ContractEndDate as ExpiryDate : Date,
+            case 
+                when 
+                    offerStatus.STATUS = 'Outcome Accepted' or 
+                    offerStatus.STATUS = 'Outcome Partially Accepted' or 
+                    offerStatus.STATUS = 'Outcome Rejected'
+                        then selectedcontractduration.ContractStartDate
+                else tender.Custom.Date_1
+            end as EffectiveDate: Date,
+            case 
+                when 
+                    offerStatus.STATUS = 'Outcome Accepted' or 
+                    offerStatus.STATUS = 'Outcome Partially Accepted' or 
+                    offerStatus.STATUS = 'Outcome Rejected'
+                        then selectedcontractduration.ContractEndDate
+                else ADD_MONTHS(tender.Custom.Date_1, 12)
+            end as ExpiryDate: Date,
             tender.BidDueDate,
             ifnull(childInst.STATUS, offerStatus.STATUS) as STATUS: String,
             tender.Custom.String_1 as ManagedBy : String,
@@ -1632,7 +1646,8 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                 std.RoyalDecreePercentage_1,
                 std.MonthlyRentPerUnit,
                 std.AnnualValue,
-                std.MarketIncentiveID
+                std.MarketIncentiveID,
+                std.BrandLevelRappel,
             };
     entity CCMPriceConditionView                   as select from TransactionalData.CCMPriceCondition{
         CountryCode,
@@ -1892,7 +1907,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             priceCondition.Settlement.ID as Settlement_ID: UUID,
             priceCondition.Settlement.Description as SettlementDescription: String,
             priceCondition.Tax,
-            priceCondition.MarketIncentiveID
+            priceCondition.MarketIncentiveID,
+            priceCondition.BrandLevelRappel,
+            productPacks.Product.HLEVEL4_CODE,
+            productPacks.Product.HLEVEL4_NAME
         }where tender.Active = 1 and tender.CountryCode = 'ES'
         group by 
             tender.CountryCode,
@@ -1919,7 +1937,10 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
             priceCondition.Settlement.ID,
             priceCondition.Settlement.Description,
             priceCondition.Tax,
-            priceCondition.MarketIncentiveID; 
+            priceCondition.MarketIncentiveID,
+            priceCondition.BrandLevelRappel,
+            productPacks.Product.HLEVEL4_CODE,
+            productPacks.Product.HLEVEL4_NAME; 
 
 entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_TMTEND as tender 
     inner join TransactionalData.PT_TMOFRS as offer 

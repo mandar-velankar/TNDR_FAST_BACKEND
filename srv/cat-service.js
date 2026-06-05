@@ -2001,19 +2001,19 @@ module.exports = (srv) => {
 		const initialOffer = await tx.run(SELECT.one.from(PT_TMOFRS).where({OfferID: offer.OFFERID }));
 		const offerLatestApprStatus = await tx.run(SELECT.from(OfferLatestApprovalStatus).where({OfferID: offer.OFFERID}));
 
-		const offerStatus = await SELECT.one.from(OfferStatus).where({
-			OFFER_ID: offer.OFFERID
+		const offerStatus = await SELECT.one.from("CatalogService.OfferStatus").where({
+			OFFER_ID: offer?.OFFERID
 		});
 
 		//where statement
 		let whereApproverType = {
-			CountryCode: offer.COUNTRYCODE
+			CountryCode: offer?.COUNTRYCODE
 		}
 
 		//Get corresponding approvertypes
 		let aApproverTypes = await tx.run(SELECT.from(ApproverTypes).where(whereApproverType));
 
-		const isNewOffer = offerStatus.STATUS === 'Offer Created';
+		const isNewOffer = offerStatus?.STATUS === 'Offer Created';
 		
 		aApproverTypes = aApproverTypes.filter(at => {
 			// If it's a new offer, return only enabled users; otherwise, return everyone
@@ -3147,8 +3147,8 @@ module.exports = (srv) => {
 		whereCountry[0].ref[0] = 'CountryCode';
 		whereCountry[2].val = offerValidation.COUNTRYCODE;
 
-		const offerStatus = await SELECT.one.from(OfferStatus).where({
-			OFFER_ID: offerValidation.OFFERID
+		const offerStatus = await SELECT.one.from("CatalogService.OfferStatus").where({
+			OFFER_ID: offerValidation?.OFFERID
 		});
 
 		let countryApprovers = await tx.run(SELECT.from(CountryApprovers).where(whereCountry));
@@ -3159,7 +3159,7 @@ module.exports = (srv) => {
 			X_TYPE: 'Budget'
 		});
 
-		const isNewOffer = offerStatus.STATUS === 'Offer Created';
+		const isNewOffer = offerStatus?.STATUS === 'Offer Created';
 
 		countryApprovers = countryApprovers.filter(ca => {
 			// If it's a new offer, return only enabled users; otherwise, return everyone

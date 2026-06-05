@@ -191,5 +191,15 @@ module.exports = {
         }
         return words;
         
+    },
+
+    roundDown: function (num, decimals) {
+        const factor = 10 ** decimals;
+        return Math.floor(num * factor) / factor;
+    },
+
+    roundUp: function(num, decimals) {
+        const factor = 10 ** decimals;
+        return Math.ceil(num * factor) / factor;
     }
 };
