@@ -8750,6 +8750,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
         }
 
         if (results.length === 0) {
+			relevantContracts = relevantContracts.filter(c => String(c.InstituteID) === String(InstituteID));
             results.push({ sourceData, case: "UNCLASSIFIED", contracts: relevantContracts });
         }
 
