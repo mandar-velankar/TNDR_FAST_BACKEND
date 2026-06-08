@@ -33,7 +33,8 @@ module.exports = (srv) => {
 		NLPPPApprovals,
 		WholesalePurchasePrice,
 		NLPPP,
-		DistributionAgreements
+		DistributionAgreements,
+		CountryApprovers
 	} = cds.entities("com.bayer.SXTENDER.MasterData");
 
     const{
@@ -1352,6 +1353,68 @@ module.exports = (srv) => {
             DistributorID: "",
             DistributorName: "All",
 		})
+	});
+
+	/**
+	 * Custom action to atomically update CountryApprover key fields.
+	 * OData does not allow updating key fields via PUT (ApproverEmailID, ApproverType, Division are keys).
+	 * This action performs a transactional delete of the old record + insert of the new record
+	 * using cds.transaction(req) to ensure atomicity.
+	 */
+	srv.on('UpdateCountryApprover', async (req) => {
+		try {
+			const {
+				oldCountryCode,
+				oldApproverType,
+				oldDivision,
+				oldApproverEmailID,
+				oldBU,
+				newCountryCode,
+				newApproverType,
+				newDivision,
+				newApproverEmailID,
+				newApproverName,
+				newEnabled,
+				newBU,
+				newNucleus
+			} = req.data;
+
+			const oldKey = {
+				CountryCode: oldCountryCode,
+				ApproverType: oldApproverType,
+				Division: oldDivision,
+				ApproverEmailID: oldApproverEmailID,
+				BU: oldBU || 'All'
+			};
+
+			const tx = cds.transaction(req);
+
+			const existing = await tx.run(SELECT.one.from(CountryApprovers).where(oldKey));
+			if (!existing) {
+				return req.reject(404, 'Original country approver record not found');
+			}
+
+			const newRecord = {
+				CountryCode: newCountryCode,
+				ApproverType: newApproverType,
+				Division: newDivision,
+				ApproverEmailID: newApproverEmailID,
+				ApproverName: newApproverName,
+				ApproverID: existing.ApproverID,
+				Enabled: newEnabled,
+				BU: newBU || 'All',
+				Nucleus: newNucleus
+			};
+
+			// Both operations within the same transaction for atomicity
+			await tx.run(DELETE.from(CountryApprovers).where(oldKey));
+			await tx.run(INSERT.into(CountryApprovers).entries(newRecord));
+
+			return 'Country approver updated successfully';
+		} catch (error) {
+			console.error('Error in UpdateCountryApprover:', error);
+			return req.reject(500, error?.message || 'Error updating country approver');
+		}
 	});
 
 	srv.on('TerminateProduct', async (req) => {

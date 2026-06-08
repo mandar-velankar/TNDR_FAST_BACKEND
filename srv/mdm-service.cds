@@ -365,4 +365,25 @@ service MasterDataManagementService @(path : 'mdm')@(requires : ['authenticated-
     action ApprovePPP(ID: String, ProductCode: Integer) returns String;
     action SoftDeleteProductPrices(productPackID: Integer, countryCode: String) returns String;
     action TerminateProduct(ProductCode: Integer, CountryCode: String, TerminationDate: Date) returns String;
+
+    /**
+     * Custom action to atomically update CountryApprover key fields.
+     * OData does not allow updating key fields via PUT (ApproverEmailID, ApproverType, Division are keys).
+     * This action performs a transactional delete of the old record + insert of the new record.
+     */
+    action UpdateCountryApprover(
+        oldCountryCode: String,
+        oldApproverType: String,
+        oldDivision: String,
+        oldApproverEmailID: String,
+        oldBU: String,
+        newCountryCode: String,
+        newApproverType: String,
+        newDivision: String,
+        newApproverEmailID: String,
+        newApproverName: String,
+        newEnabled: Boolean,
+        newBU: String,
+        newNucleus: String
+    ) returns String;
 }
