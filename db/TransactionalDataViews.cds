@@ -562,6 +562,8 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
             then
                 case
                     when max(offer.Product.PreviousApproval.NEW_APPROVAL) <> 0 then 'Offer Created'
+                    when offer.OfferStatusTable.STATUS = 'Offer Created' and offer.Tender.Country.Region = 'MEA' and (offer.PreviousApprovalHasAddedProduct = 'true' or offer.PreviousApprovalHasDeletedProduct = 'true' or offer.PreviousApprovalHasDeclinedProduct = 'true')
+                        then 'Offer Created'
                     when sum(case when offer.Product.ApprovalStatus.ApprovalStatus = 'Rejected' then 1 else 0 end) <> 0 then 'Offer Rejected'
                     when sum(case when offer.Product.ApprovalStatus.ApprovalStatus = 'Waiting' or offer.Product.ApprovalStatus.ApprovalStatus = 'Processing' then 1 else 0 end) <> 0 then 'Awaiting Approval'
                     when sum(case when
@@ -569,8 +571,6 @@ entity OfferStatus as select from TransactionalData.PT_TMOFRS as offer{
                                 and offer.Product.ApprovalStatus.ApproverTypeSection = 1
                             then 1 else 0 end) <> 0 then 'Offer Created'
                     when count(offer.Product.ApprovalStatus.ApprovalStatus) = 0 then 'Offer Created'
-                    when offer.OfferStatusTable.STATUS = 'Offer Created' and offer.Tender.Country.Region = 'MEA' and (offer.PreviousApprovalHasAddedProduct = 'true' or offer.PreviousApprovalHasDeletedProduct = 'true' or offer.PreviousApprovalHasDeclinedProduct = 'true')
-                        then 'Offer Created'
                     else 'Offer Approved'
                 end
         when offer.OfferStatusTable.STATUS = 'Results Recorded'
