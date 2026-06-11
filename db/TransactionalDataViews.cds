@@ -4094,3 +4094,69 @@ entity MEAAuthorizedIssuedBySignatory as
 where
     offer.Tender.Country.Region = 'MEA'
     and offer.Tender.TenderChannel = 'Direct';
+
+
+entity HEMCountryTenderReportView as select from TransactionalData.PT_TMTEND as tend
+    inner join TransactionalData.PT_TMOFRS as ofrs
+        on ofrs.TenderID=tend.TenderID
+    inner join TransactionalData.PT_TMOFPR as ofpr
+        on ofpr.OfferID=ofrs.OfferID
+        and ofpr.CountryCode=ofrs.CountryCode
+    inner join TransactionalData.PriceCondition as pc
+        on pc.ProductCode=ofpr.ProductCode
+        and pc.OfferID=ofrs.OfferID
+    inner join MasterData.PT_TMPRDPCK as pd
+        on pd.PRODUCTPACKID=ofpr.ProductCode
+    inner join MasterData.PT_TMCTPRDPCK as ct
+        on ct.PRODUCTPACKID=pd.PRODUCTPACKID
+        and ct.COUNTRYCODE=ofrs.CountryCode
+    left outer join MasterData.PT_TMSKUPRDPCK as sku
+        on sku.ProductPackID=ct.PRODUCTPACKID
+        and sku.CountryCode=ofrs.CountryCode
+    inner join MasterData.PT_TMPRDHIER as hier
+        on hier.HLEVEL6_CODE=pd.HLEVEL6_CODE
+    inner join MasterData.PT_TMCTRY as ctry
+        on ctry.CountryCode=ofrs.CountryCode
+    inner join TransactionalDataViews.OfferStatus as ofst
+        on ofst.OFFER_ID=ofrs.OfferID
+    left outer join TransactionalData.PT_TMTRRES as res
+        on res.OfferID=ofrs.OfferID
+        and res.ProductCode=ofpr.ProductCode
+    left outer join TransactionalData.PT_TMDLVTR as dlv
+        on dlv.OfferID=ofrs.OfferID
+        and dlv.ProductCode=res.ProductCode {
+            hier.HLEVEL4_NAME,
+            pd.CONCENTRATION,
+            ctry.CountryName,
+            ofrs.OfferID,
+            tend.AwardDate as ![Expected Award Date],
+            ofrs.Custom.Date_1 as ![Date of 1st delivery],
+            ofrs.Custom.Date_4 as ![Contract Start date],
+            ofrs.Custom.String_14 as ![Rationale Supply chain Management Assessment],
+            ofpr.RequestedVolume,
+            pc.OfferPrice as ![Tender Amount],
+            ofrs.Custom.String_6 as ![Supply Center],
+            sku.SKUCode,
+            ofst.STATUS,
+            res.SubmittedOn as ![Award Date],
+            res.Outcome,
+            round((sum(dlv.ActualDeliveryQuantity/res.AwardedQty))*100,2) as ![Delivered %]: Double
+}
+where tend.Active=1 and ofrs.CountryCode like '%-HM%'
+group by
+    hier.HLEVEL4_NAME,
+    pd.CONCENTRATION,
+    ctry.CountryName,
+    ofrs.OfferID,
+    ofpr.RequestedVolume,
+    pc.OfferPrice,
+    ofrs.Custom.String_6,
+    sku.SKUCode,
+    ofst.STATUS,
+    res.SubmittedOn,
+    res.Outcome,
+    res.AwardedQty,
+    tend.AwardDate,
+    ofrs.Custom.Date_1,
+    ofrs.Custom.Date_4,
+    ofrs.Custom.String_14;

@@ -2221,4 +2221,6 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
             InstituteType
     } where ActiveRecord = 'Yes' and InstituteType <> 'Ship-To'
         order by InstituteName asc;
+
+    entity HEMCountryTenderReport as projection on TransactionalDataViews.HEMCountryTenderReportView;
 }
