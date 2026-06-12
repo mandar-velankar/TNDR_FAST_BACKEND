@@ -4126,25 +4126,30 @@ entity HEMCountryTenderReportView as select from TransactionalData.PT_TMTEND as 
         and dlv.ProductCode=res.ProductCode {
             hier.HLEVEL4_NAME,
             pd.CONCENTRATION,
+        key ofpr.ProductCode,
             ctry.CountryName,
-            ofrs.OfferID,
-            tend.AwardDate as ![Expected Award Date],
-            ofrs.Custom.Date_1 as ![Date of 1st delivery],
-            ofrs.Custom.Date_4 as ![Contract Start date],
-            ofrs.Custom.String_14 as ![Rationale Supply chain Management Assessment],
+        key ofrs.OfferID,
+            tend.AwardDate as ExpectedAwardDate,
+            ofrs.Custom.Date_1 as DateOf1stDelivery,
+            ofrs.Custom.Date_4 as ContractStartDate,
+            ofrs.Custom.String_14 as RationaleSupplyChainManagementAssessment,
             ofpr.RequestedVolume,
-            pc.OfferPrice as ![Tender Amount],
-            ofrs.Custom.String_6 as ![Supply Center],
+            pc.OfferPrice as TenderAmount,
+            ofrs.Custom.String_6 as SupplyCenter,
             sku.SKUCode,
             ofst.STATUS,
-            res.SubmittedOn as ![Award Date],
+            res.SubmittedOn as AwardDate,
             res.Outcome,
-            round((sum(dlv.ActualDeliveryQuantity/res.AwardedQty))*100,2) as ![Delivered %]: Double
+            case 
+                when dlv.ActualDeliveryQuantity is null or dlv.ActualDeliveryQuantity = 0 then 0
+                else round((sum(dlv.ActualDeliveryQuantity/res.AwardedQty))*100,2)
+            end as DeliveredPercentage: Double
 }
 where tend.Active=1 and ofrs.CountryCode like '%-HM%'
 group by
     hier.HLEVEL4_NAME,
     pd.CONCENTRATION,
+    ofpr.ProductCode,
     ctry.CountryName,
     ofrs.OfferID,
     ofpr.RequestedVolume,
@@ -4158,4 +4163,5 @@ group by
     tend.AwardDate,
     ofrs.Custom.Date_1,
     ofrs.Custom.Date_4,
-    ofrs.Custom.String_14;
+    ofrs.Custom.String_14,
+    dlv.ActualDeliveryQuantity;
