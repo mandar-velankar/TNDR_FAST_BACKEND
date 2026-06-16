@@ -323,7 +323,7 @@ module.exports = (srv) => {
 			deliveryTerms = product.FIRST_SHIPMENT;
 		}else{
 		if (product.NUMBER_LOTS === 0 && product.INTERVAL_SHIPMENTS === 0) {
-			deliveryTerms = "Multiple deliveries from local stocks with first ";
+			deliveryTerms = "Multiple deliveries with first ";
 			deliveryTerms = deliveryTerms.concat(product.FIRST_SHIPMENT);
 		}
 		else if (product.NUMBER_LOTS === 1 && product.INTERVAL_SHIPMENTS === 0) {
