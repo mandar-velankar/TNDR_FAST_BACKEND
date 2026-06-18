@@ -309,6 +309,9 @@ entity PT_TMDLVTR {
         Custom                 : Custom; // Custom attributes for templates usage
         InvoiceValue           : Double;
         BatchNumber            : String;
+        DeliveryItemBatch      : String;
+        SLED_BBD               : Date;
+        MFG                    : Date;
     //Associations
         Institute              : Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteID;
 }
