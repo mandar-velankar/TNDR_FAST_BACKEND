@@ -307,6 +307,11 @@ entity PT_TMDLVTR {
         //EHEEX-OTT - 105262-Adding new 3 fields for delivery tracking tab
     key LotID                  : Integer default 1;
         Custom                 : Custom; // Custom attributes for templates usage
+        InvoiceValue           : Double;
+        BatchNumber            : String;
+        DeliveryItemBatch      : String;
+        SLED_BBD               : Date;
+        MFG                    : Date;
     //Associations
         Institute              : Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteID;
 }
