@@ -7721,6 +7721,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						: num(ccmPriceCondition.NETPRICEWITHTAX);
 				items.Tax = num(ccmPriceCondition.SAPTAX);
 				items.Currency = 'EUR';
+				items.IsYP11WithoutRD = ccmPriceCondition.IsYP11WithoutRD;
 			}
 
 			return items;
@@ -7904,7 +7905,8 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		  SAPTAX: 0,
 		  SAPPriceWithTax: 0,
 		  SAPBaseGrossPrice: 0,
-		  ConditionType: null
+		  ConditionType: null,
+		  IsYP11WithoutRD: false
 		};
 	  
 		const conditions = {};
@@ -7978,6 +7980,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		let precioNeto = null;
 		let precioNetoIncludesRD = false;
+		result.IsYP11WithoutRD = hasYP11 && !YD06;
 
 		if (hasYP11) {
 			precioNeto = result.YP11;

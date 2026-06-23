@@ -598,6 +598,7 @@ entity PriceCondition: cuid, managed {
     RoyalDecreePercentage_1             : Double;
     MarketIncentiveID                   : String;
     QuotationPriceConditionCode         : String;
+    IsYP11WithoutRD                     : Boolean default false;
     RoyalDecreePercentage               : Association to MasterData.RoyalDecree on  RoyalDecreePercentage.ProductPackID = ProductCode
                                                                                 and RoyalDecreePercentage.ValidTo = '9999-12-31 00:00:00.000000000';
     CapBrazil                           : Association to MasterDataViews.MostRecentCapView on CapBrazil.ValidTo = '9999-12-31 00:00:00.000000000';
@@ -1042,4 +1043,5 @@ entity CCMPriceCondition: cuid, managed{
     NETPRICEWITHOUTTAX                  : Decimal;
     NETPRICEWITHTAX                     : Decimal;
     ConditionType                       : String;
+    IsYP11WithoutRD                     : Boolean default false;
 }
