@@ -1857,6 +1857,7 @@ left outer join MasterData.PricingPolicy as pricingPolicy
     priceCondition.AnnualValue,
     priceCondition.MarketIncentiveID,
     priceCondition.QuotationPriceConditionCode,
+    priceCondition.IsYP11WithoutRD,
     @Core.Computed: false
     case 
         when product.UnitPerPack = 'Unit'
