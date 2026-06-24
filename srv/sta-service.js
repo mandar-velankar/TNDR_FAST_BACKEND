@@ -2585,6 +2585,7 @@ module.exports = async (srv) => {
 				MaximumPrice: req.data.MaximumPrice,
 				Tax: req.data.Tax,
 				NetPrice: req.data.NetPrice,
+				IsYP11WithoutRD: req.data.IsYP11WithoutRD,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
 			"DescuentoComercial":{
@@ -2611,6 +2612,7 @@ module.exports = async (srv) => {
 				MaximumPrice: req.data.MaximumPrice,
 				Tax: req.data.Tax,
 				NetPrice: req.data.NetPrice,
+				IsYP11WithoutRD: req.data.IsYP11WithoutRD,
 				PriceConditionClassification_ID: req.data.ClassificationID 
 			},
 			"PVL":{
@@ -2635,6 +2637,7 @@ module.exports = async (srv) => {
 				MaximumPrice: req.data.MaximumPrice,
 				Tax: req.data.Tax,
 				NetPrice: req.data.ConfidentialDiscount !==0 ? req.data.ConfidentialPrice : req.data.PVL,
+				IsYP11WithoutRD: req.data.IsYP11WithoutRD,
 				PriceConditionClassification_ID: req.data.ClassificationID
 			},
 			"DescuentoEspecial":{
@@ -2659,6 +2662,7 @@ module.exports = async (srv) => {
 				MaximumPrice: req.data.MaximumPrice,
 				Tax: req.data.Tax,
 				NetPrice: 0,
+				IsYP11WithoutRD: req.data.IsYP11WithoutRD,
 				PriceConditionClassification_ID: req.data.ClassificationID
 			},
 			"Rental":{
