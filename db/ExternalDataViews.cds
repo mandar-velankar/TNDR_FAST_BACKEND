@@ -1661,7 +1661,7 @@ entity HEMCountryTenderReportView as select from TransactionalData.PT_TMTEND as 
             ofpr.RequestedVolume,
             pc.OfferPrice as TenderAmount,
             ofrs.Custom.String_6 as SupplyCenter,
-            ifnull(sku.SKUCode, '') as SKUCode: String,
+            ifnull(cast(sku.SKUCode as String), '') as SKUCode : String,
             ofst.STATUS,
             res.SubmittedOn as AwardDate,
             res.Outcome,
