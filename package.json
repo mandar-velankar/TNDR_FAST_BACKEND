@@ -47,7 +47,7 @@
     "rimraf": "^6.1.2"
   },
   "engines": {
-    "node": "^20.19.5"
+    "node": "^22.22.2"
   },
   "scripts": {
     "setup": "npm install && npm run setup:ui",
