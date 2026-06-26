@@ -1071,6 +1071,15 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         *,
     }order by InstituteName;
 
+    entity PakistanOfferProductDistributor {
+        key CountryCode: String;
+        key InstituteID: Integer;
+        key OfferID: String;
+        key BU: String;
+        DistributorID: Integer;
+        DistributorName: String;
+    };
+
     entity PakistanMasterDistributors as select from MasterData.DistributorAssignment as pkdist
         inner join MasterData.PT_TMDIST as dist on dist.DistributorID = pkdist.DistributorID{
             key pkdist.InstituteID,
