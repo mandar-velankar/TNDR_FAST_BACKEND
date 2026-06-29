@@ -1075,7 +1075,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         key CountryCode: String;
         key InstituteID: Integer;
         key OfferID: String;
-        key BU: String;
+        key ProductCode: Integer;
         DistributorID: Integer;
         DistributorName: String;
     };
