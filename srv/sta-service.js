@@ -9200,11 +9200,16 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'CountryCode'); 
 			let instituteID =  req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'InstituteID');
 			let offerId =  req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'OfferID');
-			let bu =  req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'BU');
+			let productCode =  req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'ProductCode');
 			
+			const product = await SELECT.one.from(PT_TMCTPRDPCK).where({
+				COUNTRYCODE: countryCode,
+				PRODUCTPACKID: productCode
+			})
+
 			const pakistanMasterDistributor = await SELECT.one.from(PakistanMasterDistributors).where({
 				InstituteID: instituteID,
-				BU: bu,
+				BU: product?.BU,
 				CountryCode: countryCode
 			});
 			const offerDistributor = await SELECT.one.from(PT_TMOFRS)
@@ -9221,7 +9226,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					CountryCode: countryCode,
 					InstituteID: instituteID,
 					OfferID: offerId,
-					BU: bu,
+					BU: product?.BU,
 					DistributorID: offerDistributor.DistributorID,
 					DistributorName: offerDistributor.DistributorName
 				}
