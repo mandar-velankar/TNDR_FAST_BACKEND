@@ -728,6 +728,7 @@ entity PT_TMTEND: managed {
         EffectiveDate     : Date;
         ExpiryDate        : Date;
         OfferValidity      :Date;
+        Remarks              : LargeString;
 
         Custom               : Custom; // Custom attributes for templates usage
         //Associations
