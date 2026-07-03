@@ -3101,13 +3101,30 @@ module.exports = (srv) => {
 				aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
 			}
 
+			let required_action = approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? country.Region === "MEA" ? getRequiredAction(requiredAction) : approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredAction);
+			let approver_type_section = (requiredAction === 1) ? 2 : 1;
+
+			if (country.Region === "MEA") {
+				latest_approval_type = latestApproval
+					.filter(approval => approval.ApproverType === type.ApproverType)
+					.reduce((latest, current) => {
+						return !latest || new Date(current.Statustime) > new Date(latest.Statustime)
+						? current
+						: latest;
+					}, null);
+				if (latest_approval_type && latest_approval_type.ApproverTypeSection === 2) {
+					required_action = latest_approval_type.REQUIRED_ACTION;
+					approver_type_section = latest_approval_type.ApproverTypeSection;
+				}
+			}
+
 			aResults.push({
 				TenderID: offerValidation.TENDERID,
 				OfferId: offerValidation.OFFERID,
 				CountryCode: offerValidation.COUNTRYCODE,
 				ApprovalContent: getApprovalContent(approverType),
-				ApproverTypeSection: (requiredAction === 1) ? 2 : 1,
-				REQUIRED_ACTION: approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? country.Region === "MEA" ? getRequiredAction(requiredAction) : approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredAction),
+				ApproverTypeSection: approver_type_section,
+				REQUIRED_ACTION: required_action,
 				ApprovalStatus: (approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus,
 				ApproverName: approverName,
 				ApproverEmailID: approverEmailID,

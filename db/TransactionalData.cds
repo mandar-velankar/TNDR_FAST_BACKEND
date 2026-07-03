@@ -312,6 +312,7 @@ entity PT_TMDLVTR {
         DeliveryItemBatch      : String;
         SLED_BBD               : Date;
         MFG                    : Date;
+        TenderReferenceNo      : String;
     //Associations
         Institute              : Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteID;
 }
@@ -729,6 +730,7 @@ entity PT_TMTEND: managed {
         EffectiveDate     : Date;
         ExpiryDate        : Date;
         OfferValidity      :Date;
+        Remarks              : LargeString;
 
         Custom               : Custom; // Custom attributes for templates usage
         //Associations

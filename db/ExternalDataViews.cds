@@ -71,8 +71,16 @@ left outer join DeliveryForProduct as delivery on offerProduct.OfferID = deliver
     ifnull(offerProduct.Offer.Distributor.DistributorName, '') as DistributorName:String,
     key ifnull(offerProduct.SKU.PRODUCTPACKNAME, '') as ProductPackName:String,
     ifnull(offerProduct.Offer.Currency, '') as Currency:String,
-    ifnull(offerProduct.Price.OfferPrice, 0) as OfferPrice_Unit:Double,
-    (ifnull(offerProduct.Price.OfferPrice, 0) * offerProduct.SKU.PACKFACTOR) as OfferPrice_Pack:Double,
+    case
+        when offerProduct.UnitPerPack = 'Unit' 
+            then ifnull(offerProduct.Price.OfferPrice, 0)
+        else ifnull(offerProduct.Price.OfferPrice, 0) / ifnull(offerProduct.SKU.PACKFACTOR, 1)
+    end as OfferPrice_Unit:Double,
+    case
+        when offerProduct.UnitPerPack = 'Unit' 
+            then ifnull(offerProduct.Price.OfferPrice, 0) * offerProduct.SKU.PACKFACTOR
+        else ifnull(offerProduct.Price.OfferPrice, 0)
+    end as OfferPrice_Pack:Double,
     ifnull(offerProduct.Price.FOC, 0) as FOC:Double,
     ifnull(offerProduct.Price.FOC_ABS_PCT, '') as FOC_ABS_PCT:String,
     ifnull(offerProduct.Price.FOCType, '') as FOCType:String,
