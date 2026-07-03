@@ -312,6 +312,7 @@ entity PT_TMDLVTR {
         DeliveryItemBatch      : String;
         SLED_BBD               : Date;
         MFG                    : Date;
+        TenderReferenceNo      : String;
     //Associations
         Institute              : Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteID;
 }
