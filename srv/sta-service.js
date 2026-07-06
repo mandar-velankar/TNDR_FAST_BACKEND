@@ -8645,7 +8645,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 	async function classifyExistingContractsForRead(sourceData) {
 		// Step 1: Fetch all IdentifyExistingContract
-		const contracts = await ConditionContract.run(SELECT.from(IdentifyExistingContract));
+		const contracts = await fetchAllRecords(IdentifyExistingContract);
 
 		if (!Array.isArray(contracts) || contracts.length === 0) return [];
 
@@ -8687,6 +8687,66 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		const classified = classifyContracts(sourceData, uniqueContracts, customerHierarchy);
 
 		return classified;
+	}
+
+	async function fetchAllRecords(entity) {
+		const allRecords = [];
+		const seenContractNumbers = new Set();
+		let batchNum = 1;
+
+		try {
+			// First batch
+			let response = await ConditionContract.run(SELECT.from(entity));
+			let batch = Array.isArray(response) ? response : response.value || [];
+			
+			batch.forEach(c => {
+				if (!seenContractNumbers.has(c.ContractNumber)) {
+					allRecords.push(c);
+					seenContractNumbers.add(c.ContractNumber);
+				}
+			});
+			
+			console.log(`Batch ${batchNum}: ${batch.length} records | Total unique: ${allRecords.length}`);
+			batchNum++;
+
+			// Follow pagination sequentially
+			while (response?.$nextLink) {
+				const decodedNextLink = decodeURIComponent(response.$nextLink);
+				console.log(`Fetching batch ${batchNum}: ${decodedNextLink}`);
+
+				// Wait for this batch to complete BEFORE checking $nextLink again
+				response = await ConditionContract.run(decodedNextLink);
+				batch = Array.isArray(response) ? response : response.value || [];
+				
+				if (!batch.length) {
+					console.log(`Batch ${batchNum}: Empty response, stopping`);
+					break;
+				}
+				
+				const newCount = batch.filter(c => !seenContractNumbers.has(c.ContractNumber)).length;
+				batch.forEach(c => {
+					if (!seenContractNumbers.has(c.ContractNumber)) {
+						allRecords.push(c);
+						seenContractNumbers.add(c.ContractNumber);
+					}
+				});
+				
+				console.log(`Batch ${batchNum}: ${batch.length} records (${newCount} new) | Total unique: ${allRecords.length}`);
+				batchNum++;
+
+				// Stop if no new records
+				if (newCount === 0) {
+					console.log('No new records, stopping');
+					break;
+				}
+			}
+
+			console.log(`Final total unique contracts: ${allRecords.length}`);
+			return allRecords;
+		} catch (error) {
+			console.error('fetchAllRecords error:', error);
+			throw error;
+		}
 	}
 
 	function classifyContracts(sourceData, enrichedContracts, customerHierarchy) {
