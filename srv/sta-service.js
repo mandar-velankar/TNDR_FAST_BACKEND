@@ -8763,31 +8763,33 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
             return [{ sourceData, case: "NO_MATCH" }];
         }
 
-        // ---- CASE 1 ----
-        //contract is single-customer with candidate + base = newOffer.InstituteID
-        const case1Contracts = relevantContracts.filter(
-            c =>
-                c.candidateInstitute == InstituteID &&
-                c.baseInstitute == InstituteID
-        );
-        if (case1Contracts.length > 0) {
-            results.push({ sourceData, case: "CASE_1", contracts: case1Contracts });
-        }
+		if (!AssortmentReference) {
+			// ---- CASE 1 ----
+			//contract is single-customer with candidate + base = newOffer.InstituteID
+			const case1Contracts = relevantContracts.filter(
+				c =>
+					c.candidateInstitute == InstituteID &&
+					c.baseInstitute == InstituteID
+			);
+			if (case1Contracts.length > 0) {
+				results.push({ sourceData, case: "CASE_1", contracts: case1Contracts });
+			}
 
-        // CASE 2 — Child with its Existing Parent Contract
-        const matchedHierarchyCase2  = customerHierarchy.filter(h => (h.InstituteID && h.InstituteID == InstituteID));
+			// CASE 2 — Child with its Existing Parent Contract
+			const matchedHierarchyCase2  = customerHierarchy.filter(h => (h.InstituteID && h.InstituteID == InstituteID) && h.Excluded === false);
 
-        if (matchedHierarchyCase2.length > 0) {
-            const childIDs = new Set(matchedHierarchyCase2.map(h => h.InstituteID));
+			if (matchedHierarchyCase2.length > 0) {
+				const childIDs = new Set(matchedHierarchyCase2.map(h => h.InstituteID));
 
-            relevantContracts = relevantContracts.filter(c => c.AssortmentReference != null && c.candidateType == 'CHILD');
+				relevantContracts = relevantContracts.filter(c => c.AssortmentReference != null && c.candidateType == 'CHILD');
 
-            const case2Contracts = relevantContracts.filter(c => childIDs.has(String(c.candidateInstitute)));
+				const case2Contracts = relevantContracts.filter(c => childIDs.has(String(c.candidateInstitute)));
 
-            if (case2Contracts.length > 0) {
-                results.push({ sourceData, case: "CASE_2", contracts: case2Contracts });
-            }
-        }
+				if (case2Contracts.length > 0) {
+					results.push({ sourceData, case: "CASE_2", contracts: case2Contracts });
+				}
+			}
+		}
 
 
         if (AssortmentReference) {
