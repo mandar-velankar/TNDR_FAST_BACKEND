@@ -2748,6 +2748,8 @@ module.exports = (srv) => {
 			DISTRIBUTOREMAIL: offer.DISTRIBUTOREMAIL,
 			REMARKS: remarks,
 			CUSTOM_REMARKS: offer.CUSTOM_REMARKS,
+			TENDER_REMARKS: tender.Remarks,
+			PROCUREMENT_METHOD: tender.PROCUREMENT_METHOD_ID,
 			DELIVERYTERMS: deliveryTerms,
 			PAYMENTTERMS: paymentTerms,
 			SHIPMENTTERMS: shipmentTerms,
