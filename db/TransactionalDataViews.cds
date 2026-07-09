@@ -2450,6 +2450,8 @@ left outer join TransactionalData.PriceCondition as priceCondition
             REMARKS               : String(5000);
             CUSTOM_REMARKS        : String not null;
             PL_CUSTOM_REMARKS     : LargeString;
+            TENDER_REMARKS        : LargeString;
+            PROCUREMENT_METHOD    : String;
             DELIVERYTERMS         : String(5000);
             PAYMENTTERMS          : String(5000);
             SHIPMENTTERMS         : String(5000);
