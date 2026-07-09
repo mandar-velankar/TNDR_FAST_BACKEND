@@ -7,7 +7,7 @@ using { com.bayer.SXTENDER.TransactionalData } from './TransactionalData';
 using { com.bayer.SXTENDER.TransactionalDataViews } from './TransactionalDataViews';
 using { com.bayer.SXTENDER.MasterDataLatestValues } from './MasterDataLatestValues';
 using { com.bayer.SXTENDER.PriceAgreementData } from './PriceAgreementData';
-
+using { ConditionContract as ConditionContract} from '../srv/external/ConditionContract';
 entity DeliveryForProduct as select from TransactionalData.PT_TMDLVTR as delivery {
     key delivery.OfferID as OFFERID,
     key delivery.ProductCode as PRODUCTID,
@@ -1698,3 +1698,81 @@ group by
     ofrs.Custom.Date_4,
     ofrs.Custom.String_14,
     dlv.ActualDeliveryQuantity;
+
+entity SpainTenderData as select from ConditionContract.FastConditionContracts as fc
+        inner join ConditionContract.CCMContract as cc
+            on cc.FastConditionContracts_ID = fc.ID
+        inner join ConditionContract.CCMCustomer as ccc
+            on ccc.CCMContract_ID = cc.ID
+        left outer join ConditionContract.CustomerHierarchy as cch
+            on cch.CCMContractID = cc.ID
+        inner join ConditionContract.CCMMaterial as ccm
+            on ccm.CCMContract_ID = cc.ID
+        inner join ConditionContract.PriceConditionInvoice as pi
+            on pi.CCMContract_ID = cc.ID
+{
+    cc.CreationDate,
+    fc.TenderID,
+    fc.OfferID,
+    ccc.CustomerID,
+    ccc.InstituteName,
+    fc.ContractType,
+    fc.OwnerName,
+    fc.SAPID,
+    cc.ContractNumber,
+    cc.ProductName,
+    cc.CCMContractStartDate,
+    cc.CCMContractEndDate,
+    cch.CustomerID          as CustomersInContract,
+    cch.Excluded,
+    cch.AssortmentReference,
+    ccm.ProductCode,
+    ccm.MaterialNumber,
+    pi.ConditionType,
+    pi.PriceConditionCode,
+    pi.YP10                 as YP10_YP11,
+    pi.YD02 * 100           as Discount: Double
+};
+
+
+entity MEATenderDeliveryData as select from MasterData.PT_TMCTRY as c 
+    inner join TransactionalData.PT_TMTEND as t 
+        on c.CountryCode = t.CountryCode 
+        and c.Region = 'MEA'
+    inner join TransactionalData.PT_TMOFPR as ofpr 
+        on t.TenderID = ofpr.TenderID
+    inner join MasterData.PT_TMPRDPCK as p 
+        on ofpr.ProductCode = p.PRODUCTPACKID
+    inner join MasterData.PT_TMPRDHIER as ph 
+        on p.HLEVEL6_CODE = ph.HLEVEL6_CODE
+    inner join MasterData.PT_TMINST as i 
+        on t.InstituteID = i.InstituteID
+    inner join TransactionalData.PT_TMDLVTR as d 
+        on t.CountryCode = d.CountryCode 
+        and t.TenderID = d.TenderID 
+        and ofpr.OfferID = d.OfferID
+        and ofpr.ProductCode = d.ProductCode {
+            c.CountryName as Country,
+            ph.HLEVEL4_NAME as BRAND,
+            t.TenderID,
+            t.TenderName,
+            ofpr.OfferID,
+            i.InstituteName as TENDERED_INSTITUTE,
+            i.InstituteName as DELIVERED_INSTITUTE,
+            p.PRODUCTPACKNAME as PRODUCT,
+            d.SKUCode as SKU,
+            d.LocalOrDirectDelivery as LOCAL_OR_DIRECT,
+            d.RequestedDeliveryDate as REQUESTED_DELIVERY_DATE,
+            d.RequestedQuantity as REQUESTED_QUANTITY,
+            d.ActualDeliveryDate as ACTUAL_DELIVERY_DATE,
+            d.ActualDeliveryQuantity as ACTUAL_QUANTITY,
+            d.PaidOrFree as PAID_OR_FREE,
+            d.PO as PO_NUMBER,
+            d.InvoiceNo as INVOICE_NO,
+            d.LocalDeliveryNoteNo as LOCAL_DELIVERY_NOTE_NO,
+            d.BatchNumber as BATCH_NO,
+            d.MFG as MFG_DATE,
+            d.SLED_BBD as EXPIRY_DATE,
+            d.Penalty,
+            d.Compensated
+};
