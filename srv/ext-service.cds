@@ -2,6 +2,7 @@ using { com.bayer.SXTENDER.ExternalDataViews } from '../db/ExternalDataViews';
 using {com.bayer.SXTENDER.MasterDataViews} from '../db/MasterDataViews';
 using {com.bayer.SXTENDER.MasterDataLatestValues} from '../db/MasterDataLatestValues';
 using {com.bayer.SXTENDER.TransactionalData} from '../db/TransactionalData';
+using { ConditionContract as ConditionContract } from './external/ConditionContract';
 
 @cds.query.limit: { default: 1000000, max: 1000000 }
 service ExternalService @(path: '/') @(requires:['f_tndr_cag_admin','f_tndr_cag_ext_user','f_tndr_cag_technical_user']){
@@ -198,7 +199,7 @@ service ExternalService @(path: '/') @(requires:['f_tndr_cag_admin','f_tndr_cag_
     @cov2ap.isoDateTime:true
     @cov2ap.isoTimestamp:true
     @cov2ap.isoDateTimeOffset:true
-    entity SpainTenderData as projection on ExternalDataViews.SpainTenderData;
+    entity SpainTenderData @readonly as projection on ConditionContract.SpainTenderData;
 
     @cov2ap.isoTime:true
     @cov2ap.isoDate:true
