@@ -1698,5 +1698,37 @@ entity ConditionContract.FastConditionContractMaterialsAndBrands {
 };
 
 @cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.SpainTenderData {
+  @odata.Type : 'Edm.Date'
+  CreationDate : Date;
+  TenderID : LargeString;
+  OfferID : LargeString;
+  CustomerID : LargeString;
+  InstituteName : LargeString;
+  ContractType : LargeString;
+  OwnerName : LargeString;
+  SAPID : LargeString;
+  ContractNumber : LargeString;
+  ProductName : LargeString;
+  @odata.Type : 'Edm.Date'
+  CCMContractStartDate : Date;
+  @odata.Type : 'Edm.Date'
+  CCMContractEndDate : Date;
+  CustomersInContract : LargeString;
+  @odata.Type : 'Edm.Boolean'
+  Excluded : Boolean;
+  AssortmentReference : LargeString;
+  ProductCode : LargeString;
+  MaterialNumber : LargeString;
+  ConditionType : LargeString;
+  PriceConditionCode : LargeString;
+  @odata.Type : 'Edm.Double'
+  YP10_YP11 : Double;
+  @odata.Type : 'Edm.Double'
+  Discount : Double;
+};
+
+@cds.external : true
 service ConditionContract {};
 
