@@ -1700,6 +1700,10 @@ entity ConditionContract.FastConditionContractMaterialsAndBrands {
 @cds.external : true
 @cds.persistence.skip : true
 entity ConditionContract.SpainTenderData {
+  @odata.Type : 'Edm.Guid'
+  key FastConditionContractID : UUID not null;
+  @odata.Type : 'Edm.Guid'
+  key CCMContractID : UUID not null;
   @odata.Type : 'Edm.Date'
   CreationDate : Date;
   TenderID : LargeString;
