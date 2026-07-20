@@ -1418,7 +1418,7 @@ module.exports = async (srv) => {
         }
 	});
 
-	srv.after("READ", "OfferProductsDetailView", async (data, req) => {
+	/**srv.after("READ", "OfferProductsDetailView", async (data, req) => {
 		try {
 			if (!data || (Array.isArray(data) && data.length === 0)) {
 				return data;
@@ -1460,7 +1460,7 @@ module.exports = async (srv) => {
 			console.error('Error in OfferProductsDetailView After READ');
             return req.reject(403, error?.message||"Error in OfferProductsDetailView");
 		}
-	});
+	});**/
 
 	srv.before(
 		['CREATE','UPDATE'], 
