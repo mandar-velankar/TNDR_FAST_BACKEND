@@ -170,7 +170,8 @@ module.exports = async (srv) => {
 		RelatedInstitutes,
 		CandidateInstitutes,
 		PolandOffersWithOnlyTMPending,
-		OfferProductsTableView
+		OfferProductsTableView,
+		PakistanMasterDistributors
 	} = cds.entities("StandardAppService");
 
 	const {
@@ -7833,6 +7834,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 		body["SoldToParty"] = customerID;
         body["to_Item"][0]["Material"] = materialNumber;
+        body["to_Partner"][0]["Customer"] = customerID;
         return body;
     }
 
@@ -7874,6 +7876,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 					"Material": "66040304",
 					"RequestedQuantity": "10000",
 					"to_PricingElement": []
+				}
+			],
+			"to_Partner": [
+				{
+					"PartnerFunction": "WE",
+					"Customer": "900000352"
 				}
 			]
 		}
@@ -9253,6 +9261,49 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		} catch (error) {
 			console.error('Error in TenderMasterInstituteView READ');
 			return req.reject(403, error?.message || "Error in TenderMasterInstituteView READ");
+		}
+	});
+
+	srv.on('READ', 'PakistanOfferProductDistributor', async (req) => {
+		try {
+			let countryCode =  req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'CountryCode'); 
+			let instituteID =  req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'InstituteID');
+			let offerId =  req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'OfferID');
+			let productCode =  req.query.SELECT.where && ServiceHelper.getWhereValue(req, 'ProductCode');
+			
+			const product = await SELECT.one.from(PT_TMCTPRDPCK).where({
+				COUNTRYCODE: countryCode,
+				PRODUCTPACKID: productCode
+			})
+
+			const pakistanMasterDistributor = await SELECT.one.from(PakistanMasterDistributors).where({
+				InstituteID: instituteID,
+				BU: product?.BU,
+				CountryCode: countryCode
+			});
+			const offerDistributor = await SELECT.one.from(PT_TMOFRS)
+				.columns('Distributor.DistributorID', 'Distributor.DistributorName')
+				.where({ OfferID: offerId });
+
+			if (pakistanMasterDistributor) {
+				return {
+					...pakistanMasterDistributor,
+					OfferID: offerId
+				}
+			}else {
+				return {
+					CountryCode: countryCode,
+					InstituteID: instituteID,
+					OfferID: offerId,
+					BU: product?.BU,
+					DistributorID: offerDistributor.DistributorID,
+					DistributorName: offerDistributor.DistributorName
+				}
+			}
+			
+		} catch (error) {
+			console.error('Error in PakistanOfferProductDistributor READ');
+			return req.reject(403, error?.message || "Error in PakistanOfferProductDistributor READ");
 		}
 	});
 
