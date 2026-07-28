@@ -308,6 +308,12 @@ entity PT_TMDLVTR {
         //EHEEX-OTT - 105262-Adding new 3 fields for delivery tracking tab
     key LotID                  : Integer default 1;
         Custom                 : Custom; // Custom attributes for templates usage
+        InvoiceValue           : Double;
+        BatchNumber            : String;
+        DeliveryItemBatch      : String;
+        SLED_BBD               : Date;
+        MFG                    : Date;
+        TenderReferenceNo      : String;
     //Associations
         Institute              : Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteID;
 }
@@ -495,6 +501,7 @@ entity FreeGoodsOther: cuid, managed {
     PotentialGeneratedSavings           : Decimal;
     RoyalDecree                         : String;
     ADD_INCLUDE                         : String;
+    FreeGoodsOther_STP_FOC_Percentage   : Double; // Applciable for PACAWI countries
     PriceCondition                      : Association to PriceCondition;
 }
 
@@ -592,6 +599,8 @@ entity PriceCondition: cuid, managed {
     ConfidentialDiscount                : Double;
     RoyalDecreePercentage_1             : Double;
     MarketIncentiveID                   : String;
+    QuotationPriceConditionCode         : String;
+    IsYP11WithoutRD                     : Boolean default false;
     RoyalDecreePercentage               : Association to MasterData.RoyalDecree on  RoyalDecreePercentage.ProductPackID = ProductCode
                                                                                 and RoyalDecreePercentage.ValidTo = '9999-12-31 00:00:00.000000000';
     CapBrazil                           : Association to MasterDataViews.MostRecentCapView on CapBrazil.ValidTo = '9999-12-31 00:00:00.000000000';
@@ -721,6 +730,7 @@ entity PT_TMTEND: managed {
         EffectiveDate     : Date;
         ExpiryDate        : Date;
         OfferValidity      :Date;
+        Remarks              : LargeString;
 
         Custom               : Custom; // Custom attributes for templates usage
         //Associations
@@ -940,10 +950,12 @@ entity OfferProductOfferStatus {
             ApproverList        : Association to many MasterData.CountryApprovers
                                       on  ApproverList.CountryCode  = CountryCode
                                       and ApproverList.ApproverType = ApproverType
-                                      and ApproverList.Division     = Division;
+                                      and ApproverList.Division     = Division
+                                      and ApproverList.Enabled      = true;
             ApproverTypes       : Association to many MasterData.ApproverTypes
                                       on  ApproverTypes.CountryCode  = CountryCode
-                                      and ApproverTypes.ApproverType = ApproverType;
+                                      and ApproverTypes.ApproverType = ApproverType
+                                      and ApproverTypes.Enabled      = true;
 };
 
 entity ExcelUpload:cuid {
@@ -1016,6 +1028,7 @@ entity CCMPriceCondition: cuid, managed{
     YP00                                : Decimal; //PVL
     YP04                                : Decimal; //Confidential Discount
     YP10                                : Decimal; //NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD
+    YP11                                : Decimal;
     YD75                                : Double;  //ADDITIONALDISCOUNT
     YD06                                : Double; //ROYALDECREE
     YD02                                : Double; //Commercial Discount 
@@ -1033,4 +1046,5 @@ entity CCMPriceCondition: cuid, managed{
     NETPRICEWITHOUTTAX                  : Decimal;
     NETPRICEWITHTAX                     : Decimal;
     ConditionType                       : String;
+    IsYP11WithoutRD                     : Boolean default false;
 }

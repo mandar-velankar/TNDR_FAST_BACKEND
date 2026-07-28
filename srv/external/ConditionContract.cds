@@ -1,4 +1,4 @@
-/* checksum : 2d74f2f64d707d758d364a8cf85ae577 */
+/* checksum : 96082b5db700131234e30b31876d5d76 */
 @cds.external : true
 function ConditionContract.getInstituteData() returns LargeString;
 
@@ -7,6 +7,18 @@ function ConditionContract.getESUsers() returns LargeString;
 
 @cds.external : true
 function ConditionContract.getUserCountries() returns LargeString;
+
+@cds.external : true
+function ConditionContract.getCacheStats() returns LargeString;
+
+@cds.external : true
+function ConditionContract.invalidateInstitute() returns LargeString;
+
+@cds.external : true
+function ConditionContract.refreshInstitute() returns LargeString;
+
+@cds.external : true
+function ConditionContract.invalidateAPI() returns LargeString;
 
 @cds.external : true
 action ConditionContract.createCCMContract(
@@ -44,6 +56,11 @@ action ConditionContract.getSAPSalesOrderSimulation(
 @cds.external : true
 action ConditionContract.ignoreCurrentCCMPrice(
   CCMContractID : UUID
+) returns LargeString;
+
+@cds.external : true
+action ConditionContract.addNewMaterialNumberToExistingContract(
+  FastCCMContractId : UUID
 ) returns LargeString;
 
 @cds.external : true
@@ -93,6 +110,8 @@ entity ConditionContract.FastConditionContracts {
   Reference : LargeString;
   Status : LargeString;
   Owner : LargeString;
+  OwnerName : LargeString;
+  OwnerEmail : LargeString;
   BrandFilter : LargeString;
   ProductFilter : LargeString;
   Extension : Boolean;
@@ -108,7 +127,6 @@ entity ConditionContract.FastConditionContracts {
   hasExpiringSoonContracts : Boolean;
   hasExpiredContracts : Boolean;
   hasCancelledContracts : Boolean;
-  hasContractsToBeSynchronized : Boolean;
   hasNewContracts : Boolean;
   @cds.ambiguous : 'missing on condition?'
   CCMContract : Composition of many ConditionContract.CCMContract;
@@ -168,7 +186,9 @@ entity ConditionContract.CCMContract {
   CCMContractStartDate : Date;
   CCMContractEndDate : Date;
   PreviousContractNumber : LargeString;
+  UpdatedContractNumber : LargeString;
   ContractNumber : LargeString;
+  ContractReferene : LargeString;
   Expired : Boolean;
   ItemGUID : LargeString;
   Synchronized : Boolean default false;
@@ -430,6 +450,7 @@ entity ConditionContract.PriceConditionInvoice {
   RentalPrice : Double;
   MonthlyRentPerUnit : Double;
   AnnualValue : Double;
+  PriceConditionCode : LargeString;
   @cds.ambiguous : 'missing on condition?'
   CCMContract : Association to one ConditionContract.CCMContract on CCMContract.ID = CCMContract_ID;
   CCMContract_ID : UUID;
@@ -629,6 +650,7 @@ entity ConditionContract.SettlementsDate {
   ToDate : Date;
   SettlementID : LargeString;
   RebateContractNumber : LargeString;
+  CreationDate : Date;
   Synchronized : Boolean default false;
 };
 
@@ -733,9 +755,8 @@ entity ConditionContract.ConditionContractsLog {
   Synchronized : Boolean default false;
   createdAt : Date;
   createdBy : LargeString;
-  @cds.ambiguous : 'missing on condition?'
-  CCMContract : Association to one ConditionContract.CCMContract on CCMContract.ID = CCMContract_ID;
-  CCMContract_ID : UUID;
+  ErrorMessage : LargeString;
+  CCMContractID : UUID;
 };
 
 @cds.external : true
@@ -832,6 +853,8 @@ entity ConditionContract.FastConditionContractsView {
   Reference : LargeString;
   Status : LargeString;
   Owner : LargeString;
+  OwnerName : LargeString;
+  OwnerEmail : LargeString;
   BrandFilter : LargeString;
   ProductFilter : LargeString;
   Extension : Boolean;
@@ -847,10 +870,14 @@ entity ConditionContract.FastConditionContractsView {
   hasExpiringSoonContracts : Boolean;
   hasExpiredContracts : Boolean;
   hasCancelledContracts : Boolean;
-  hasContractsToBeSynchronized : Boolean;
   hasNewContracts : Boolean;
   @cds.ambiguous : 'missing on condition?'
   CCMContract : Composition of many ConditionContract.CCMContract;
+  FastConditionContractID : UUID;
+  @Core.Computed : true
+  ContractMaterialNumbers : LargeString;
+  @Core.Computed : true
+  ContractBrandIDs : LargeString;
 };
 
 @cds.external : true
@@ -876,6 +903,8 @@ entity ConditionContract.CCMContractView {
   Extension : Boolean;
   ExtensionPeriod : LargeString;
   CreationDate : Date;
+  CCMContractID : UUID;
+  CCMCustomerID : UUID;
   InstituteName : LargeString;
   InstituteType : LargeString;
   InstituteID : LargeString;
@@ -929,6 +958,8 @@ entity ConditionContract.CCMContractInformationDetailView {
   Reference : LargeString;
   Status : LargeString;
   Owner : LargeString;
+  OwnerName : LargeString;
+  OwnerEmail : LargeString;
   BrandFilter : LargeString;
   ProductFilter : LargeString;
   Extension : Boolean;
@@ -944,7 +975,6 @@ entity ConditionContract.CCMContractInformationDetailView {
   hasExpiringSoonContracts : Boolean;
   hasExpiredContracts : Boolean;
   hasCancelledContracts : Boolean;
-  hasContractsToBeSynchronized : Boolean;
   hasNewContracts : Boolean;
   @cds.ambiguous : 'missing on condition?'
   CCMContract : Composition of many ConditionContract.CCMContract;
@@ -1004,7 +1034,9 @@ entity ConditionContract.CCMContractProductsView {
   CCMContractStartDate : Date;
   CCMContractEndDate : Date;
   PreviousContractNumber : LargeString;
+  UpdatedContractNumber : LargeString;
   ContractNumber : LargeString;
+  ContractReferene : LargeString;
   Expired : Boolean;
   ItemGUID : LargeString;
   Synchronized : Boolean default false;
@@ -1090,7 +1122,9 @@ entity ConditionContract.CCMContractInformationDetailDetailView {
   CCMContractStartDate : Date;
   CCMContractEndDate : Date;
   PreviousContractNumber : LargeString;
+  UpdatedContractNumber : LargeString;
   ContractNumber : LargeString;
+  ContractReferene : LargeString;
   Expired : Boolean;
   ItemGUID : LargeString;
   Synchronized : Boolean default false;
@@ -1143,12 +1177,15 @@ entity ConditionContract.ContractPayloadView {
   ConditionValidityStartDate : Date;
   ConditionValidityEndDate : Date;
   ConditionRateAmount : Double;
+  EANUPCCode : LargeString;
   Product : LargeString;
   SAPID : LargeString;
   ExternalID : LargeString;
   Reference : LargeString;
   TenderID : LargeString;
+  OfferID : LargeString;
   ContractType : LargeString;
+  PriceConditionCode : LargeString;
 };
 
 @cds.external : true
@@ -1202,6 +1239,7 @@ entity ConditionContract.MaxDiscountView {
 entity ConditionContract.CCMContractPricingFormView {
   @Core.ComputedDefaultValue : true
   key CCMContractID : UUID not null;
+  Synchronized : Boolean default false;
   ConditionType : LargeString;
   CountryCode : LargeString;
   YP00 : Double;
@@ -1227,6 +1265,8 @@ entity ConditionContract.CCMContractPricingFormView {
   RentalPrice : Double;
   MonthlyRentPerUnit : Double;
   AnnualValue : Double;
+  PriceConditionCode : LargeString;
+  ContractType : LargeString;
 };
 
 @cds.external : true
@@ -1295,6 +1335,7 @@ entity ConditionContract.IdentifyExistingContract {
   ProductCode : LargeString;
   AssortmentReference : LargeString;
   InstituteID : LargeString;
+  EANUPCCode : LargeString;
   CndnContrValidFrom : Date;
   CndnContrValidTo : Date;
   key Customer : LargeString not null;
@@ -1385,6 +1426,8 @@ entity ConditionContract.CurrentCCMPricingView {
   @Core.ComputedDefaultValue : true
   key ID : UUID not null;
   CountryCode : LargeString;
+  ContractType : LargeString;
+  PriceConditionCode : LargeString;
   @Core.Computed : true
   ConditionType : LargeString;
   @Core.Computed : true
@@ -1431,6 +1474,263 @@ entity ConditionContract.CurrentCCMPricingView {
   MonthlyRentPerUnit : Double;
   @Core.Computed : true
   AnnualValue : Double;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.CCMContractsCreatedNotificationMailJobView {
+  FastConditionContractID : UUID;
+  CCMContractID : UUID;
+  CountryCode : LargeString;
+  /** User's unique ID */
+  @UI.HiddenFilter : true
+  @UI.ExcludeFromNavigationContext : true
+  @Core.Computed : true
+  @Common.Label : 'Changed By'
+  CWID : String(255);
+  Owner : LargeString;
+  UserEmail : LargeString;
+  OwnerName : LargeString;
+  key InstituteID : LargeString not null;
+  InstituteName : LargeString;
+  key MaterialNumber : LargeString not null;
+  PRODUCTPACKNAME : LargeString;
+  OfferID : LargeString;
+  Division : LargeString;
+  @Core.Computed : true
+  ContractType : LargeString;
+  ContractNumber : LargeString;
+  UpdatedContractNumber : LargeString;
+  EffectiveDate : Date;
+  ExpiryDate : Date;
+  ContractCreationDate : Date;
+  ContractReferene : LargeString;
+  TenderID : LargeString;
+  Classification : LargeString;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.CCMContractsExtendedView {
+  FastConditionContractID : UUID;
+  CCMContractID : UUID;
+  CountryCode : LargeString;
+  /** User's unique ID */
+  @UI.HiddenFilter : true
+  @UI.ExcludeFromNavigationContext : true
+  @Core.Computed : true
+  @Common.Label : 'Changed By'
+  CWID : String(255);
+  Owner : LargeString;
+  UserEmail : LargeString;
+  OwnerName : LargeString;
+  key InstituteID : LargeString not null;
+  InstituteName : LargeString;
+  key MaterialNumber : LargeString not null;
+  PRODUCTPACKNAME : LargeString;
+  OfferID : LargeString;
+  Division : LargeString;
+  @Core.Computed : true
+  ContractType : LargeString;
+  ContractNumber : LargeString;
+  EffectiveDate : Date;
+  ExpiryDate : Date;
+  ContractCreationDate : Date;
+  ContractReferene : LargeString;
+  TenderID : LargeString;
+  Classification : LargeString;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.CCMContractsExpiringSoonView {
+  FastConditionContractID : UUID;
+  @Core.ComputedDefaultValue : true
+  key CCMContractID : UUID not null;
+  TenderID : LargeString;
+  OfferID : LargeString;
+  CountryCode : LargeString;
+  /** User's unique ID */
+  @UI.HiddenFilter : true
+  @UI.ExcludeFromNavigationContext : true
+  @Core.Computed : true
+  @Common.Label : 'Changed By'
+  CWID : String(255);
+  Owner : LargeString;
+  OwnerEmail : LargeString;
+  OwnerName : LargeString;
+  ExternalID : LargeString;
+  CCMContractEndDate : Date;
+  InstituteName : LargeString;
+  ProductName : LargeString;
+  ProductCode : LargeString;
+  ContractNumber : LargeString;
+  EffectiveDate : Date;
+  ExpiryDate : Date;
+  Synchronized : Boolean default false;
+  ExtensionPeriod : LargeString;
+  Extension : Boolean;
+  PVL : Double;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.CCMContractPriceChangeNotificationView {
+  FastConditionContractID : UUID;
+  @Core.ComputedDefaultValue : true
+  key CCMContractID : UUID not null;
+  TenderID : LargeString;
+  OfferID : LargeString;
+  CountryCode : LargeString;
+  /** User's unique ID */
+  @UI.HiddenFilter : true
+  @UI.ExcludeFromNavigationContext : true
+  @Core.Computed : true
+  @Common.Label : 'Changed By'
+  CWID : String(255);
+  Owner : LargeString;
+  OwnerEmail : LargeString;
+  OwnerName : LargeString;
+  ExternalID : LargeString;
+  hasNetPriceAbovePVL : Boolean;
+  hasNetPriceBelowFloorPrice : Boolean;
+  hasUpdatedPVL : Boolean;
+  hasUpdatedConfidentialPrice : Boolean;
+  InstituteName : LargeString;
+  InstituteType : LargeString;
+  InstituteID : LargeString;
+  CustomerID : LargeString;
+  ProductName : LargeString;
+  ProductCode : LargeString;
+  ContractNumber : LargeString;
+  EffectiveDate : Date;
+  ExpiryDate : Date;
+  Synchronized : Boolean default false;
+  ExtensionPeriod : LargeString;
+  Extension : Boolean;
+  isCancelled : Boolean default false;
+  isExpired : Boolean;
+  UoM : LargeString;
+  PackFactor : Double;
+  MaterialNumber : LargeString;
+  ConditionType : LargeString;
+  PVL : Double;
+  CurrentPVL : Double;
+  NetPriceWithTax : Decimal;
+  @Core.Computed : true
+  NetPrice : Double;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.ContractNewMaterialNumberPayloadView {
+  @Core.ComputedDefaultValue : true
+  key FastConditionContractID : UUID not null;
+  @Core.ComputedDefaultValue : true
+  key CCMContractID : UUID not null;
+  key ProductCode : LargeString not null;
+  ContractNumber : LargeString;
+  CndnContrValidFrom : Date;
+  CndnContrValidTo : Date;
+  Customer : LargeString;
+  InstituteID : Integer;
+  Division : LargeString;
+  ConditionType : LargeString;
+  YD02 : Double;
+  YD06 : Double;
+  YP10 : Double;
+  UoM : LargeString;
+  PackFactor : Double;
+  RequestedVolume : Integer;
+  ConditionValidityStartDate : Date;
+  ConditionValidityEndDate : Date;
+  ConditionRateAmount : Double;
+  Product : LargeString;
+  SAPID : LargeString;
+  ExternalID : LargeString;
+  Reference : LargeString;
+  TenderID : LargeString;
+  ContractType : LargeString;
+  PriceConditionCode : LargeString;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.CCMContractsCancelledNotificationMailJob {
+  FastConditionContractID : UUID;
+  CCMContractID : UUID;
+  CountryCode : LargeString;
+  /** User's unique ID */
+  @UI.HiddenFilter : true
+  @UI.ExcludeFromNavigationContext : true
+  @Core.Computed : true
+  @Common.Label : 'Changed By'
+  CWID : String(255);
+  Owner : LargeString;
+  UserEmail : LargeString;
+  OwnerName : LargeString;
+  key InstituteID : LargeString not null;
+  InstituteName : LargeString;
+  key MaterialNumber : LargeString not null;
+  PRODUCTPACKNAME : LargeString;
+  OfferID : LargeString;
+  Division : LargeString;
+  @Core.Computed : true
+  ContractType : LargeString;
+  ContractNumber : LargeString;
+  EffectiveDate : Date;
+  ExpiryDate : Date;
+  ContractCreationDate : Date;
+  ContractReferene : LargeString;
+  TenderID : LargeString;
+  Classification : LargeString;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.FastConditionContractMaterialsAndBrands {
+  @Core.ComputedDefaultValue : true
+  key FastConditionContractID : UUID not null;
+  @Core.Computed : true
+  ContractMaterialNumbers : LargeString;
+  @Core.Computed : true
+  ContractBrandIDs : LargeString;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.SpainTenderData {
+  @odata.Type : 'Edm.Guid'
+  key FastConditionContractID : UUID not null;
+  @odata.Type : 'Edm.Guid'
+  key CCMContractID : UUID not null;
+  @odata.Type : 'Edm.Date'
+  CreationDate : Date;
+  TenderID : LargeString;
+  OfferID : LargeString;
+  CustomerID : LargeString;
+  InstituteName : LargeString;
+  ContractType : LargeString;
+  OwnerName : LargeString;
+  SAPID : LargeString;
+  ContractNumber : LargeString;
+  ProductName : LargeString;
+  @odata.Type : 'Edm.Date'
+  CCMContractStartDate : Date;
+  @odata.Type : 'Edm.Date'
+  CCMContractEndDate : Date;
+  CustomersInContract : LargeString;
+  @odata.Type : 'Edm.Boolean'
+  Excluded : Boolean;
+  AssortmentReference : LargeString;
+  ProductCode : LargeString;
+  MaterialNumber : LargeString;
+  ConditionType : LargeString;
+  PriceConditionCode : LargeString;
+  @odata.Type : 'Edm.Double'
+  YP10_YP11 : Double;
+  @odata.Type : 'Edm.Double'
+  Discount : Double;
 };
 
 @cds.external : true

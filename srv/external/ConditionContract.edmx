@@ -68,9 +68,7 @@
         <EntitySet Name="ContractItemGUID" EntityType="ConditionContract.ContractItemGUID">
           <NavigationPropertyBinding Path="CCMContract" Target="CCMContract"/>
         </EntitySet>
-        <EntitySet Name="ConditionContractsLog" EntityType="ConditionContract.ConditionContractsLog">
-          <NavigationPropertyBinding Path="CCMContract" Target="CCMContract"/>
-        </EntitySet>
+        <EntitySet Name="ConditionContractsLog" EntityType="ConditionContract.ConditionContractsLog"/>
         <EntitySet Name="CustomerHierarchy" EntityType="ConditionContract.CustomerHierarchy">
           <NavigationPropertyBinding Path="CCMCustomer" Target="CCMCustomer"/>
         </EntitySet>
@@ -114,6 +112,13 @@
         <EntitySet Name="BrandProductsView" EntityType="ConditionContract.BrandProductsView"/>
         <EntitySet Name="ExistingContractInvoicePrices" EntityType="ConditionContract.ExistingContractInvoicePrices"/>
         <EntitySet Name="CurrentCCMPricingView" EntityType="ConditionContract.CurrentCCMPricingView"/>
+        <EntitySet Name="CCMContractsCreatedNotificationMailJobView" EntityType="ConditionContract.CCMContractsCreatedNotificationMailJobView"/>
+        <EntitySet Name="CCMContractsExtendedView" EntityType="ConditionContract.CCMContractsExtendedView"/>
+        <EntitySet Name="CCMContractsExpiringSoonView" EntityType="ConditionContract.CCMContractsExpiringSoonView"/>
+        <EntitySet Name="CCMContractPriceChangeNotificationView" EntityType="ConditionContract.CCMContractPriceChangeNotificationView"/>
+        <EntitySet Name="ContractNewMaterialNumberPayloadView" EntityType="ConditionContract.ContractNewMaterialNumberPayloadView"/>
+        <EntitySet Name="CCMContractsCancelledNotificationMailJob" EntityType="ConditionContract.CCMContractsCancelledNotificationMailJob"/>
+        <EntitySet Name="FastConditionContractMaterialsAndBrands" EntityType="ConditionContract.FastConditionContractMaterialsAndBrands"/>
         <FunctionImport Name="getInstituteData" Function="ConditionContract.getInstituteData"/>
         <FunctionImport Name="getESUsers" Function="ConditionContract.getESUsers"/>
         <FunctionImport Name="getUserCountries" Function="ConditionContract.getUserCountries"/>
@@ -123,6 +128,11 @@
         <ActionImport Name="terminateCCMContract" Action="ConditionContract.terminateCCMContract"/>
         <ActionImport Name="getSAPSalesOrderSimulation" Action="ConditionContract.getSAPSalesOrderSimulation"/>
         <ActionImport Name="ignoreCurrentCCMPrice" Action="ConditionContract.ignoreCurrentCCMPrice"/>
+        <ActionImport Name="addNewMaterialNumberToExistingContract" Action="ConditionContract.addNewMaterialNumberToExistingContract"/>
+        <FunctionImport Name="getCacheStats" Function="ConditionContract.getCacheStats"/>
+        <FunctionImport Name="invalidateInstitute" Function="ConditionContract.invalidateInstitute"/>
+        <FunctionImport Name="refreshInstitute" Function="ConditionContract.refreshInstitute"/>
+        <FunctionImport Name="invalidateAPI" Function="ConditionContract.invalidateAPI"/>
       </EntityContainer>
       <EntityType Name="FastConditionContracts">
         <Key>
@@ -147,6 +157,8 @@
         <Property Name="Reference" Type="Edm.String"/>
         <Property Name="Status" Type="Edm.String"/>
         <Property Name="Owner" Type="Edm.String"/>
+        <Property Name="OwnerName" Type="Edm.String"/>
+        <Property Name="OwnerEmail" Type="Edm.String"/>
         <Property Name="BrandFilter" Type="Edm.String"/>
         <Property Name="ProductFilter" Type="Edm.String"/>
         <Property Name="Extension" Type="Edm.Boolean"/>
@@ -162,7 +174,6 @@
         <Property Name="hasExpiringSoonContracts" Type="Edm.Boolean"/>
         <Property Name="hasExpiredContracts" Type="Edm.Boolean"/>
         <Property Name="hasCancelledContracts" Type="Edm.Boolean"/>
-        <Property Name="hasContractsToBeSynchronized" Type="Edm.Boolean"/>
         <Property Name="hasNewContracts" Type="Edm.Boolean"/>
         <NavigationProperty Name="CCMContract" Type="Collection(ConditionContract.CCMContract)" Partner="FastConditionContracts">
           <OnDelete Action="Cascade"/>
@@ -194,7 +205,9 @@
         <Property Name="CCMContractStartDate" Type="Edm.Date"/>
         <Property Name="CCMContractEndDate" Type="Edm.Date"/>
         <Property Name="PreviousContractNumber" Type="Edm.String"/>
+        <Property Name="UpdatedContractNumber" Type="Edm.String"/>
         <Property Name="ContractNumber" Type="Edm.String"/>
+        <Property Name="ContractReferene" Type="Edm.String"/>
         <Property Name="Expired" Type="Edm.Boolean"/>
         <Property Name="ItemGUID" Type="Edm.String"/>
         <Property Name="Synchronized" Type="Edm.Boolean" DefaultValue="false"/>
@@ -358,6 +371,7 @@
         <Property Name="RentalPrice" Type="Edm.Double"/>
         <Property Name="MonthlyRentPerUnit" Type="Edm.Double"/>
         <Property Name="AnnualValue" Type="Edm.Double"/>
+        <Property Name="PriceConditionCode" Type="Edm.String"/>
         <NavigationProperty Name="CCMContract" Type="ConditionContract.CCMContract">
           <ReferentialConstraint Property="CCMContract_ID" ReferencedProperty="ID"/>
         </NavigationProperty>
@@ -455,6 +469,7 @@
         <Property Name="ToDate" Type="Edm.Date"/>
         <Property Name="SettlementID" Type="Edm.String"/>
         <Property Name="RebateContractNumber" Type="Edm.String"/>
+        <Property Name="CreationDate" Type="Edm.Date"/>
         <Property Name="Synchronized" Type="Edm.Boolean" DefaultValue="false"/>
       </EntityType>
       <EntityType Name="APIDefinition">
@@ -534,10 +549,8 @@
         <Property Name="Synchronized" Type="Edm.Boolean" DefaultValue="false"/>
         <Property Name="createdAt" Type="Edm.Date"/>
         <Property Name="createdBy" Type="Edm.String"/>
-        <NavigationProperty Name="CCMContract" Type="ConditionContract.CCMContract">
-          <ReferentialConstraint Property="CCMContract_ID" ReferencedProperty="ID"/>
-        </NavigationProperty>
-        <Property Name="CCMContract_ID" Type="Edm.Guid"/>
+        <Property Name="ErrorMessage" Type="Edm.String"/>
+        <Property Name="CCMContractID" Type="Edm.Guid"/>
       </EntityType>
       <EntityType Name="CustomerHierarchy">
         <Key>
@@ -585,6 +598,8 @@
         <Property Name="Reference" Type="Edm.String"/>
         <Property Name="Status" Type="Edm.String"/>
         <Property Name="Owner" Type="Edm.String"/>
+        <Property Name="OwnerName" Type="Edm.String"/>
+        <Property Name="OwnerEmail" Type="Edm.String"/>
         <Property Name="BrandFilter" Type="Edm.String"/>
         <Property Name="ProductFilter" Type="Edm.String"/>
         <Property Name="Extension" Type="Edm.Boolean"/>
@@ -600,11 +615,13 @@
         <Property Name="hasExpiringSoonContracts" Type="Edm.Boolean"/>
         <Property Name="hasExpiredContracts" Type="Edm.Boolean"/>
         <Property Name="hasCancelledContracts" Type="Edm.Boolean"/>
-        <Property Name="hasContractsToBeSynchronized" Type="Edm.Boolean"/>
         <Property Name="hasNewContracts" Type="Edm.Boolean"/>
         <NavigationProperty Name="CCMContract" Type="Collection(ConditionContract.CCMContract)">
           <OnDelete Action="Cascade"/>
         </NavigationProperty>
+        <Property Name="FastConditionContractID" Type="Edm.Guid"/>
+        <Property Name="ContractMaterialNumbers" Type="Edm.String"/>
+        <Property Name="ContractBrandIDs" Type="Edm.String"/>
       </EntityType>
       <EntityType Name="CCMContractView">
         <Key>
@@ -629,6 +646,8 @@
         <Property Name="Extension" Type="Edm.Boolean"/>
         <Property Name="ExtensionPeriod" Type="Edm.String"/>
         <Property Name="CreationDate" Type="Edm.Date"/>
+        <Property Name="CCMContractID" Type="Edm.Guid"/>
+        <Property Name="CCMCustomerID" Type="Edm.Guid"/>
         <Property Name="InstituteName" Type="Edm.String"/>
         <Property Name="InstituteType" Type="Edm.String"/>
         <Property Name="InstituteID" Type="Edm.String"/>
@@ -657,6 +676,8 @@
         <Property Name="Reference" Type="Edm.String"/>
         <Property Name="Status" Type="Edm.String"/>
         <Property Name="Owner" Type="Edm.String"/>
+        <Property Name="OwnerName" Type="Edm.String"/>
+        <Property Name="OwnerEmail" Type="Edm.String"/>
         <Property Name="BrandFilter" Type="Edm.String"/>
         <Property Name="ProductFilter" Type="Edm.String"/>
         <Property Name="Extension" Type="Edm.Boolean"/>
@@ -672,7 +693,6 @@
         <Property Name="hasExpiringSoonContracts" Type="Edm.Boolean"/>
         <Property Name="hasExpiredContracts" Type="Edm.Boolean"/>
         <Property Name="hasCancelledContracts" Type="Edm.Boolean"/>
-        <Property Name="hasContractsToBeSynchronized" Type="Edm.Boolean"/>
         <Property Name="hasNewContracts" Type="Edm.Boolean"/>
         <NavigationProperty Name="CCMContract" Type="Collection(ConditionContract.CCMContract)">
           <OnDelete Action="Cascade"/>
@@ -704,7 +724,9 @@
         <Property Name="CCMContractStartDate" Type="Edm.Date"/>
         <Property Name="CCMContractEndDate" Type="Edm.Date"/>
         <Property Name="PreviousContractNumber" Type="Edm.String"/>
+        <Property Name="UpdatedContractNumber" Type="Edm.String"/>
         <Property Name="ContractNumber" Type="Edm.String"/>
+        <Property Name="ContractReferene" Type="Edm.String"/>
         <Property Name="Expired" Type="Edm.Boolean"/>
         <Property Name="ItemGUID" Type="Edm.String"/>
         <Property Name="Synchronized" Type="Edm.Boolean" DefaultValue="false"/>
@@ -769,7 +791,9 @@
         <Property Name="CCMContractStartDate" Type="Edm.Date"/>
         <Property Name="CCMContractEndDate" Type="Edm.Date"/>
         <Property Name="PreviousContractNumber" Type="Edm.String"/>
+        <Property Name="UpdatedContractNumber" Type="Edm.String"/>
         <Property Name="ContractNumber" Type="Edm.String"/>
+        <Property Name="ContractReferene" Type="Edm.String"/>
         <Property Name="Expired" Type="Edm.Boolean"/>
         <Property Name="ItemGUID" Type="Edm.String"/>
         <Property Name="Synchronized" Type="Edm.Boolean" DefaultValue="false"/>
@@ -830,12 +854,15 @@
         <Property Name="ConditionValidityStartDate" Type="Edm.Date"/>
         <Property Name="ConditionValidityEndDate" Type="Edm.Date"/>
         <Property Name="ConditionRateAmount" Type="Edm.Double"/>
+        <Property Name="EANUPCCode" Type="Edm.String"/>
         <Property Name="Product" Type="Edm.String"/>
         <Property Name="SAPID" Type="Edm.String"/>
         <Property Name="ExternalID" Type="Edm.String"/>
         <Property Name="Reference" Type="Edm.String"/>
         <Property Name="TenderID" Type="Edm.String"/>
+        <Property Name="OfferID" Type="Edm.String"/>
         <Property Name="ContractType" Type="Edm.String"/>
+        <Property Name="PriceConditionCode" Type="Edm.String"/>
       </EntityType>
       <EntityType Name="ContractRebatePayloadView">
         <Key>
@@ -887,6 +914,7 @@
           <PropertyRef Name="CCMContractID"/>
         </Key>
         <Property Name="CCMContractID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="Synchronized" Type="Edm.Boolean" DefaultValue="false"/>
         <Property Name="ConditionType" Type="Edm.String"/>
         <Property Name="CountryCode" Type="Edm.String"/>
         <Property Name="YP00" Type="Edm.Double"/>
@@ -912,6 +940,8 @@
         <Property Name="RentalPrice" Type="Edm.Double"/>
         <Property Name="MonthlyRentPerUnit" Type="Edm.Double"/>
         <Property Name="AnnualValue" Type="Edm.Double"/>
+        <Property Name="PriceConditionCode" Type="Edm.String"/>
+        <Property Name="ContractType" Type="Edm.String"/>
       </EntityType>
       <EntityType Name="CCMContractFOCTableView">
         <Key>
@@ -978,6 +1008,7 @@
         <Property Name="ProductCode" Type="Edm.String"/>
         <Property Name="AssortmentReference" Type="Edm.String"/>
         <Property Name="InstituteID" Type="Edm.String"/>
+        <Property Name="EANUPCCode" Type="Edm.String"/>
         <Property Name="CndnContrValidFrom" Type="Edm.Date"/>
         <Property Name="CndnContrValidTo" Type="Edm.Date"/>
         <Property Name="Customer" Type="Edm.String" Nullable="false"/>
@@ -1068,6 +1099,8 @@
         </Key>
         <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
         <Property Name="CountryCode" Type="Edm.String"/>
+        <Property Name="ContractType" Type="Edm.String"/>
+        <Property Name="PriceConditionCode" Type="Edm.String"/>
         <Property Name="ConditionType" Type="Edm.String"/>
         <Property Name="Currency" Type="Edm.String"/>
         <Property Name="YP00" Type="Edm.Double"/>
@@ -1091,6 +1124,196 @@
         <Property Name="RentalPrice" Type="Edm.Double"/>
         <Property Name="MonthlyRentPerUnit" Type="Edm.Double"/>
         <Property Name="AnnualValue" Type="Edm.Double"/>
+      </EntityType>
+      <EntityType Name="CCMContractsCreatedNotificationMailJobView">
+        <Key>
+          <PropertyRef Name="InstituteID"/>
+          <PropertyRef Name="MaterialNumber"/>
+        </Key>
+        <Property Name="FastConditionContractID" Type="Edm.Guid"/>
+        <Property Name="CCMContractID" Type="Edm.Guid"/>
+        <Property Name="CountryCode" Type="Edm.String"/>
+        <Property Name="CWID" Type="Edm.String" MaxLength="255"/>
+        <Property Name="Owner" Type="Edm.String"/>
+        <Property Name="UserEmail" Type="Edm.String"/>
+        <Property Name="OwnerName" Type="Edm.String"/>
+        <Property Name="InstituteID" Type="Edm.String" Nullable="false"/>
+        <Property Name="InstituteName" Type="Edm.String"/>
+        <Property Name="MaterialNumber" Type="Edm.String" Nullable="false"/>
+        <Property Name="PRODUCTPACKNAME" Type="Edm.String"/>
+        <Property Name="OfferID" Type="Edm.String"/>
+        <Property Name="Division" Type="Edm.String"/>
+        <Property Name="ContractType" Type="Edm.String"/>
+        <Property Name="ContractNumber" Type="Edm.String"/>
+        <Property Name="UpdatedContractNumber" Type="Edm.String"/>
+        <Property Name="EffectiveDate" Type="Edm.Date"/>
+        <Property Name="ExpiryDate" Type="Edm.Date"/>
+        <Property Name="ContractCreationDate" Type="Edm.Date"/>
+        <Property Name="ContractReferene" Type="Edm.String"/>
+        <Property Name="TenderID" Type="Edm.String"/>
+        <Property Name="Classification" Type="Edm.String"/>
+      </EntityType>
+      <EntityType Name="CCMContractsExtendedView">
+        <Key>
+          <PropertyRef Name="InstituteID"/>
+          <PropertyRef Name="MaterialNumber"/>
+        </Key>
+        <Property Name="FastConditionContractID" Type="Edm.Guid"/>
+        <Property Name="CCMContractID" Type="Edm.Guid"/>
+        <Property Name="CountryCode" Type="Edm.String"/>
+        <Property Name="CWID" Type="Edm.String" MaxLength="255"/>
+        <Property Name="Owner" Type="Edm.String"/>
+        <Property Name="UserEmail" Type="Edm.String"/>
+        <Property Name="OwnerName" Type="Edm.String"/>
+        <Property Name="InstituteID" Type="Edm.String" Nullable="false"/>
+        <Property Name="InstituteName" Type="Edm.String"/>
+        <Property Name="MaterialNumber" Type="Edm.String" Nullable="false"/>
+        <Property Name="PRODUCTPACKNAME" Type="Edm.String"/>
+        <Property Name="OfferID" Type="Edm.String"/>
+        <Property Name="Division" Type="Edm.String"/>
+        <Property Name="ContractType" Type="Edm.String"/>
+        <Property Name="ContractNumber" Type="Edm.String"/>
+        <Property Name="EffectiveDate" Type="Edm.Date"/>
+        <Property Name="ExpiryDate" Type="Edm.Date"/>
+        <Property Name="ContractCreationDate" Type="Edm.Date"/>
+        <Property Name="ContractReferene" Type="Edm.String"/>
+        <Property Name="TenderID" Type="Edm.String"/>
+        <Property Name="Classification" Type="Edm.String"/>
+      </EntityType>
+      <EntityType Name="CCMContractsExpiringSoonView">
+        <Key>
+          <PropertyRef Name="CCMContractID"/>
+        </Key>
+        <Property Name="FastConditionContractID" Type="Edm.Guid"/>
+        <Property Name="CCMContractID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="TenderID" Type="Edm.String"/>
+        <Property Name="OfferID" Type="Edm.String"/>
+        <Property Name="CountryCode" Type="Edm.String"/>
+        <Property Name="CWID" Type="Edm.String" MaxLength="255"/>
+        <Property Name="Owner" Type="Edm.String"/>
+        <Property Name="OwnerEmail" Type="Edm.String"/>
+        <Property Name="OwnerName" Type="Edm.String"/>
+        <Property Name="ExternalID" Type="Edm.String"/>
+        <Property Name="CCMContractEndDate" Type="Edm.Date"/>
+        <Property Name="InstituteName" Type="Edm.String"/>
+        <Property Name="ProductName" Type="Edm.String"/>
+        <Property Name="ProductCode" Type="Edm.String"/>
+        <Property Name="ContractNumber" Type="Edm.String"/>
+        <Property Name="EffectiveDate" Type="Edm.Date"/>
+        <Property Name="ExpiryDate" Type="Edm.Date"/>
+        <Property Name="Synchronized" Type="Edm.Boolean" DefaultValue="false"/>
+        <Property Name="ExtensionPeriod" Type="Edm.String"/>
+        <Property Name="Extension" Type="Edm.Boolean"/>
+        <Property Name="PVL" Type="Edm.Double"/>
+      </EntityType>
+      <EntityType Name="CCMContractPriceChangeNotificationView">
+        <Key>
+          <PropertyRef Name="CCMContractID"/>
+        </Key>
+        <Property Name="FastConditionContractID" Type="Edm.Guid"/>
+        <Property Name="CCMContractID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="TenderID" Type="Edm.String"/>
+        <Property Name="OfferID" Type="Edm.String"/>
+        <Property Name="CountryCode" Type="Edm.String"/>
+        <Property Name="CWID" Type="Edm.String" MaxLength="255"/>
+        <Property Name="Owner" Type="Edm.String"/>
+        <Property Name="OwnerEmail" Type="Edm.String"/>
+        <Property Name="OwnerName" Type="Edm.String"/>
+        <Property Name="ExternalID" Type="Edm.String"/>
+        <Property Name="hasNetPriceAbovePVL" Type="Edm.Boolean"/>
+        <Property Name="hasNetPriceBelowFloorPrice" Type="Edm.Boolean"/>
+        <Property Name="hasUpdatedPVL" Type="Edm.Boolean"/>
+        <Property Name="hasUpdatedConfidentialPrice" Type="Edm.Boolean"/>
+        <Property Name="InstituteName" Type="Edm.String"/>
+        <Property Name="InstituteType" Type="Edm.String"/>
+        <Property Name="InstituteID" Type="Edm.String"/>
+        <Property Name="CustomerID" Type="Edm.String"/>
+        <Property Name="ProductName" Type="Edm.String"/>
+        <Property Name="ProductCode" Type="Edm.String"/>
+        <Property Name="ContractNumber" Type="Edm.String"/>
+        <Property Name="EffectiveDate" Type="Edm.Date"/>
+        <Property Name="ExpiryDate" Type="Edm.Date"/>
+        <Property Name="Synchronized" Type="Edm.Boolean" DefaultValue="false"/>
+        <Property Name="ExtensionPeriod" Type="Edm.String"/>
+        <Property Name="Extension" Type="Edm.Boolean"/>
+        <Property Name="isCancelled" Type="Edm.Boolean" DefaultValue="false"/>
+        <Property Name="isExpired" Type="Edm.Boolean"/>
+        <Property Name="UoM" Type="Edm.String"/>
+        <Property Name="PackFactor" Type="Edm.Double"/>
+        <Property Name="MaterialNumber" Type="Edm.String"/>
+        <Property Name="ConditionType" Type="Edm.String"/>
+        <Property Name="PVL" Type="Edm.Double"/>
+        <Property Name="CurrentPVL" Type="Edm.Double"/>
+        <Property Name="NetPriceWithTax" Type="Edm.Decimal" Scale="variable"/>
+        <Property Name="NetPrice" Type="Edm.Double"/>
+      </EntityType>
+      <EntityType Name="ContractNewMaterialNumberPayloadView">
+        <Key>
+          <PropertyRef Name="FastConditionContractID"/>
+          <PropertyRef Name="CCMContractID"/>
+          <PropertyRef Name="ProductCode"/>
+        </Key>
+        <Property Name="FastConditionContractID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="CCMContractID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="ProductCode" Type="Edm.String" Nullable="false"/>
+        <Property Name="ContractNumber" Type="Edm.String"/>
+        <Property Name="CndnContrValidFrom" Type="Edm.Date"/>
+        <Property Name="CndnContrValidTo" Type="Edm.Date"/>
+        <Property Name="Customer" Type="Edm.String"/>
+        <Property Name="InstituteID" Type="Edm.Int32"/>
+        <Property Name="Division" Type="Edm.String"/>
+        <Property Name="ConditionType" Type="Edm.String"/>
+        <Property Name="YD02" Type="Edm.Double"/>
+        <Property Name="YD06" Type="Edm.Double"/>
+        <Property Name="YP10" Type="Edm.Double"/>
+        <Property Name="UoM" Type="Edm.String"/>
+        <Property Name="PackFactor" Type="Edm.Double"/>
+        <Property Name="RequestedVolume" Type="Edm.Int32"/>
+        <Property Name="ConditionValidityStartDate" Type="Edm.Date"/>
+        <Property Name="ConditionValidityEndDate" Type="Edm.Date"/>
+        <Property Name="ConditionRateAmount" Type="Edm.Double"/>
+        <Property Name="Product" Type="Edm.String"/>
+        <Property Name="SAPID" Type="Edm.String"/>
+        <Property Name="ExternalID" Type="Edm.String"/>
+        <Property Name="Reference" Type="Edm.String"/>
+        <Property Name="TenderID" Type="Edm.String"/>
+        <Property Name="ContractType" Type="Edm.String"/>
+        <Property Name="PriceConditionCode" Type="Edm.String"/>
+      </EntityType>
+      <EntityType Name="CCMContractsCancelledNotificationMailJob">
+        <Key>
+          <PropertyRef Name="InstituteID"/>
+          <PropertyRef Name="MaterialNumber"/>
+        </Key>
+        <Property Name="FastConditionContractID" Type="Edm.Guid"/>
+        <Property Name="CCMContractID" Type="Edm.Guid"/>
+        <Property Name="CountryCode" Type="Edm.String"/>
+        <Property Name="CWID" Type="Edm.String" MaxLength="255"/>
+        <Property Name="Owner" Type="Edm.String"/>
+        <Property Name="UserEmail" Type="Edm.String"/>
+        <Property Name="OwnerName" Type="Edm.String"/>
+        <Property Name="InstituteID" Type="Edm.String" Nullable="false"/>
+        <Property Name="InstituteName" Type="Edm.String"/>
+        <Property Name="MaterialNumber" Type="Edm.String" Nullable="false"/>
+        <Property Name="PRODUCTPACKNAME" Type="Edm.String"/>
+        <Property Name="OfferID" Type="Edm.String"/>
+        <Property Name="Division" Type="Edm.String"/>
+        <Property Name="ContractType" Type="Edm.String"/>
+        <Property Name="ContractNumber" Type="Edm.String"/>
+        <Property Name="EffectiveDate" Type="Edm.Date"/>
+        <Property Name="ExpiryDate" Type="Edm.Date"/>
+        <Property Name="ContractCreationDate" Type="Edm.Date"/>
+        <Property Name="ContractReferene" Type="Edm.String"/>
+        <Property Name="TenderID" Type="Edm.String"/>
+        <Property Name="Classification" Type="Edm.String"/>
+      </EntityType>
+      <EntityType Name="FastConditionContractMaterialsAndBrands">
+        <Key>
+          <PropertyRef Name="FastConditionContractID"/>
+        </Key>
+        <Property Name="FastConditionContractID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="ContractMaterialNumbers" Type="Edm.String"/>
+        <Property Name="ContractBrandIDs" Type="Edm.String"/>
       </EntityType>
       <Function Name="getInstituteData" IsBound="false" IsComposable="false">
         <ReturnType Type="Edm.String"/>
@@ -1133,6 +1356,22 @@
         <Parameter Name="CCMContractID" Type="Edm.Guid"/>
         <ReturnType Type="Edm.String"/>
       </Action>
+      <Action Name="addNewMaterialNumberToExistingContract" IsBound="false">
+        <Parameter Name="FastCCMContractId" Type="Edm.Guid"/>
+        <ReturnType Type="Edm.String"/>
+      </Action>
+      <Function Name="getCacheStats" IsBound="false" IsComposable="false">
+        <ReturnType Type="Edm.String"/>
+      </Function>
+      <Function Name="invalidateInstitute" IsBound="false" IsComposable="false">
+        <ReturnType Type="Edm.String"/>
+      </Function>
+      <Function Name="refreshInstitute" IsBound="false" IsComposable="false">
+        <ReturnType Type="Edm.String"/>
+      </Function>
+      <Function Name="invalidateAPI" IsBound="false" IsComposable="false">
+        <ReturnType Type="Edm.String"/>
+      </Function>
       <Annotations Target="ConditionContract.FastConditionContracts/ID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
       </Annotations>
@@ -1548,6 +1787,12 @@
         <Annotation Term="Core.Description" String="User's unique ID"/>
         <Annotation Term="Common.Label" String="Changed By"/>
       </Annotations>
+      <Annotations Target="ConditionContract.FastConditionContractsView/ContractMaterialNumbers">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.FastConditionContractsView/ContractBrandIDs">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
       <Annotations Target="ConditionContract.CCMContractView/FastConditionContractsID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
       </Annotations>
@@ -1750,6 +1995,74 @@
         <Annotation Term="Core.Computed" Bool="true"/>
       </Annotations>
       <Annotations Target="ConditionContract.CurrentCCMPricingView/AnnualValue">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CCMContractsCreatedNotificationMailJobView/CWID">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CCMContractsCreatedNotificationMailJobView/ContractType">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CCMContractsExtendedView/CWID">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CCMContractsExtendedView/ContractType">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CCMContractsExpiringSoonView/CCMContractID">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CCMContractsExpiringSoonView/CWID">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CCMContractPriceChangeNotificationView/CCMContractID">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CCMContractPriceChangeNotificationView/CWID">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CCMContractPriceChangeNotificationView/NetPrice">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.ContractNewMaterialNumberPayloadView/FastConditionContractID">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.ContractNewMaterialNumberPayloadView/CCMContractID">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CCMContractsCancelledNotificationMailJob/CWID">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="User's unique ID"/>
+        <Annotation Term="Common.Label" String="Changed By"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CCMContractsCancelledNotificationMailJob/ContractType">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.FastConditionContractMaterialsAndBrands/FastConditionContractID">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.FastConditionContractMaterialsAndBrands/ContractMaterialNumbers">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.FastConditionContractMaterialsAndBrands/ContractBrandIDs">
         <Annotation Term="Core.Computed" Bool="true"/>
       </Annotations>
     </Schema>

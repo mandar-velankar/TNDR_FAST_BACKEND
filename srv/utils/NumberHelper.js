@@ -18,7 +18,7 @@ const chunk = n => xs =>
 	 * @param {Number n}
 	 * @return {String s}
 */
-let inWords = (n) => {
+let inWords = (n, regionname) => {
 
     //if nothing to convert to amount in words
     if(n === null){
@@ -68,7 +68,7 @@ let inWords = (n) => {
 
 
     if (typeof n === 'number')
-        return inWords(String(n));
+        return inWords(String(n), regionname);
     else if (n === '0')
         return 'zero';
     else {      
@@ -103,18 +103,24 @@ let inWords = (n) => {
         }
         //EHQUT-INC0162365 | INC15186896 - Total Amount in Words
         if (Number(cents) > 0) {
-
-            if (cents.length === 1)
-                cents = cents + '0';
-            
             numInWords += ' Point ';
-            numInWords += comp(chunk(3))(reverse)(arr(cents))
-                .map(makeGroup)
-                .map(thousand)
-                .filter(comp(not)(isEmpty))
-                .reverse()
-                .join(' ');
-            //numInWords += 'cents ';
+            if (regionname === 'MEA') {
+                // MEA: read digits individually
+                numInWords += arr(cents)
+                    .map(d => d === '0' ? 'Zero' : a[num(d)])
+                    .join(' ');
+            } else {
+                // ORIGINAL LOGIC (unchanged)
+                if (cents.length === 1)
+                    cents = cents + '0';
+
+                numInWords += comp(chunk(3))(reverse)(arr(cents))
+                    .map(makeGroup)
+                    .map(thousand)
+                    .filter(comp(not)(isEmpty))
+                    .reverse()
+                    .join(' ');
+            }
         }
         //EHQUT-INC0162365 | INC15186896 - Total Amount in Words
         //currency only addition is now done after method
@@ -134,7 +140,7 @@ module.exports = {
      * @param {*} value 
      * @returns 
      */
-    formatNumberToText:function(countryCode,value){
+    formatNumberToText:function(countryCode,value, regionname = ''){
 
         if(countryCode === "IT"){
             //this is a generic method that can be used for all languages 
@@ -142,7 +148,7 @@ module.exports = {
             return this.inWordsGeneric(countryCode,value); 
         }else{
             //this is our original more specific method created for ES in Thailand & MEA (beceause they had special requirements)
-            return inWords(value);
+            return inWords(value, regionname);
         }
 
         

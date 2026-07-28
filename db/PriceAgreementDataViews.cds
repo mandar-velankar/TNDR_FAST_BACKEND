@@ -200,11 +200,13 @@ left outer join MasterDataViews.MostRecentConsumerPricesView as cp on cp.Country
       CASE
         WHEN pa.UoM = 'Pack' THEN
             CASE
+                WHEN pa.CountryCode = 'IT' and pa.Status = 'Ignored Price' and ABS(pa.IgnoredListPrice - cp.ConsumerPriceExclPP) < 0.0001 THEN 1
                 WHEN ABS(pa.ListPrice - cp.ConsumerPriceExclPP) < 0.0001 THEN 1
                 ELSE 0
             END
         ELSE
             CASE
+                WHEN pa.CountryCode = 'IT' and pa.Status = 'Ignored Price' and ABS(pa.IgnoredListPrice - cp.ConsumerPriceExclPU) < 0.0001 THEN 1
                 WHEN ABS(pa.ListPrice - cp.ConsumerPriceExclPU) < 0.0001 THEN 1
                 ELSE 0
             END
@@ -212,11 +214,13 @@ left outer join MasterDataViews.MostRecentConsumerPricesView as cp on cp.Country
     CASE
         WHEN pa.UoM = 'Pack' THEN
             CASE
+                WHEN pa.CountryCode = 'IT' and pa.Status = 'Ignored Price' and ABS(pa.IgnoredRetailPrice - cp.MaxPriceNhsPP) < 0.0001 THEN 1
                 WHEN ABS(pa.RetailPrice - cp.MaxPriceNhsPP) < 0.0001 THEN 1
                 ELSE 0
             END
         ELSE
             CASE
+                WHEN pa.CountryCode = 'IT' and pa.Status = 'Ignored Price' and ABS(pa.IgnoredRetailPrice - cp.MaxPriceNhsPU) < 0.0001 THEN 1
                 WHEN ABS(pa.RetailPrice - cp.MaxPriceNhsPU) < 0.0001 THEN 1
                 ELSE 0
             END

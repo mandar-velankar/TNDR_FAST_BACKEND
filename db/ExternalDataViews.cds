@@ -7,7 +7,6 @@ using { com.bayer.SXTENDER.TransactionalData } from './TransactionalData';
 using { com.bayer.SXTENDER.TransactionalDataViews } from './TransactionalDataViews';
 using { com.bayer.SXTENDER.MasterDataLatestValues } from './MasterDataLatestValues';
 using { com.bayer.SXTENDER.PriceAgreementData } from './PriceAgreementData';
-
 entity DeliveryForProduct as select from TransactionalData.PT_TMDLVTR as delivery {
     key delivery.OfferID as OFFERID,
     key delivery.ProductCode as PRODUCTID,
@@ -71,8 +70,16 @@ left outer join DeliveryForProduct as delivery on offerProduct.OfferID = deliver
     ifnull(offerProduct.Offer.Distributor.DistributorName, '') as DistributorName:String,
     key ifnull(offerProduct.SKU.PRODUCTPACKNAME, '') as ProductPackName:String,
     ifnull(offerProduct.Offer.Currency, '') as Currency:String,
-    ifnull(offerProduct.Price.OfferPrice, 0) as OfferPrice_Unit:Double,
-    (ifnull(offerProduct.Price.OfferPrice, 0) * offerProduct.SKU.PACKFACTOR) as OfferPrice_Pack:Double,
+    case
+        when offerProduct.UnitPerPack = 'Unit' 
+            then ifnull(offerProduct.Price.OfferPrice, 0)
+        else ifnull(offerProduct.Price.OfferPrice, 0) / ifnull(offerProduct.SKU.PACKFACTOR, 1)
+    end as OfferPrice_Unit:Double,
+    case
+        when offerProduct.UnitPerPack = 'Unit' 
+            then ifnull(offerProduct.Price.OfferPrice, 0) * offerProduct.SKU.PACKFACTOR
+        else ifnull(offerProduct.Price.OfferPrice, 0)
+    end as OfferPrice_Pack:Double,
     ifnull(offerProduct.Price.FOC, 0) as FOC:Double,
     ifnull(offerProduct.Price.FOC_ABS_PCT, '') as FOC_ABS_PCT:String,
     ifnull(offerProduct.Price.FOCType, '') as FOCType:String,
@@ -1618,4 +1625,117 @@ entity MasterNucleusHeads as select from MasterData.NucleusHeads as MasterNucleu
 key MasterNucleusHeads.Nucleus:String,
 MasterNucleusHeads.NucleusHeadsName:String,
 key MasterNucleusHeads.NucleusHeadsEmailID: String
+};
+
+entity HEMCountryTenderReportView as select from TransactionalData.PT_TMTEND as tend
+    inner join TransactionalData.PT_TMOFRS as ofrs
+        on ofrs.TenderID=tend.TenderID
+    inner join TransactionalData.PT_TMOFPR as ofpr
+        on ofpr.OfferID=ofrs.OfferID
+        and ofpr.CountryCode=ofrs.CountryCode
+    inner join TransactionalData.PriceCondition as pc
+        on pc.ProductCode=ofpr.ProductCode
+        and pc.OfferID=ofrs.OfferID
+    inner join MasterData.PT_TMPRDPCK as pd
+        on pd.PRODUCTPACKID=ofpr.ProductCode
+    inner join MasterData.PT_TMCTPRDPCK as ct
+        on ct.PRODUCTPACKID=pd.PRODUCTPACKID
+        and ct.COUNTRYCODE=ofrs.CountryCode
+    left outer join MasterData.PT_TMSKUPRDPCK as sku
+        on sku.ProductPackID=ct.PRODUCTPACKID
+        and sku.CountryCode=ofrs.CountryCode
+    inner join MasterData.PT_TMPRDHIER as hier
+        on hier.HLEVEL6_CODE=pd.HLEVEL6_CODE
+    inner join MasterData.PT_TMCTRY as ctry
+        on ctry.CountryCode=ofrs.CountryCode
+    inner join TransactionalDataViews.OfferStatus as ofst
+        on ofst.OFFER_ID=ofrs.OfferID
+    left outer join TransactionalData.PT_TMTRRES as res
+        on res.OfferID=ofrs.OfferID
+        and res.ProductCode=ofpr.ProductCode
+    left outer join TransactionalData.PT_TMDLVTR as dlv
+        on dlv.OfferID=ofrs.OfferID
+        and dlv.ProductCode=res.ProductCode {
+            hier.HLEVEL4_NAME,
+            pd.CONCENTRATION,
+        key ofpr.ProductCode,
+            ctry.CountryName,
+        key ofrs.OfferID,
+            tend.AwardDate as ExpectedAwardDate,
+            ofrs.Custom.Date_1 as DateOf1stDelivery,
+            ofrs.Custom.Date_4 as ContractStartDate,
+            ofrs.Custom.String_14 as RationaleSupplyChainManagementAssessment,
+            ofpr.RequestedVolume,
+            pc.OfferPrice as TenderAmount,
+            ofrs.Custom.String_6 as SupplyCenter,
+            ifnull(cast(sku.SKUCode as String), '') as SKUCode : String,
+            ofst.STATUS,
+            res.SubmittedOn as AwardDate,
+            res.Outcome,
+            case 
+                when dlv.ActualDeliveryQuantity is null or dlv.ActualDeliveryQuantity = 0 then 0
+                else round((sum(dlv.ActualDeliveryQuantity/res.AwardedQty))*100,2)
+            end as DeliveredPercentage: Double
+}
+where tend.Active=1 and ofrs.CountryCode like '%-HM%'
+group by
+    hier.HLEVEL4_NAME,
+    pd.CONCENTRATION,
+    ofpr.ProductCode,
+    ctry.CountryName,
+    ofrs.OfferID,
+    ofpr.RequestedVolume,
+    pc.OfferPrice,
+    ofrs.Custom.String_6,
+    sku.SKUCode,
+    ofst.STATUS,
+    res.SubmittedOn,
+    res.Outcome,
+    res.AwardedQty,
+    tend.AwardDate,
+    ofrs.Custom.Date_1,
+    ofrs.Custom.Date_4,
+    ofrs.Custom.String_14,
+    dlv.ActualDeliveryQuantity;
+
+entity MEATenderDeliveryData as select from MasterData.PT_TMCTRY as c 
+    inner join TransactionalData.PT_TMTEND as t 
+        on c.CountryCode = t.CountryCode 
+        and c.Region = 'MEA'
+    inner join TransactionalData.PT_TMOFPR as ofpr 
+        on t.TenderID = ofpr.TenderID
+    inner join MasterData.PT_TMPRDPCK as p 
+        on ofpr.ProductCode = p.PRODUCTPACKID
+    inner join MasterData.PT_TMPRDHIER as ph 
+        on p.HLEVEL6_CODE = ph.HLEVEL6_CODE
+    inner join MasterData.PT_TMINST as i 
+        on t.InstituteID = i.InstituteID
+    inner join TransactionalData.PT_TMDLVTR as d 
+        on t.CountryCode = d.CountryCode 
+        and t.TenderID = d.TenderID 
+        and ofpr.OfferID = d.OfferID
+        and ofpr.ProductCode = d.ProductCode {
+            c.CountryName as Country,
+            ph.HLEVEL4_NAME as BRAND,
+            t.TenderID,
+            t.TenderName,
+            ofpr.OfferID,
+            i.InstituteName as TENDERED_INSTITUTE,
+            i.InstituteName as DELIVERED_INSTITUTE,
+            p.PRODUCTPACKNAME as PRODUCT,
+            d.SKUCode as SKU,
+            d.LocalOrDirectDelivery as LOCAL_OR_DIRECT,
+            d.RequestedDeliveryDate as REQUESTED_DELIVERY_DATE,
+            d.RequestedQuantity as REQUESTED_QUANTITY,
+            d.ActualDeliveryDate as ACTUAL_DELIVERY_DATE,
+            d.ActualDeliveryQuantity as ACTUAL_QUANTITY,
+            d.PaidOrFree as PAID_OR_FREE,
+            d.PO as PO_NUMBER,
+            d.InvoiceNo as INVOICE_NO,
+            d.LocalDeliveryNoteNo as LOCAL_DELIVERY_NOTE_NO,
+            d.BatchNumber as BATCH_NO,
+            d.MFG as MFG_DATE,
+            d.SLED_BBD as EXPIRY_DATE,
+            d.Penalty,
+            d.Compensated
 };
