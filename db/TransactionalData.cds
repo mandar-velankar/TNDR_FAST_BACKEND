@@ -313,6 +313,7 @@ entity PT_TMDLVTR {
         SLED_BBD               : Date;
         MFG                    : Date;
         TenderReferenceNo      : String;
+        CCReference            : String;
     //Associations
         Institute              : Association to MasterData.PT_TMINST on Institute.InstituteID = InstituteID;
 }
