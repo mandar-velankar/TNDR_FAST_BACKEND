@@ -177,6 +177,8 @@ module.exports = async (srv) => {
 
 	} = cds.entities()
 
+	const contractCache = { data: null, fetchedAt: 0, inFlight: null };
+	const CONTRACT_CACHE_TTL_MS = 10 * 60 * 1000;
 
 	srv.on('READ', 'Properties', req => {
 		console.log('passing request to remote service ...');		
@@ -1417,7 +1419,7 @@ module.exports = async (srv) => {
         }
 	});
 
-	/**srv.after("READ", "OfferProductsDetailView", async (data, req) => {
+	srv.after("READ", "OfferProductsDetailView", async (data, req) => {
 		try {
 			if (!data || (Array.isArray(data) && data.length === 0)) {
 				return data;
@@ -1436,11 +1438,7 @@ module.exports = async (srv) => {
 			product.Custom_String_2 = null;
 
 			let classified = await classifyExistingContractsForRead({ProductCode: product.ProductCode, InstituteID: institute.InstituteID, AssortmentReference: institute.External_InstituteId});
-			// const existingContracts = await ConditionContract.run(SELECT.from(IdentifyExistingContract).where({ProductCode: product?.ProductCode.toString(), InstituteID: tender?.InstituteID.toString()}));
-			// if (Array.isArray(existingContracts) && existingContracts.length > 0) {
-			// 	product.Custom_String_1 = `${existingContracts?.[0].FastConditionContractID}:${existingContracts?.map(contract => `${contract.OfferID};${contract.CCMContractID};${contract.ProductCode}`).join(',')}` || null
-			// 	product.Custom_String_2 = existingContracts?.map(contract => contract.ContractType).join(',') || null;
-			// }
+
 			classified = (classified || []).filter(entry => entry.case !== "NO_MATCH");
 			if (classified.length === 0) return;
 
@@ -1459,7 +1457,7 @@ module.exports = async (srv) => {
 			console.error('Error in OfferProductsDetailView After READ');
             return req.reject(403, error?.message||"Error in OfferProductsDetailView");
 		}
-	});**/
+	});
 
 	srv.before(
 		['CREATE','UPDATE'], 
@@ -8643,33 +8641,39 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 	}
 
 	async function classifyExistingContractsForRead(sourceData) {
-		// Step 1: Fetch all IdentifyExistingContract
-		const contracts = await fetchAllRecords(IdentifyExistingContract);
+		// Independent reads — run in parallel instead of sequentially
+		const [contracts, candidates, customerHierarchy] = await Promise.all([
+			fetchAllRecords(IdentifyExistingContract),
+			SELECT.from(CandidateInstitutes),
+			ConditionContract.run(SELECT.from(CustomerHierarchy))
+		]);
 
 		if (!Array.isArray(contracts) || contracts.length === 0) return [];
 
-		// Step 2: Fetch institute hierarchy candidates
-		const candidates = await SELECT.from(CandidateInstitutes);
+		// Build lookup ONCE — O(n) — instead of filtering candidates
+		// per-contract inside flatMap, which was O(contracts × candidates)
+		const candidateMap = new Map();
+		for (const c of candidates) {
+			const keys = [
+				String(c.CandidateInstituteID).trim(),
+				String(c.BaseInstituteID).trim()
+			];
+			for (const key of keys) {
+				if (!candidateMap.has(key)) candidateMap.set(key, []);
+				candidateMap.get(key).push(c);
+			}
+		}
 
-		// Step 3: Fetch CustomerHierarchy
-		const customerHierarchy = await ConditionContract.run(SELECT.from(CustomerHierarchy));
-
-		// Step 4: Enrich contracts
 		const enrichedContracts = contracts.flatMap(contract => {
-			return candidates
-				.filter(c =>
-					String(c.CandidateInstituteID).trim() === String(contract.InstituteID).trim() ||
-					String(c.BaseInstituteID).trim() === String(contract.InstituteID).trim()
-				)
-				.map(match => ({
-					...contract,
-					candidateType: match.RelationType,
-					baseInstitute: match.BaseInstituteID,
-					candidateInstitute: match.CandidateInstituteID
-				}));
+			const matches = candidateMap.get(String(contract.InstituteID).trim()) || [];
+			return matches.map(match => ({
+				...contract,
+				candidateType: match.RelationType,
+				baseInstitute: match.BaseInstituteID,
+				candidateInstitute: match.CandidateInstituteID
+			}));
 		});
 
-		// Step 5: Make unique
 		const uniqueContracts = Array.from(
 			new Map(enrichedContracts.map(c => [
 				[
@@ -8683,69 +8687,69 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			])).values()
 		);
 
-		const classified = classifyContracts(sourceData, uniqueContracts, customerHierarchy);
-
-		return classified;
+		return classifyContracts(sourceData, uniqueContracts, customerHierarchy);
 	}
 
 	async function fetchAllRecords(entity) {
-		const allRecords = [];
-		const seenContractNumbers = new Set();
-		let batchNum = 1;
+		const now = Date.now();
 
-		try {
-			// First batch
-			let response = await ConditionContract.run(SELECT.from(entity));
-			let batch = Array.isArray(response) ? response : response.value || [];
-			
-			batch.forEach(c => {
-				if (!seenContractNumbers.has(c.ContractNumber)) {
-					allRecords.push(c);
-					seenContractNumbers.add(c.ContractNumber);
-				}
-			});
-			
-			console.log(`Batch ${batchNum}: ${batch.length} records | Total unique: ${allRecords.length}`);
-			batchNum++;
+		// Fresh cache — return immediately
+		if (contractCache.data && (now - contractCache.fetchedAt) < CONTRACT_CACHE_TTL_MS) {
+			return contractCache.data;
+		}
 
-			// Follow pagination sequentially
-			while (response?.$nextLink) {
-				const decodedNextLink = decodeURIComponent(response.$nextLink);
-				console.log(`Fetching batch ${batchNum}: ${decodedNextLink}`);
+		// A fetch is already running (e.g. triggered by product #1's READ) —
+		// don't start a second one; just wait for the same result.
+		if (contractCache.inFlight) {
+			return contractCache.inFlight;
+		}
 
-				// Wait for this batch to complete BEFORE checking $nextLink again
-				response = await ConditionContract.run(decodedNextLink);
-				batch = Array.isArray(response) ? response : response.value || [];
-				
-				if (!batch.length) {
-					console.log(`Batch ${batchNum}: Empty response, stopping`);
-					break;
-				}
-				
-				const newCount = batch.filter(c => !seenContractNumbers.has(c.ContractNumber)).length;
+		// No cache, nothing in flight — this call becomes the one fetch
+		// that all the other concurrent callers will piggyback on.
+		contractCache.inFlight = (async () => {
+			const allRecords = [];
+			const seenContractNumbers = new Set();
+			let batchNum = 1;
+
+			try {
+				let response = await ConditionContract.run(SELECT.from(entity));
+				let batch = Array.isArray(response) ? response : response.value || [];
 				batch.forEach(c => {
 					if (!seenContractNumbers.has(c.ContractNumber)) {
 						allRecords.push(c);
 						seenContractNumbers.add(c.ContractNumber);
 					}
 				});
-				
-				console.log(`Batch ${batchNum}: ${batch.length} records (${newCount} new) | Total unique: ${allRecords.length}`);
+				console.log(`Batch ${batchNum}: ${batch.length} records | Total unique: ${allRecords.length}`);
 				batchNum++;
 
-				// Stop if no new records
-				if (newCount === 0) {
-					console.log('No new records, stopping');
-					break;
-				}
-			}
+				while (response?.$nextLink) {
+					const decodedNextLink = decodeURIComponent(response.$nextLink);
+					response = await ConditionContract.run(decodedNextLink);
+					batch = Array.isArray(response) ? response : response.value || [];
+					if (!batch.length) break;
 
-			console.log(`Final total unique contracts: ${allRecords.length}`);
-			return allRecords;
-		} catch (error) {
-			console.error('fetchAllRecords error:', error);
-			throw error;
-		}
+					const newCount = batch.filter(c => !seenContractNumbers.has(c.ContractNumber)).length;
+					batch.forEach(c => {
+						if (!seenContractNumbers.has(c.ContractNumber)) {
+							allRecords.push(c);
+							seenContractNumbers.add(c.ContractNumber);
+						}
+					});
+					console.log(`Batch ${batchNum}: ${batch.length} records (${newCount} new) | Total unique: ${allRecords.length}`);
+					batchNum++;
+					if (newCount === 0) break;
+				}
+
+				contractCache.data = allRecords;
+				contractCache.fetchedAt = Date.now();
+				return allRecords;
+			} finally {
+				contractCache.inFlight = null;
+			}
+		})();
+
+		return contractCache.inFlight;
 	}
 
 	function classifyContracts(sourceData, enrichedContracts, customerHierarchy) {
@@ -8753,69 +8757,85 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
         const { ProductCode, InstituteID, AssortmentReference } = sourceData;
         const results = [];
 
-        // filter contracts only on same ProductCode
-        let relevantContracts = enrichedContracts.filter(
-            c => c.ProductCode == ProductCode
-        );
+        // Filter once, reuse throughout
+        const relevantContracts = enrichedContracts.filter(c => c.ProductCode === ProductCode);
 
         if (relevantContracts.length === 0) {
             return [{ sourceData, case: "NO_MATCH" }];
         }
 
-		if (!AssortmentReference) {
-			// ---- CASE 1 ----
-			//contract is single-customer with candidate + base = newOffer.InstituteID
-			const case1Contracts = relevantContracts.filter(
-				c =>
-					c.candidateInstitute == InstituteID &&
-					c.baseInstitute == InstituteID
-			);
-			if (case1Contracts.length > 0) {
-				results.push({ sourceData, case: "CASE_1", contracts: case1Contracts });
-			}
+        // Pre-build hierarchy lookup for access instead of repeated filters
+        const hierarchyByInstitute = new Map();
+        const hierarchyByParent = new Map();
 
-			// CASE 2 — Child with its Existing Parent Contract
-			const matchedHierarchyCase2  = customerHierarchy.filter(h => (h.InstituteID && h.InstituteID == InstituteID) && h.Excluded === false);
+        customerHierarchy.forEach(h => {
+            if (h.InstituteID) {
+                if (!hierarchyByInstitute.has(h.InstituteID)) {
+                    hierarchyByInstitute.set(h.InstituteID, []);
+                }
+                hierarchyByInstitute.get(h.InstituteID).push(h);
+            }
 
-			if (matchedHierarchyCase2.length > 0) {
-				const childIDs = new Set(matchedHierarchyCase2.map(h => h.InstituteID));
+            if (h.ParentInstituteID) {
+                if (!hierarchyByParent.has(h.ParentInstituteID)) {
+                    hierarchyByParent.set(h.ParentInstituteID, []);
+                }
+                hierarchyByParent.get(h.ParentInstituteID).push(h);
+            }
+        });
 
-				relevantContracts = relevantContracts.filter(c => c.AssortmentReference != null && c.candidateType == 'CHILD');
+        // CASE_1 and CASE_2 only apply when the incoming offer has NO
+        // AssortmentReference. When AssortmentReference is present, only
+        // CASE_3 / CASE_5 are relevant classifications.
+        if (!AssortmentReference) {
+            // CASE 1: Single-customer with matching candidate + base
+            const case1Contracts = relevantContracts.filter(
+                c => c.candidateInstitute === InstituteID && c.baseInstitute === InstituteID
+            );
+            if (case1Contracts.length) {
+                results.push({ sourceData, case: "CASE_1", contracts: case1Contracts });
+            }
 
-				const case2Contracts = relevantContracts.filter(c => childIDs.has(String(c.candidateInstitute)));
+            // CASE 2: Child with existing parent contract
+            const hierarchyCase2 = hierarchyByInstitute.get(String(InstituteID));
+            if (hierarchyCase2) {
+                const childIDs = new Set(hierarchyCase2.map(h => h.InstituteID));
+                const case2Contracts = relevantContracts.filter(
+                    c => c.AssortmentReference !== null &&
+                        c.candidateType === "CHILD" &&
+                        childIDs.has(String(c.candidateInstitute))
+                );
+                if (case2Contracts.length) {
+                    results.push({ sourceData, case: "CASE_2", contracts: case2Contracts });
+                }
+            }
+        }
 
-				if (case2Contracts.length > 0) {
-					results.push({ sourceData, case: "CASE_2", contracts: case2Contracts });
-				}
-			}
-		}
-
-
+        // CASE 3 & 5: Only check if AssortmentReference exists
         if (AssortmentReference) {
-            // ---- CASE 3 ----
-            // assortment reference matches on both new offer and contract
-            const case3Contracts = relevantContracts.filter(c => c.AssortmentReference == AssortmentReference);
-            if (case3Contracts.length > 0) {
+            // CASE 3: Assortment reference matches
+            const case3Contracts = relevantContracts.filter(
+                c => c.AssortmentReference === AssortmentReference
+            );
+            if (case3Contracts.length) {
                 results.push({ sourceData, case: "CASE_3", contracts: case3Contracts });
             }
 
-
-            // ---- CASE 5 ----
-            const matchedHierarchyCase5 = customerHierarchy.filter(h => (h.ParentInstituteID && h.ParentInstituteID == InstituteID));
-
-            if (matchedHierarchyCase5.length > 0) {
-                const childIDs = new Set(matchedHierarchyCase5.map(h => h.InstituteID));
-
-                const case5Contracts = relevantContracts.filter(c => childIDs.has(String(c.InstituteID)));
-
-                if (case5Contracts.length > 0) {
+            // CASE 5: Parent with child contracts
+            const hierarchyCase5 = hierarchyByParent.get(String(InstituteID));
+            if (hierarchyCase5) {
+                const childIDs = new Set(hierarchyCase5.map(h => h.InstituteID));
+                const case5Contracts = relevantContracts.filter(
+                    c => childIDs.has(String(c.InstituteID))
+                );
+                if (case5Contracts.length) {
                     results.push({ sourceData, case: "CASE_5", contracts: case5Contracts });
                 }
             }
         }
 
+        // Fallback: unclassified
         if (results.length === 0) {
-			relevantContracts = relevantContracts.filter(c => String(c.InstituteID) === String(InstituteID));
             results.push({ sourceData, case: "UNCLASSIFIED", contracts: relevantContracts });
         }
 
