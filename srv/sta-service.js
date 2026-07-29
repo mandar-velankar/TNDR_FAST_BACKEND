@@ -8766,7 +8766,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
         const results = [];
 
         // Filter once, reuse throughout
-        const relevantContracts = enrichedContracts.filter(c => c.ProductCode === ProductCode);
+        let relevantContracts = enrichedContracts.filter(c => c.ProductCode == ProductCode);
 
         if (relevantContracts.length === 0) {
             return [{ sourceData, case: "NO_MATCH" }];
@@ -8844,6 +8844,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
         // Fallback: unclassified
         if (results.length === 0) {
+			relevantContracts = relevantContracts.filter(c => String(c.InstituteID) === String(InstituteID));
             results.push({ sourceData, case: "UNCLASSIFIED", contracts: relevantContracts });
         }
 
