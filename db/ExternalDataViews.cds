@@ -1628,6 +1628,8 @@ key MasterNucleusHeads.NucleusHeadsEmailID: String
 };
 
 entity HEMCountryTenderReportView as select from TransactionalData.PT_TMTEND as tend
+    inner join MasterData.PT_TMINST as inst 
+        on inst.InstituteID = tend.InstituteID
     inner join TransactionalData.PT_TMOFRS as ofrs
         on ofrs.TenderID=tend.TenderID
     inner join TransactionalData.PT_TMOFPR as ofpr
@@ -1661,7 +1663,9 @@ entity HEMCountryTenderReportView as select from TransactionalData.PT_TMTEND as 
         key ofpr.ProductCode,
             ctry.CountryName,
         key ofrs.OfferID,
+            inst.InstituteName,
             tend.AwardDate as ExpectedAwardDate,
+            ofrs.Custom.String_3 as ProfitabilitySecuringTender,
             ofrs.Custom.Date_1 as DateOf1stDelivery,
             ofrs.Custom.Date_4 as ContractStartDate,
             ofrs.Custom.String_14 as RationaleSupplyChainManagementAssessment,
@@ -1696,7 +1700,9 @@ group by
     ofrs.Custom.Date_1,
     ofrs.Custom.Date_4,
     ofrs.Custom.String_14,
-    dlv.ActualDeliveryQuantity;
+    dlv.ActualDeliveryQuantity,
+    inst.InstituteName,
+    ofrs.Custom.String_3;
 
 entity MEATenderDeliveryData as select from MasterData.PT_TMCTRY as c 
     inner join TransactionalData.PT_TMTEND as t 
