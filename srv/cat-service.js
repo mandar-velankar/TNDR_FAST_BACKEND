@@ -3877,7 +3877,7 @@ module.exports = (srv) => {
 		const tx = cds.tx(req);
 		req.data.SNo = await getNextValue(PT_TMDLVTR, "SNo");
         const delivery = await next();   
-        await tx.commit();     
+        // await tx.commit();     
         return delivery; 
 		}
 		catch(error){
