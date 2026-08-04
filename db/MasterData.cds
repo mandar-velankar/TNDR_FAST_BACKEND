@@ -91,6 +91,7 @@ entity PT_TMINST{
 	CG2_Description: String;
 	CG1_Code: String;
 	CG2_Code: String;
+	OfferClassification: String;
 	//Associations
 	InstituteDistributorBrands:Association to many PT_TMINDSBR on InstituteDistributorBrands.Institute = $self;
 	InstituteBrandTerms:Association to many PT_TMINSBRTR on InstituteBrandTerms.Institute = $self;
