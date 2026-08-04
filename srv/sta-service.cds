@@ -102,6 +102,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.RegionalHealthSystem,
         Institute.CG1_Description,
         Institute.CG2_Description,
+        Institute.OfferClassification,
         Country.Region
     }; 
 
