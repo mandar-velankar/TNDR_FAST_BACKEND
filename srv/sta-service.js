@@ -806,6 +806,7 @@ module.exports = async (srv) => {
 		delete req.data.RegionalHealthSystem;
 		delete req.data.CG1_Description;
 		delete req.data.CG2_Description;
+		delete req.data.OfferClassification;
 		}
 		catch(error){
             console.error('Error in TenderFormView CREATE');
