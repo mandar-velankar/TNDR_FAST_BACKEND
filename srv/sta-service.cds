@@ -490,7 +490,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                     ) ),2) 
             else null
         end as GrossMargin:Double,
-        SKU.ProductType
+        SKU.ProductType,
+        @Core.Computed: false
+        ProductActiveSKUs.ACTIVE_MATERIAL_NUMBERS,
+        @Core.Computed: false
+        ProductInActiveSKUs.INACTIVE_MATERIAL_NUMBERS
     } order by SORTER asc; // Form used in the Offer tab - offer products
 
     type copyOfferResponse {
