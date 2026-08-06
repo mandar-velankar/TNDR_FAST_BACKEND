@@ -9333,4 +9333,20 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		}
 	});
 
+	srv.after('READ', 'MasterDistributors', data => {
+		try {
+			const countryCode = data && data[0] && data[0].CountryCode;
+			if (countryCode === 'PK' && data && Array.isArray(data) && data.length > 0) {
+				data.unshift({
+					CountryCode: countryCode,
+					DistributorID: "",
+					DistributorName: ""
+				});
+			}
+		} catch (error) {
+			console.error('Error in MasterDistributors READ');
+			return req.reject(403, error?.message || "Error in MasterDistributors READ");
+		}
+	});
+
 }
