@@ -1,4 +1,4 @@
-/* checksum : 96082b5db700131234e30b31876d5d76 */
+/* checksum : 1f786f1537d0e35691529ad7b495632f */
 @cds.external : true
 function ConditionContract.getInstituteData() returns LargeString;
 
@@ -101,6 +101,7 @@ entity ConditionContract.FastConditionContracts {
   CountryCode : LargeString;
   InstituteID : Integer;
   InstituteName : LargeString;
+  InstituteType : LargeString;
   DistributorID : Integer;
   ContractStartDate : Date;
   ContractEndDate : Date;
@@ -507,6 +508,9 @@ entity ConditionContract.PriceConditionRebate {
   RefundDate : Date;
   PriceConditionCode : LargeString;
   MarketIncentiveID : LargeString;
+  BrandLevelRappel : LargeString;
+  HLEVEL4_CODE : LargeString;
+  HLEVEL4_NAME : LargeString;
   MarketIncentiveDescription : LargeString;
   @cds.ambiguous : 'missing on condition?'
   CCMContract : Association to one ConditionContract.CCMContract on CCMContract.ID = CCMContract_ID;
@@ -844,6 +848,7 @@ entity ConditionContract.FastConditionContractsView {
   CountryCode : LargeString;
   InstituteID : Integer;
   InstituteName : LargeString;
+  InstituteType : LargeString;
   DistributorID : Integer;
   ContractStartDate : Date;
   ContractEndDate : Date;
@@ -878,6 +883,8 @@ entity ConditionContract.FastConditionContractsView {
   ContractMaterialNumbers : LargeString;
   @Core.Computed : true
   ContractBrandIDs : LargeString;
+  @Core.Computed : true
+  ContractNumbers : LargeString;
 };
 
 @cds.external : true
@@ -909,6 +916,8 @@ entity ConditionContract.CCMContractView {
   InstituteType : LargeString;
   InstituteID : LargeString;
   CustomerID : LargeString;
+  @Core.Computed : true
+  ContractMaterialNumbers : LargeString;
 };
 
 @cds.external : true
@@ -949,6 +958,7 @@ entity ConditionContract.CCMContractInformationDetailView {
   CountryCode : LargeString;
   InstituteID : Integer;
   InstituteName : LargeString;
+  InstituteType : LargeString;
   DistributorID : Integer;
   ContractStartDate : Date;
   ContractEndDate : Date;
@@ -1063,6 +1073,9 @@ entity ConditionContract.CCMContractProductsView {
   @cds.ambiguous : 'missing on condition?'
   FastConditionContracts : Association to one ConditionContract.FastConditionContracts on FastConditionContracts.ID = FastConditionContracts_ID;
   FastConditionContracts_ID : UUID;
+  CCMContractID : UUID;
+  @Core.Computed : true
+  ContractMaterialNumbers : LargeString;
   FastConditionContractsID : UUID;
   InstituteName : LargeString;
   InstituteType : LargeString;
@@ -1214,6 +1227,9 @@ entity ConditionContract.ContractRebatePayloadView {
   RefundDate : Date;
   PriceConditionCode : LargeString;
   MarketIncentiveID : LargeString;
+  BrandLevelRappel : LargeString;
+  HLEVEL4_CODE : LargeString;
+  HLEVEL4_NAME : LargeString;
   ConditionValidityStartDate : Date;
   ConditionValidityEndDate : Date;
   ConditionRateAmount : Double;
@@ -1307,6 +1323,9 @@ entity ConditionContract.CCMContractRebateFormView {
   RefundDate : Date;
   PriceConditionCode : LargeString;
   MarketIncentiveID : LargeString;
+  BrandLevelRappel : LargeString;
+  HLEVEL4_CODE : LargeString;
+  HLEVEL4_NAME : LargeString;
   MarketIncentiveDescription : LargeString;
 };
 
@@ -1695,16 +1714,20 @@ entity ConditionContract.FastConditionContractMaterialsAndBrands {
   ContractMaterialNumbers : LargeString;
   @Core.Computed : true
   ContractBrandIDs : LargeString;
+  @Core.Computed : true
+  ContractNumbers : LargeString;
 };
 
 @cds.external : true
 @cds.persistence.skip : true
+@Capabilities.DeleteRestrictions.Deletable : false
+@Capabilities.InsertRestrictions.Insertable : false
+@Capabilities.UpdateRestrictions.Updatable : false
 entity ConditionContract.SpainTenderData {
-  @odata.Type : 'Edm.Guid'
+  @Core.ComputedDefaultValue : true
   key FastConditionContractID : UUID not null;
-  @odata.Type : 'Edm.Guid'
+  @Core.ComputedDefaultValue : true
   key CCMContractID : UUID not null;
-  @odata.Type : 'Edm.Date'
   CreationDate : Date;
   TenderID : LargeString;
   OfferID : LargeString;
@@ -1715,22 +1738,43 @@ entity ConditionContract.SpainTenderData {
   SAPID : LargeString;
   ContractNumber : LargeString;
   ProductName : LargeString;
-  @odata.Type : 'Edm.Date'
   CCMContractStartDate : Date;
-  @odata.Type : 'Edm.Date'
   CCMContractEndDate : Date;
   CustomersInContract : LargeString;
-  @odata.Type : 'Edm.Boolean'
-  Excluded : Boolean;
+  Excluded : Boolean default false;
   AssortmentReference : LargeString;
   ProductCode : LargeString;
   MaterialNumber : LargeString;
   ConditionType : LargeString;
   PriceConditionCode : LargeString;
-  @odata.Type : 'Edm.Double'
   YP10_YP11 : Double;
-  @odata.Type : 'Edm.Double'
+  @Core.Computed : true
   Discount : Double;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.CCMContractMaterialNumbers {
+  @Core.ComputedDefaultValue : true
+  key CCMContractID : UUID not null;
+  @Core.Computed : true
+  ContractMaterialNumbers : LargeString;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.InstituteTypeView {
+  key InstituteID : LargeString not null;
+  key CustomerID : LargeString not null;
+  InstituteType : LargeString;
+};
+
+@cds.external : true
+@cds.persistence.skip : true
+entity ConditionContract.InstituteNameView {
+  key InstituteID : LargeString not null;
+  key CustomerID : LargeString not null;
+  InstituteName : LargeString;
 };
 
 @cds.external : true
