@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+  <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Capabilities.V1.xml">
+    <edmx:Include Alias="Capabilities" Namespace="Org.OData.Capabilities.V1"/>
+  </edmx:Reference>
   <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml">
     <edmx:Include Alias="Common" Namespace="com.sap.vocabularies.Common.v1"/>
   </edmx:Reference>
@@ -119,6 +122,10 @@
         <EntitySet Name="ContractNewMaterialNumberPayloadView" EntityType="ConditionContract.ContractNewMaterialNumberPayloadView"/>
         <EntitySet Name="CCMContractsCancelledNotificationMailJob" EntityType="ConditionContract.CCMContractsCancelledNotificationMailJob"/>
         <EntitySet Name="FastConditionContractMaterialsAndBrands" EntityType="ConditionContract.FastConditionContractMaterialsAndBrands"/>
+        <EntitySet Name="SpainTenderData" EntityType="ConditionContract.SpainTenderData"/>
+        <EntitySet Name="CCMContractMaterialNumbers" EntityType="ConditionContract.CCMContractMaterialNumbers"/>
+        <EntitySet Name="InstituteTypeView" EntityType="ConditionContract.InstituteTypeView"/>
+        <EntitySet Name="InstituteNameView" EntityType="ConditionContract.InstituteNameView"/>
         <FunctionImport Name="getInstituteData" Function="ConditionContract.getInstituteData"/>
         <FunctionImport Name="getESUsers" Function="ConditionContract.getESUsers"/>
         <FunctionImport Name="getUserCountries" Function="ConditionContract.getUserCountries"/>
@@ -148,6 +155,7 @@
         <Property Name="CountryCode" Type="Edm.String"/>
         <Property Name="InstituteID" Type="Edm.Int32"/>
         <Property Name="InstituteName" Type="Edm.String"/>
+        <Property Name="InstituteType" Type="Edm.String"/>
         <Property Name="DistributorID" Type="Edm.Int32"/>
         <Property Name="ContractStartDate" Type="Edm.Date"/>
         <Property Name="ContractEndDate" Type="Edm.Date"/>
@@ -400,6 +408,9 @@
         <Property Name="RefundDate" Type="Edm.Date"/>
         <Property Name="PriceConditionCode" Type="Edm.String"/>
         <Property Name="MarketIncentiveID" Type="Edm.String"/>
+        <Property Name="BrandLevelRappel" Type="Edm.String"/>
+        <Property Name="HLEVEL4_CODE" Type="Edm.String"/>
+        <Property Name="HLEVEL4_NAME" Type="Edm.String"/>
         <Property Name="MarketIncentiveDescription" Type="Edm.String"/>
         <NavigationProperty Name="CCMContract" Type="ConditionContract.CCMContract">
           <ReferentialConstraint Property="CCMContract_ID" ReferencedProperty="ID"/>
@@ -589,6 +600,7 @@
         <Property Name="CountryCode" Type="Edm.String"/>
         <Property Name="InstituteID" Type="Edm.Int32"/>
         <Property Name="InstituteName" Type="Edm.String"/>
+        <Property Name="InstituteType" Type="Edm.String"/>
         <Property Name="DistributorID" Type="Edm.Int32"/>
         <Property Name="ContractStartDate" Type="Edm.Date"/>
         <Property Name="ContractEndDate" Type="Edm.Date"/>
@@ -622,6 +634,7 @@
         <Property Name="FastConditionContractID" Type="Edm.Guid"/>
         <Property Name="ContractMaterialNumbers" Type="Edm.String"/>
         <Property Name="ContractBrandIDs" Type="Edm.String"/>
+        <Property Name="ContractNumbers" Type="Edm.String"/>
       </EntityType>
       <EntityType Name="CCMContractView">
         <Key>
@@ -652,6 +665,7 @@
         <Property Name="InstituteType" Type="Edm.String"/>
         <Property Name="InstituteID" Type="Edm.String"/>
         <Property Name="CustomerID" Type="Edm.String"/>
+        <Property Name="ContractMaterialNumbers" Type="Edm.String"/>
       </EntityType>
       <EntityType Name="CCMContractInformationDetailView">
         <Key>
@@ -667,6 +681,7 @@
         <Property Name="CountryCode" Type="Edm.String"/>
         <Property Name="InstituteID" Type="Edm.Int32"/>
         <Property Name="InstituteName" Type="Edm.String"/>
+        <Property Name="InstituteType" Type="Edm.String"/>
         <Property Name="DistributorID" Type="Edm.Int32"/>
         <Property Name="ContractStartDate" Type="Edm.Date"/>
         <Property Name="ContractEndDate" Type="Edm.Date"/>
@@ -761,6 +776,8 @@
           <ReferentialConstraint Property="FastConditionContracts_ID" ReferencedProperty="ID"/>
         </NavigationProperty>
         <Property Name="FastConditionContracts_ID" Type="Edm.Guid"/>
+        <Property Name="CCMContractID" Type="Edm.Guid"/>
+        <Property Name="ContractMaterialNumbers" Type="Edm.String"/>
         <Property Name="FastConditionContractsID" Type="Edm.Guid"/>
         <Property Name="InstituteName" Type="Edm.String"/>
         <Property Name="InstituteType" Type="Edm.String"/>
@@ -890,6 +907,9 @@
         <Property Name="RefundDate" Type="Edm.Date"/>
         <Property Name="PriceConditionCode" Type="Edm.String"/>
         <Property Name="MarketIncentiveID" Type="Edm.String"/>
+        <Property Name="BrandLevelRappel" Type="Edm.String"/>
+        <Property Name="HLEVEL4_CODE" Type="Edm.String"/>
+        <Property Name="HLEVEL4_NAME" Type="Edm.String"/>
         <Property Name="ConditionValidityStartDate" Type="Edm.Date"/>
         <Property Name="ConditionValidityEndDate" Type="Edm.Date"/>
         <Property Name="ConditionRateAmount" Type="Edm.Double"/>
@@ -980,6 +1000,9 @@
         <Property Name="RefundDate" Type="Edm.Date"/>
         <Property Name="PriceConditionCode" Type="Edm.String"/>
         <Property Name="MarketIncentiveID" Type="Edm.String"/>
+        <Property Name="BrandLevelRappel" Type="Edm.String"/>
+        <Property Name="HLEVEL4_CODE" Type="Edm.String"/>
+        <Property Name="HLEVEL4_NAME" Type="Edm.String"/>
         <Property Name="MarketIncentiveDescription" Type="Edm.String"/>
       </EntityType>
       <EntityType Name="CCMContractRebateDiscountConditionTableView">
@@ -1314,6 +1337,61 @@
         <Property Name="FastConditionContractID" Type="Edm.Guid" Nullable="false"/>
         <Property Name="ContractMaterialNumbers" Type="Edm.String"/>
         <Property Name="ContractBrandIDs" Type="Edm.String"/>
+        <Property Name="ContractNumbers" Type="Edm.String"/>
+      </EntityType>
+      <EntityType Name="SpainTenderData">
+        <Key>
+          <PropertyRef Name="FastConditionContractID"/>
+          <PropertyRef Name="CCMContractID"/>
+        </Key>
+        <Property Name="FastConditionContractID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="CCMContractID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="CreationDate" Type="Edm.Date"/>
+        <Property Name="TenderID" Type="Edm.String"/>
+        <Property Name="OfferID" Type="Edm.String"/>
+        <Property Name="CustomerID" Type="Edm.String"/>
+        <Property Name="InstituteName" Type="Edm.String"/>
+        <Property Name="ContractType" Type="Edm.String"/>
+        <Property Name="OwnerName" Type="Edm.String"/>
+        <Property Name="SAPID" Type="Edm.String"/>
+        <Property Name="ContractNumber" Type="Edm.String"/>
+        <Property Name="ProductName" Type="Edm.String"/>
+        <Property Name="CCMContractStartDate" Type="Edm.Date"/>
+        <Property Name="CCMContractEndDate" Type="Edm.Date"/>
+        <Property Name="CustomersInContract" Type="Edm.String"/>
+        <Property Name="Excluded" Type="Edm.Boolean" DefaultValue="false"/>
+        <Property Name="AssortmentReference" Type="Edm.String"/>
+        <Property Name="ProductCode" Type="Edm.String"/>
+        <Property Name="MaterialNumber" Type="Edm.String"/>
+        <Property Name="ConditionType" Type="Edm.String"/>
+        <Property Name="PriceConditionCode" Type="Edm.String"/>
+        <Property Name="YP10_YP11" Type="Edm.Double"/>
+        <Property Name="Discount" Type="Edm.Double"/>
+      </EntityType>
+      <EntityType Name="CCMContractMaterialNumbers">
+        <Key>
+          <PropertyRef Name="CCMContractID"/>
+        </Key>
+        <Property Name="CCMContractID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="ContractMaterialNumbers" Type="Edm.String"/>
+      </EntityType>
+      <EntityType Name="InstituteTypeView">
+        <Key>
+          <PropertyRef Name="InstituteID"/>
+          <PropertyRef Name="CustomerID"/>
+        </Key>
+        <Property Name="InstituteID" Type="Edm.String" Nullable="false"/>
+        <Property Name="CustomerID" Type="Edm.String" Nullable="false"/>
+        <Property Name="InstituteType" Type="Edm.String"/>
+      </EntityType>
+      <EntityType Name="InstituteNameView">
+        <Key>
+          <PropertyRef Name="InstituteID"/>
+          <PropertyRef Name="CustomerID"/>
+        </Key>
+        <Property Name="InstituteID" Type="Edm.String" Nullable="false"/>
+        <Property Name="CustomerID" Type="Edm.String" Nullable="false"/>
+        <Property Name="InstituteName" Type="Edm.String"/>
       </EntityType>
       <Function Name="getInstituteData" IsBound="false" IsComposable="false">
         <ReturnType Type="Edm.String"/>
@@ -1793,8 +1871,14 @@
       <Annotations Target="ConditionContract.FastConditionContractsView/ContractBrandIDs">
         <Annotation Term="Core.Computed" Bool="true"/>
       </Annotations>
+      <Annotations Target="ConditionContract.FastConditionContractsView/ContractNumbers">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
       <Annotations Target="ConditionContract.CCMContractView/FastConditionContractsID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CCMContractView/ContractMaterialNumbers">
+        <Annotation Term="Core.Computed" Bool="true"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMContractInformationDetailView/ID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
@@ -1857,6 +1941,9 @@
         <Annotation Term="Core.Computed" Bool="true"/>
         <Annotation Term="Core.Description" String="User's unique ID"/>
         <Annotation Term="Common.Label" String="Changed By"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CCMContractProductsView/ContractMaterialNumbers">
+        <Annotation Term="Core.Computed" Bool="true"/>
       </Annotations>
       <Annotations Target="ConditionContract.CCMContractInformationDetailDetailView/ID">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
@@ -2063,6 +2150,41 @@
         <Annotation Term="Core.Computed" Bool="true"/>
       </Annotations>
       <Annotations Target="ConditionContract.FastConditionContractMaterialsAndBrands/ContractBrandIDs">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.FastConditionContractMaterialsAndBrands/ContractNumbers">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.EntityContainer/SpainTenderData">
+        <Annotation Term="Capabilities.DeleteRestrictions">
+          <Record Type="Capabilities.DeleteRestrictionsType">
+            <PropertyValue Property="Deletable" Bool="false"/>
+          </Record>
+        </Annotation>
+        <Annotation Term="Capabilities.InsertRestrictions">
+          <Record Type="Capabilities.InsertRestrictionsType">
+            <PropertyValue Property="Insertable" Bool="false"/>
+          </Record>
+        </Annotation>
+        <Annotation Term="Capabilities.UpdateRestrictions">
+          <Record Type="Capabilities.UpdateRestrictionsType">
+            <PropertyValue Property="Updatable" Bool="false"/>
+          </Record>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="ConditionContract.SpainTenderData/FastConditionContractID">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.SpainTenderData/CCMContractID">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.SpainTenderData/Discount">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CCMContractMaterialNumbers/CCMContractID">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ConditionContract.CCMContractMaterialNumbers/ContractMaterialNumbers">
         <Annotation Term="Core.Computed" Bool="true"/>
       </Annotations>
     </Schema>
