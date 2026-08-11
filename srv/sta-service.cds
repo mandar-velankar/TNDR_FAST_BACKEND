@@ -102,6 +102,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         Institute.RegionalHealthSystem,
         Institute.CG1_Description,
         Institute.CG2_Description,
+        Institute.OfferClassification,
         Country.Region
     }; 
 
@@ -157,6 +158,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
         tender.BidDueDate,
         max(brands.BRANDID) as BrandID:String,
         STRING_AGG(brands.BRANDID, ',') as OfferBrandIDs:String,
+        STRING_AGG(offer.Product.ProductCode, ',') as OfferProductCodes:String,
         tender.createdAt,
         tender.modifiedBy,
         tender.modifiedAt, 
@@ -488,7 +490,11 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
                     ) ),2) 
             else null
         end as GrossMargin:Double,
-        SKU.ProductType
+        SKU.ProductType,
+        @Core.Computed: false
+        ProductActiveSKUs.ACTIVE_MATERIAL_NUMBERS,
+        @Core.Computed: false
+        ProductInActiveSKUs.INACTIVE_MATERIAL_NUMBERS
     } order by SORTER asc; // Form used in the Offer tab - offer products
 
     type copyOfferResponse {
@@ -641,6 +647,24 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     having count(CountryCode) = 1;
 
     entity CountryTenderBrands @readonly as projection on TransactionalDataViews.CountryTenderBrands;
+
+    entity CountryProductFilterView @readonly as select from MasterData.PT_TMCTPRDPCK as ctp
+        inner join MasterData.PT_TMPRDPCK as pp on pp.PRODUCTPACKID = ctp.PRODUCTPACKID {
+        key ctp.COUNTRYCODE as CountryCode,
+        key cast(ctp.PRODUCTPACKID as String) as ProductPackID : String,
+        pp.PRODUCTPACKNAME as ProductPackName,
+        pp.Product.HLEVEL4_CODE as BrandID,
+        pp.Product.HLEVEL4_NAME as BrandName
+    } where ctp.ACTIVERECORD = 'Yes' and pp.ACTIVERECORD = 'Yes'
+    union
+    select from MasterData.PT_TMCTRY as country {
+        country.CountryCode as CountryCode,
+        'All_Products' as ProductPackID,
+        ' All' as ProductPackName,
+        null as BrandID,
+        null as BrandName
+    };
+
     entity CountryStatusses @readonly as projection on MasterData.MASTER_COUNTRY_STATUS;
     entity Divisions @readonly @(cds.redirection.target:false)    as projection on MasterDataViews.Divisions;
     entity MasterDistributors @readonly @(cds.redirection.target:false) as projection on ExternalDataViews.MasterDistributors;
