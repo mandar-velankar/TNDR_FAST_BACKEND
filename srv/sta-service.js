@@ -1449,14 +1449,22 @@ module.exports = async (srv) => {
 			// Merge ALL contracts from ALL classification cases
 			let allContracts = classified.flatMap(entry => entry.contracts || []).filter(contract => contract.OfferID !== product.OfferID);
 			allContracts = Array.from(new Map(allContracts.map(c => [c.CCMContractID, c])).values());
-			if (allContracts.length === 0) return;
+
+			// Exclude contracts whose validity window does not overlap the offer's tender window
+			const overlappingContracts = allContracts.filter(c => isValidityOverlapping(
+				c.ConditionValidityStartDate,
+				c.ConditionValidityEndDate,
+				tender.EffectiveDate,
+				tender.ExpiryDate
+			));
+			if (overlappingContracts.length === 0) return;
 
 			product.Custom_String_1 =
-				`${allContracts
+				`${overlappingContracts
 					.map(c => `${c.FastConditionContractID};${c.ContractNumber}-${c.OfferID};${c.CCMContractID};${c.ProductCode}`)
 					.join(",")}`;
 
-			product.Custom_String_2 = allContracts.map(c => c.ContractType).join(",");
+			product.Custom_String_2 = overlappingContracts.map(c => c.ContractType).join(",");
 		} catch (error) {
 			console.error('Error in OfferProductsDetailView After READ');
             return req.reject(403, error?.message||"Error in OfferProductsDetailView");
@@ -9346,5 +9354,18 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			return req.reject(403, error?.message || "Error in MasterDistributors READ");
 		}
 	});
+
+	// Checks whether a contract's validity window overlaps the tender's effective/expiry window.
+	// Missing tender dates are treated as unbounded; missing contract dates as open-ended validity.
+	// CDS Date values are 'YYYY-MM-DD' strings, so lexicographic comparison is safe.
+	function isValidityOverlapping(contractStart, contractEnd, tenderEffective, tenderExpiry) {
+		const tStart = tenderEffective || null;
+		const tEnd   = tenderExpiry   || null;
+		if (!tStart && !tEnd) return true; // no tender window -> keep current behaviour
+
+		if (contractEnd && tStart && String(contractEnd) < String(tStart)) return false;   // contract expired before offer starts
+		if (contractStart && tEnd && String(contractStart) > String(tEnd)) return false;   // contract starts after offer expires
+		return true;
+	}
 
 }
