@@ -195,11 +195,25 @@ module.exports = {
 
     roundDown: function (num, decimals) {
         const factor = 10 ** decimals;
-        return Math.floor(num * factor) / factor;
+        const scaled = num * factor;
+        const nearest = Math.round(scaled);
+
+        if (Math.abs(scaled - nearest) < 1e-10) {
+            return nearest / factor;
+        }
+
+        return Math.floor(scaled) / factor;
     },
 
     roundUp: function(num, decimals) {
         const factor = 10 ** decimals;
-        return Math.ceil(num * factor) / factor;
-    }
+        const scaled = num * factor;
+        const nearest = Math.round(scaled);
+
+        if (Math.abs(scaled - nearest) < 1e-10) {
+            return nearest / factor;
+        }
+
+        return Math.ceil(scaled) / factor;
+    },
 };
