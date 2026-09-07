@@ -1441,8 +1441,6 @@ module.exports = async (srv) => {
 			// Always reset derived fields
 			product.Custom_String_1 = null;
 			product.Custom_String_2 = null;
-			product.Custom_Boolean_1 = false;
-
 			let classified = await classifyExistingContractsForRead({ProductCode: product.ProductCode, InstituteID: institute.InstituteID, AssortmentReference: institute.External_InstituteId});
 
 			classified = (classified || []).filter(entry => entry.case !== "NO_MATCH");
@@ -1467,8 +1465,6 @@ module.exports = async (srv) => {
 					.join(",")}`;
 
 			product.Custom_String_2 = overlappingContracts.map(c => c.ContractType).join(",");
-			  product.Custom_Boolean_1 = overlappingContracts.length > 0 && tender.Classification === "Commercial Agreement" && !institute.External_InstituteId ? true : false;
-			  console.log( product.Custom_Boolean_1);
 		} catch (error) {
 			console.error('Error in OfferProductsDetailView After READ');
             return req.reject(403, error?.message||"Error in OfferProductsDetailView");
