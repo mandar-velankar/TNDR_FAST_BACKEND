@@ -8127,6 +8127,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 
 			const [rootRow] = await tx.run(SELECT.from(FastConditionContractsView).where({ OfferID: offerID }));
 
+			if (!rootRow) {
+				console.error("No condition contract data found for offer. Check whether the Tender SubmittedBy value matches a valid username.");
+
+				return req.error(404, `No condition contract data found for offer ${offerID}. ` +
+					"The submitted user may not exist or may not match the username in the User table.");
+			}
+
 			let extension = false;
 			let extensionPeriod = 0;
 
