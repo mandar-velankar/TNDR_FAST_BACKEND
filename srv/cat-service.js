@@ -2803,7 +2803,77 @@ module.exports = (srv) => {
 			AttentionTo: quotation?.Custom_String_6,
             QuotationDate: quotation?.Custom_Date_3,
 			TenderChannel: offer.TENDER_CHANNEL,
-			COUNTRY_REGION: offer.Region
+			COUNTRY_REGION: offer.Region,
+			Tender_Custom_Integer_1: tender?.Custom_Integer_1,
+            Tender_Custom_Integer_2: tender?.Custom_Integer_2,
+            Tender_Custom_Integer_3: tender?.Custom_Integer_3,
+            Tender_Custom_Integer_4: tender?.Custom_Integer_4,
+            Tender_Custom_Integer_5: tender?.Custom_Integer_5,
+            Tender_Custom_Integer_6: tender?.Custom_Integer_6,
+            Tender_Custom_Integer_7: tender?.Custom_Integer_7,
+            Tender_Custom_Integer_8: tender?.Custom_Integer_8,
+            Tender_Custom_Integer_9: tender?.Custom_Integer_9,
+            Tender_Custom_Integer_10: tender?.Custom_Integer_10,
+            Tender_Custom_String_1: tender?.Custom_String_1,
+            Tender_Custom_String_2: tender?.Custom_String_2,
+            Tender_Custom_String_3: tender?.Custom_String_3,
+            Tender_Custom_String_4: tender?.Custom_String_4,
+            Tender_Custom_String_5: tender?.Custom_String_5,
+            Tender_Custom_String_6: tender?.Custom_String_6,
+            Tender_Custom_String_7: tender?.Custom_String_7,
+            Tender_Custom_String_8: tender?.Custom_String_8,
+            Tender_Custom_String_9: tender?.Custom_String_9,
+            Tender_Custom_String_10: tender?.Custom_String_10,
+            Tender_Custom_String_11: tender?.Custom_String_11,
+            Tender_Custom_String_12: tender?.Custom_String_12,
+            Tender_Custom_String_13: tender?.Custom_String_13,
+            Tender_Custom_String_14: tender?.Custom_String_14,
+            Tender_Custom_String_15: tender?.Custom_String_15,
+            Tender_Custom_String_16: tender?.Custom_String_16,
+            Tender_Custom_String_17: tender?.Custom_String_17,
+            Tender_Custom_String_18: tender?.Custom_String_18,
+            Tender_Custom_String_19: tender?.Custom_String_19,
+            Tender_Custom_String_20: tender?.Custom_String_20,
+            Tender_Custom_Double_1: tender?.Custom_Double_1,
+            Tender_Custom_Double_2: tender?.Custom_Double_2,
+            Tender_Custom_Double_3: tender?.Custom_Double_3,
+            Tender_Custom_Double_4: tender?.Custom_Double_4,
+            Tender_Custom_Double_5: tender?.Custom_Double_5,
+            Tender_Custom_Double_6: tender?.Custom_Double_6,
+            Tender_Custom_Double_7: tender?.Custom_Double_7,
+            Tender_Custom_Double_8: tender?.Custom_Double_8,
+            Tender_Custom_Double_9: tender?.Custom_Double_9,
+            Tender_Custom_Double_10: tender?.Custom_Double_10,
+            Tender_Custom_Date_1: tender?.Custom_Date_1,
+            Tender_Custom_Date_2: tender?.Custom_Date_2,
+            Tender_Custom_Date_3: tender?.Custom_Date_3,
+            Tender_Custom_Date_4: tender?.Custom_Date_4,
+            Tender_Custom_Date_5: tender?.Custom_Date_5,
+            Tender_Custom_Date_6: tender?.Custom_Date_6,
+            Tender_Custom_Date_7: tender?.Custom_Date_7,
+            Tender_Custom_Date_8: tender?.Custom_Date_8,
+            Tender_Custom_Date_9: tender?.Custom_Date_9,
+            Tender_Custom_Date_10: tender?.Custom_Date_10,
+            Tender_Custom_Boolean_1: tender?.Custom_Boolean_1,
+            Tender_Custom_Boolean_2: tender?.Custom_Boolean_2,
+            Tender_Custom_Boolean_3: tender?.Custom_Boolean_3,
+            Tender_Custom_Boolean_4: tender?.Custom_Boolean_4,
+            Tender_Custom_Boolean_5: tender?.Custom_Boolean_5,
+            Tender_Custom_Boolean_6: tender?.Custom_Boolean_6,
+            Tender_Custom_Boolean_7: tender?.Custom_Boolean_7,
+            Tender_Custom_Boolean_8: tender?.Custom_Boolean_8,
+            Tender_Custom_Boolean_9: tender?.Custom_Boolean_9,
+            Tender_Custom_Boolean_10: tender?.Custom_Boolean_10,
+            Tender_Custom_Datetime_1: tender?.Custom_Datetime_1,
+            Tender_Custom_Datetime_2: tender?.Custom_Datetime_2,
+            Tender_Custom_Datetime_3: tender?.Custom_Datetime_3,
+            Tender_Custom_Datetime_4: tender?.Custom_Datetime_4,
+            Tender_Custom_Datetime_5: tender?.Custom_Datetime_5,
+            Tender_Custom_Datetime_6: tender?.Custom_Datetime_6,
+            Tender_Custom_Datetime_7: tender?.Custom_Datetime_7,
+            Tender_Custom_Datetime_8: tender?.Custom_Datetime_8,
+            Tender_Custom_Datetime_9: tender?.Custom_Datetime_9,
+            Tender_Custom_Datetime_10: tender?.Custom_Datetime_10
 		};
 		return results;
 		
@@ -3103,13 +3173,30 @@ module.exports = (srv) => {
 				aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
 			}
 
+			let required_action = approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? country.Region === "MEA" ? getRequiredAction(requiredAction) : approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredAction);
+			let approver_type_section = (requiredAction === 1) ? 2 : 1;
+
+			if (country.Region === "MEA") {
+				latest_approval_type = latestApproval
+					.filter(approval => approval.ApproverType === type.ApproverType)
+					.reduce((latest, current) => {
+						return !latest || new Date(current.Statustime) > new Date(latest.Statustime)
+						? current
+						: latest;
+					}, null);
+				if (latest_approval_type && latest_approval_type.ApproverTypeSection === 2) {
+					required_action = latest_approval_type.REQUIRED_ACTION;
+					approver_type_section = latest_approval_type.ApproverTypeSection;
+				}
+			}
+
 			aResults.push({
 				TenderID: offerValidation.TENDERID,
 				OfferId: offerValidation.OFFERID,
 				CountryCode: offerValidation.COUNTRYCODE,
 				ApprovalContent: getApprovalContent(approverType),
-				ApproverTypeSection: (requiredAction === 1) ? 2 : 1,
-				REQUIRED_ACTION: approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? country.Region === "MEA" ? getRequiredAction(requiredAction) : approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredAction),
+				ApproverTypeSection: approver_type_section,
+				REQUIRED_ACTION: required_action,
 				ApprovalStatus: (approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus,
 				ApproverName: approverName,
 				ApproverEmailID: approverEmailID,
