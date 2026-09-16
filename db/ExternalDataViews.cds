@@ -1887,3 +1887,84 @@ entity TaiwanFASTData as select from TransactionalDataViews.ZuelligExtractView a
     'BT' as BT: String,
     COALESCE(TO_VARCHAR(CAST(ROUND(CAST(NULLIF(TO_VARCHAR(extract.RegisteredPrice),'') AS Decimal(38,10)), 4) AS Decimal(19,4))), '0.0000') as Current_NHI_Price: String
 };
+
+entity AuroraMasterProductPacksView as select from MasterData.PT_TMCTRY as MasterProductPacks
+    inner join MasterData.PT_TMCTPRDPCK as CP 
+        on MasterProductPacks.CountryCode = CP.COUNTRYCODE
+    inner join MasterData.PT_TMPRDPCK as P 
+        on CP.PRODUCTPACKID = P.PRODUCTPACKID 
+    inner join MasterData.PT_TMPRDHIER as H 
+        on P.HLEVEL6_CODE = H.HLEVEL6_CODE
+    left outer join MasterData.PT_TMSKUPRDPCK as sku 
+        on CP.COUNTRYCODE = sku.CountryCode 
+        and CP.PRODUCTPACKID = sku.ProductPackID {
+            key P.PRODUCTPACKID,
+            key CP.COUNTRYCODE,
+            min(H.HLEVEL1_NAME) as HLEVEL1_NAME:String,
+            min(H.HLEVEL4_CODE) as HLEVEL4_CODE:String,
+            min(H.HLEVEL4_NAME) as HLEVEL4_NAME:String,
+            P.HLEVEL6_CODE,
+            min(H.HLEVEL6_NAME) as HLEVEL6_NAME:String,
+            P.PRODUCTPACKNAME,
+            P.PRESENTATION,
+            P.UOM,
+            P.CONCENTRATION,
+            P.PACKFACTOR,
+            P.PCIName,
+            CP.GPP_GOVERNED,
+            CP.LAP_CURRENCY,
+            CP.LAP,
+            CP.LAP_UNIT,
+            CP.PRAF_ID,
+            CP.PRAF_COMMENTS,
+            P.Nucleus,
+            CP.COUNTRYOFORIGIN,
+            CP.SHELFLIFE,
+            case CP.REGISTERED 
+                when 0 then 'No'
+                when 1 then 'Without Price'
+                when 2 then 'With Price'
+            end as REGISTERED:String,
+            CP.MANUFACTURER,
+            CP.COMMENT,
+            sku.SKUCode as MaterialNumbers:Integer,
+            CP.QTY_THRESHOLD,
+            CP.OutSourcedStatus,
+            P.ACTIVERECORD as ACTIVE_PRODUCT,
+            CP.ACTIVERECORD as ACTIVE_COUNTRY_PRODUCT
+    } group by P.PRODUCTPACKID,
+        CP.COUNTRYCODE,
+        P.HLEVEL6_CODE,
+        P.PRODUCTPACKNAME,
+        P.PRESENTATION,
+        P.UOM,
+        P.CONCENTRATION,
+        P.PACKFACTOR,
+        CP.COUNTRYOFORIGIN,
+        CP.SHELFLIFE,
+        CP.MANUFACTURER,
+        P.ACTIVERECORD,
+        CP.ACTIVERECORD,
+        P.PCIName,
+        CP.GPP_GOVERNED,
+        CP.LAP_CURRENCY,
+        CP.LAP,
+        CP.LAP_UNIT,
+        CP.PRAF_ID,
+        CP.PRAF_COMMENTS,
+        P.Nucleus,
+        CP.REGISTERED,
+        CP.COMMENT,
+        sku.SKUCode,
+        CP.QTY_THRESHOLD,
+        CP.OutSourcedStatus,
+        P.ACTIVERECORD,
+        CP.ACTIVERECORD
+    order by CP.COUNTRYCODE,
+            P.PRODUCTPACKNAME;
+
+entity AuroraMasterProductPackSKUView as select from MasterData.PT_TMSKUPRDPCK {
+    key CountryCode,
+    key ProductPackID,
+    SKUCode
+};
