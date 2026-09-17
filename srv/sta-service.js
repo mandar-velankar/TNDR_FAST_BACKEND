@@ -5611,7 +5611,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			aApproverTypes.splice(CDHApproverTypeIndex, 1);
 		}
 		} else if (product.DIVISION === 'Pharma') {
-			if(product.NET_PRICE < dFloorPrice || (Difference_In_Days > 30 && offer.CLASSIFICATION !=='Tender') ){
+			if(product.NET_PRICE > dFloorPrice || (Difference_In_Days > 30 && offer.CLASSIFICATION !=='Tender') ){
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
 					case "BU/RAM 1":
@@ -7635,12 +7635,13 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			ConfidentialPrice                   : req.data.ConfidentialPrice ? req.data.ConfidentialPrice : standardTenderPriceConditionView?.ConfidentialPrice,
 			Discount                            : standardTenderPriceConditionView?.Discount,
 			RoyalDecree                         : req.data.RoyalDecree ? req.data.RoyalDecree : standardTenderPriceConditionView?.RoyalDecree,
-			Tax                                 : standardTenderPriceConditionView?.Tax,
+			Tax                                 : req.data.Tax ? req.data.Tax : standardTenderPriceConditionView?.Tax,
 			Liquidation                         : req.data.Liquidation ? req.data.Liquidation : standardTenderPriceConditionView?.Liquidation,
 			RefundDate                          : req.data.RefundDate ? req.data.RefundDate : standardTenderPriceConditionView?.RefundDate,
 			PriceConditionCode                  : req.data.PriceConditionCode ? req.data.PriceConditionCode : standardTenderPriceConditionView?.PriceConditionCode,
 			LotID                               : 1,
-			MarketIncentiveID				  	: req.data.MarketIncentiveID ? req.data.MarketIncentiveID : standardTenderPriceConditionView?.MarketIncentiveID,		
+			MarketIncentiveID				  	: req.data.MarketIncentiveID ? req.data.MarketIncentiveID : standardTenderPriceConditionView?.MarketIncentiveID,
+			BrandLevelRappel					: req.data.BrandLevelRappel ?? standardTenderPriceConditionView?.BrandLevelRappel ?? 'No',		
 			Settlement_ID						: req.data.Settlement_ID ? req.data.Settlement_ID : standardTenderPriceConditionView?.Settlement_ID,
 			PriceConditionClassification_ID     : standardTenderPriceConditionView?.ClassificationID,
 		}
@@ -8297,7 +8298,10 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 						RefundDate: toStr(rebateRow.RefundDate),
 						PriceConditionCode: toStr(rebateRow.PriceConditionCode),
 						MarketIncentiveID: toStr(rebateRow.MarketIncentiveID),
-						MarketIncentiveDescription: toStr(marketIncentiveInfo?.Description),
+						MarketIncentiveDescription: toStr(marketIncentiveInfo.Description),
+						BrandLevelRappel: toStr(rebateRow.BrandLevelRappel),
+						HLEVEL4_CODE: toStr(rebateRow.HLEVEL4_CODE),
+						HLEVEL4_NAME: toStr(rebateRow.HLEVEL4_NAME),
 						CCMContract_ID: ccmContractId,
 						validFrom: today,
 						validTo: "9999-12-31",
