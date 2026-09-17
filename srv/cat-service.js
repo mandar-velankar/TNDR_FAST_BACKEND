@@ -4828,6 +4828,7 @@ module.exports = (srv) => {
 					ApprovalHasDeletedProduct_Previous_State: false,
 					ApprovalHasDeclinedProduct_Previous_State: false,
 					ApprovalHas_Deleted_DeclinedProduct_Previous_State: false,
+					ApprovalHasAddedProduct_Previous_State: false,
 					ApprovalHas_Deleted_Products_PTL_Previous_State: ""
 				}).where({OfferID: OfferId}))
 
