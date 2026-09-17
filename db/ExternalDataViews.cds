@@ -1894,10 +1894,7 @@ entity AuroraMasterProductPacksView as select from MasterData.PT_TMCTRY as Maste
     inner join MasterData.PT_TMPRDPCK as P 
         on CP.PRODUCTPACKID = P.PRODUCTPACKID 
     inner join MasterData.PT_TMPRDHIER as H 
-        on P.HLEVEL6_CODE = H.HLEVEL6_CODE
-    left outer join MasterData.PT_TMSKUPRDPCK as sku 
-        on CP.COUNTRYCODE = sku.CountryCode 
-        and CP.PRODUCTPACKID = sku.ProductPackID {
+        on P.HLEVEL6_CODE = H.HLEVEL6_CODE {
             key P.PRODUCTPACKID,
             key CP.COUNTRYCODE,
             min(H.HLEVEL1_NAME) as HLEVEL1_NAME:String,
@@ -1927,7 +1924,6 @@ entity AuroraMasterProductPacksView as select from MasterData.PT_TMCTRY as Maste
             end as REGISTERED:String,
             CP.MANUFACTURER,
             CP.COMMENT,
-            sku.SKUCode as MaterialNumbers:Integer,
             CP.QTY_THRESHOLD,
             CP.OutSourcedStatus,
             P.ACTIVERECORD as ACTIVE_PRODUCT,
@@ -1955,7 +1951,6 @@ entity AuroraMasterProductPacksView as select from MasterData.PT_TMCTRY as Maste
         P.Nucleus,
         CP.REGISTERED,
         CP.COMMENT,
-        sku.SKUCode,
         CP.QTY_THRESHOLD,
         CP.OutSourcedStatus,
         P.ACTIVERECORD,
