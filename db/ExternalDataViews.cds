@@ -1164,6 +1164,7 @@ inner join OfferPriceVolumeInfo as price_volume_info on offerProducts.OfferID = 
 	offerProducts.Offer.Tender.ContractLength as ExpectedContractDuration:Integer,
 	offerProducts.Offer.Tender.ContractExtenseion as ExpectedContractExtension:Integer,
 	offerProducts.Offer.Tender.Institute.InstituteName as InstituteName:String,
+	offerProducts.Offer.Tender.Institute.InstituteID as InstituteID:String,
 	offerProducts.Offer.Tender.Institute.InstituteType as InstituteType:String,
 	offerProducts.Offer.Tender.Institute.CustomerID as CustomerNumber:Integer,
 
