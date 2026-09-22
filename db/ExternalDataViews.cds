@@ -1928,7 +1928,9 @@ entity AuroraMasterProductPacksView as select from MasterData.PT_TMCTRY as Maste
             CP.QTY_THRESHOLD,
             CP.OutSourcedStatus,
             P.ACTIVERECORD as ACTIVE_PRODUCT,
-            CP.ACTIVERECORD as ACTIVE_COUNTRY_PRODUCT
+            CP.ACTIVERECORD as ACTIVE_COUNTRY_PRODUCT,
+            H.TA.TA,
+            H.TA.TAShort,
     } group by P.PRODUCTPACKID,
         CP.COUNTRYCODE,
         P.HLEVEL6_CODE,
@@ -1955,7 +1957,9 @@ entity AuroraMasterProductPacksView as select from MasterData.PT_TMCTRY as Maste
         CP.QTY_THRESHOLD,
         CP.OutSourcedStatus,
         P.ACTIVERECORD,
-        CP.ACTIVERECORD
+        CP.ACTIVERECORD,
+        H.TA.TA,
+        H.TA.TAShort
     order by CP.COUNTRYCODE,
             P.PRODUCTPACKNAME;
 
