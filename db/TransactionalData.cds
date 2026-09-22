@@ -889,6 +889,21 @@ entity OutgoingMails : managed, cuid {
     RecipientCC: String;
 }
 
+entity OutgoingMailBodyUploads : managed, cuid {
+    CountryCode: String;
+    TenderID: String(50);
+    OfferID: String(30);
+    Sender: LargeString;
+    Recipients: LargeString;
+    Subject: LargeString;
+    Sent: Boolean default false;
+    Status: String(20);
+    mail: Association to OutgoingMails;
+    @Core.MediaType: MediaType
+    Content: LargeBinary;
+    MediaType: String(100);
+}
+
 entity CountrySpecificTenderInfo: managed {
     key TenderID             : String(50);
     key CountryCode          : String;

@@ -24,6 +24,7 @@ service ConditionContractService @(path: 'conditioncontracting')@(requires: [
     entity Country                      as projection on MasterData.PT_TMCTRY;
     entity Users                        as projection on AdminData.PT_TMUSER;
     entity OutgoingMails                as projection on TransactionalData.OutgoingMails;
+    entity OutgoingMailBodyUploads     as projection on TransactionalData.OutgoingMailBodyUploads;
     entity MailTemplate                 as projection on AdminData.MailTemplate;
     entity MailTemplateFile             as projection on AdminData.MailTemplateFile;
     entity SchedulerApiConfig           as projection on AdminData.SchedulerApiConfig;
@@ -36,5 +37,6 @@ service ConditionContractService @(path: 'conditioncontracting')@(requires: [
 
     function getUserCountries() returns object;
     function getInstituteData() returns object;
+    action completeMailBodyUpload(uploadId : UUID) returns Boolean;
 
 }
