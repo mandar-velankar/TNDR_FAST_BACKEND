@@ -1173,6 +1173,7 @@ service StandardAppService @(path : 'sta_tender')@(requires : [
     entity MailTemplates                                as projection on AdminData.MailTemplate;
     entity MailTemplateFiles                            as projection on AdminData.MailTemplateFile;
     entity Outbox                                       as projection on TransactionalData.OutgoingMails;
+    entity OutgoingMailBodyUploads                      as projection on TransactionalData.OutgoingMailBodyUploads;
     entity StandardTenderFOCInformation                 as projection on TransactionalDataViews.StandardTenderFOCInformation;   
     @cds.redirection.target
     entity NotificationUserList as select from AdminData.PT_TMUSERCTRY{
@@ -2186,6 +2187,7 @@ entity PriceConditionDiscountConditionsView as select from TransactionalData.PT_
     action updateFinalContractStartEndDate(OfferID: String, ContractStartDate: Date, ContractEndDate: Date) returns String;
     action createAllFastConditionContracts(OfferID: String, ContractStartDate: Date, ContractEndDate: Date) returns String;
     function getFastContractForOffer(offerID: String, tenderID: String) returns String;
+    action completeMailBodyUpload(uploadId : UUID) returns Boolean;
     entity PolandPendingTMApprovals as select from TransactionalData.PT_TMOFRS as o
         inner join TransactionalData.PT_TMAPPRST as a
             on o.OfferID = a.OfferId
