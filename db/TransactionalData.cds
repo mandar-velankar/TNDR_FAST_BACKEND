@@ -600,7 +600,6 @@ entity PriceCondition: cuid, managed {
     ConfidentialDiscount                : Double;
     RoyalDecreePercentage_1             : Double;
     MarketIncentiveID                   : String;
-    BrandLevelRappel                    : String default 'No';
     QuotationPriceConditionCode         : String;
     IsYP11WithoutRD                     : Boolean default false;
     BrandLevelRappel                    : String default 'No';
