@@ -5611,7 +5611,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			aApproverTypes.splice(CDHApproverTypeIndex, 1);
 		}
 		} else if (product.DIVISION === 'Pharma') {
-			if(product.NET_PRICE < dFloorPrice || (Difference_In_Days > 30 && offer.CLASSIFICATION !=='Tender') ){
+			if(product.NET_PRICE > dFloorPrice || (Difference_In_Days > 30 && offer.CLASSIFICATION !=='Tender') ){
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
 					case "BU/RAM 1":
@@ -7635,7 +7635,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			ConfidentialPrice                   : req.data.ConfidentialPrice ? req.data.ConfidentialPrice : standardTenderPriceConditionView?.ConfidentialPrice,
 			Discount                            : standardTenderPriceConditionView?.Discount,
 			RoyalDecree                         : req.data.RoyalDecree ? req.data.RoyalDecree : standardTenderPriceConditionView?.RoyalDecree,
-			Tax                                 : standardTenderPriceConditionView?.Tax,
+			Tax                                 : req.data.Tax ? req.data.Tax : standardTenderPriceConditionView?.Tax,
 			Liquidation                         : req.data.Liquidation ? req.data.Liquidation : standardTenderPriceConditionView?.Liquidation,
 			RefundDate                          : req.data.RefundDate ? req.data.RefundDate : standardTenderPriceConditionView?.RefundDate,
 			PriceConditionCode                  : req.data.PriceConditionCode ? req.data.PriceConditionCode : standardTenderPriceConditionView?.PriceConditionCode,
