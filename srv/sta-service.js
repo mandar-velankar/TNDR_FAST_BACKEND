@@ -9447,11 +9447,12 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 		);
 
 		await tx.run(
-			UPDATE(OutgoingMailBodyUploads)
-				.set({
-					Status: 'COMPLETED',
-					mail_ID: mailId
-				})
+            UPDATE(OutgoingMailBodyUploads)
+                .set({
+                    Status: 'COMPLETED',
+                    mail_ID: mailId,
+                    Content: null
+                })
 				.where({ ID: uploadId })
 		);
 
