@@ -1102,3 +1102,17 @@ select from SAP.ItalyMaterials as material
 }
 group by
     product.PRODUCTPACKID;
+	
+	entity ItalyCustomerProvinceView as
+    select from SAP.ItalyCustomers as customer
+        inner join MasterData.CountryProvinces as province
+            on customer.E1KNA1M.REGIO = province.Name
+{
+    key customer.E1KNA1M.KUNNR      as KUNNR,
+    customer.E1KNA1M,
+    customer.E1KNVVM,
+    province.RegionID
+}
+where customer.E1KNA1M.LAND1 = 'IT'
+  and province.CountryCode = 'IT'
+  and customer.E1KNA1M.KTOKD <> '0002';
