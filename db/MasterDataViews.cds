@@ -1053,3 +1053,52 @@ group by ID,
 	CustPartnrFuncsCount,
 	PartyRoleCode;
 
+ 
+entity ItalyProductPackView as
+    select from MasterData.PT_TMPRDPCK as p
+    inner join MasterData.PT_TMCTPRDPCK as cp
+        on p.PRODUCTPACKID = cp.PRODUCTPACKID
+{
+    p.PRODUCTPACKNAME as ProductPackName
+}
+where cp.COUNTRYCODE = 'IT';
+
+entity ItalyMaterialProductPackView as
+    select from SAP.ItalyMaterials as material
+        inner join MasterData.PT_TMPRDPCK as product
+            on material.MAKTX = product.PRODUCTPACKNAME
+        inner join MasterData.PT_TMCTPRDPCK as countryProduct
+            on product.PRODUCTPACKID = countryProduct.PRODUCTPACKID
+{
+    key product.PRODUCTPACKID as ProductPackID,
+    material.MATNR
+}
+// where countryProduct.COUNTRYCODE = 'IT';
+
+/**
+ * View used by Italy Product Pack Job
+ * Returns ProductPackID and COGS for Italy materials
+ */
+entity ItalyMaterialCOGSView as
+    select from SAP.ItalyMaterials as material
+        inner join MasterData.PT_TMPRDPCK as product
+            on material.MAKTX = product.PRODUCTPACKNAME
+        inner join MasterData.PT_TMCTPRDPCK as countryProduct
+            on product.PRODUCTPACKID = countryProduct.PRODUCTPACKID
+{
+    key product.PRODUCTPACKID as ProductPackID,
+    max(material.COGS) as COGS
+}
+where countryProduct.COUNTRYCODE = 'IT'
+group by product.PRODUCTPACKID;
+
+entity ItalyMaterialCountryOriginView as
+select from SAP.ItalyMaterials as material
+    inner join MasterData.PT_TMPRDPCK as product
+        on material.MAKTX = product.PRODUCTPACKNAME
+{
+    key product.PRODUCTPACKID as ProductPackID,
+    max(material.COUNTRYOFORIG) as COUNTRYOFORIGIN
+}
+group by
+    product.PRODUCTPACKID;
