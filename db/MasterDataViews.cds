@@ -1073,7 +1073,7 @@ entity ItalyMaterialProductPackView as
     key product.PRODUCTPACKID as ProductPackID,
     material.MATNR
 }
-// where countryProduct.COUNTRYCODE = 'IT';
+where countryProduct.COUNTRYCODE = 'IT';
 
 /**
  * View used by Italy Product Pack Job
