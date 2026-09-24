@@ -39,6 +39,7 @@ module.exports = (srv) => {
 		PT_TMAPPRST, 
 		PT_TMOFPR,
 		PT_TMOFRS,
+		MEAApprovalLatestAction,
 		PT_TMQUTO,
 		FreeGoodsOther, 
 		CandidatePrices, 
@@ -1614,9 +1615,20 @@ module.exports = (srv) => {
 		return results;
 	}
 
-	function buildProductValidationForType19(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals) {//MEA
+	function buildProductValidationForType19(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals, latestMEAAction) {//MEA
+		const isLatestActionForProduct = latestMEAAction
+			&& String(latestMEAAction.ProductCode) === String(product.ProductCode)
+			&& Number(latestMEAAction.LotID || 1) === Number(product.LotID || 1);
+		const latestActionForProduct = isLatestActionForProduct ? latestMEAAction : null;
+		const isUnapprovedNewProduct = product.IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL === true
+			|| product.IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL === 1
+			|| product.IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL === "true";
+		const effectiveLatestAction = latestActionForProduct && isUnapprovedNewProduct && latestActionForProduct.ActionType !== "IS_NEW_PRODUCT"
+			? {...latestActionForProduct, ActionType: "IS_NEW_PRODUCT"}
+			: latestActionForProduct;
 		const everyProductLatestFieldEmpty = aOfferProduct.every(pr => !pr.MEA_APPROVAL_LATEST_UPDATED_FIELD);
-		const latestUpdatedField = offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? product.MEA_APPROVAL_LATEST_UPDATED_FIELD : product.MEA_APPROVAL_LATEST_UPDATED_FIELD_PREVIOUS_STATE || "";
+		const legacyLatestUpdatedField = offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? product.MEA_APPROVAL_LATEST_UPDATED_FIELD : product.MEA_APPROVAL_LATEST_UPDATED_FIELD_PREVIOUS_STATE || "";
+		const latestUpdatedField = effectiveLatestAction?.ActionType || legacyLatestUpdatedField;
 		const deleted_state= offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? initialOffer.PreviousApprovalHasDeletedProduct : initialOffer.ApprovalHasDeletedProduct_Previous_State;
 		const declined_state= offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? initialOffer.PreviousApprovalHasDeclinedProduct : initialOffer.ApprovalHasDeclinedProduct_Previous_State;
 		const deleted_product_ptl= offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? initialOffer.PreviousApprovalHas_Deleted_Products_PTL : initialOffer.ApprovalHas_Deleted_Products_PTL_Previous_State || "";
@@ -1624,7 +1636,7 @@ module.exports = (srv) => {
 		const maxSupplyUpdate = Math.max(...originalOfferProducts.map(pr => pr.SUPPLY_UPDATE));
 		const maxPaymentUpdate = Math.max(...originalOfferProducts.map(pr => pr.PAYMENT_UPDATE));
 		const maxPriceUpdate = Math.max(...originalOfferProducts.map(pr => pr.PRICE_UPDATE));
-		const isOfferReApproved = initialOffer.APPROVALS_SENT > 0 && (maxSupplyUpdate > 0 || maxPaymentUpdate > 0 || maxPriceUpdate > 0 || initialOffer.PreviousApprovalHasAddedProduct || deleted_state || declined_state);
+		const isOfferReApproved = initialOffer.APPROVALS_SENT > 0 && (maxSupplyUpdate > 0 || maxPaymentUpdate > 0 || maxPriceUpdate > 0 || initialOffer.PreviousApprovalHasAddedProduct || deleted_state || declined_state || effectiveLatestAction);
 		const hasNegativeMargin = ServiceHelper.isDoubleXBelowY(productInfo.GrossProfitEurSpot, 0);
 		const IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR = MEAOfferTotalAmountCheck(aOfferProduct, exchangeRate);
 		//EHQUT-197468-MEA – Nucleus heads notifications flow
@@ -1779,6 +1791,22 @@ module.exports = (srv) => {
 				creditManager: 1,
 				legal: hasNegativeMargin ? 3 : ["Private", "NGO-NPO", "Semi-Governmental"].includes(offer.INSTITUTE_TYPE) ? 2 : meaPreviousApprovalsFlags?.LEGAL_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1,
 				controlling: hasNegativeMargin ? 2 : meaPreviousApprovalsFlags?.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1,
+			},
+			"PRODUCT_DELETED": {
+				supply: 2,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 2 : meaPreviousApprovalsFlags?.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
+				nucleus: 2,
+				creditManager: 1,
+				legal: ["Private", "NGO-NPO", "Semi-Governmental"].includes(offer.INSTITUTE_TYPE) ? 2 : meaPreviousApprovalsFlags?.LEGAL_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1,
+				controlling: meaPreviousApprovalsFlags?.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1,
+			},
+			"PRODUCT_DECLINED": {
+				supply: 2,
+				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 2 : meaPreviousApprovalsFlags?.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
+				nucleus: 2,
+				creditManager: 1,
+				legal: ["Private", "NGO-NPO", "Semi-Governmental"].includes(offer.INSTITUTE_TYPE) ? 2 : meaPreviousApprovalsFlags?.LEGAL_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1,
+				controlling: meaPreviousApprovalsFlags?.CONTROLLING_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : 1,
 			}
 		};
 
@@ -1795,11 +1823,14 @@ module.exports = (srv) => {
 			supply = result.supply !== undefined ? result.supply : supply;
 			regionalBusiness = result.regionalBusiness !== undefined ? result.regionalBusiness : regionalBusiness;
 			nucleus = result.nucleus !== undefined ? result.nucleus : nucleus;
-			// ... apply other fields if they exist in the updates object
+			legal = result.legal !== undefined ? result.legal : legal;
+			controlling = result.controlling !== undefined ? result.controlling : controlling;
 		}
 
 
-		if (declined_state || deleted_state) {
+		const latestActionIsDeletedOrDeclined = ["PRODUCT_DELETED", "PRODUCT_DECLINED"].includes(effectiveLatestAction?.ActionType);
+		const latestDeletedProductPtl = latestActionIsDeletedOrDeclined && effectiveLatestAction.Nucleus ? effectiveLatestAction.Nucleus : deleted_product_ptl;
+		if ((declined_state || deleted_state) && !effectiveLatestAction) {
 			supply = 2;
 			regionalBusiness = offer.TENDER_CHANNEL === "Direct" ? 2 : meaPreviousApprovalsFlags?.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1;
 			nucleus = 2; 
@@ -1849,8 +1880,8 @@ module.exports = (srv) => {
 					}
 				}
 
-				if (deleted_state || declined_state) {
-					oApproverType.ValidationType = deleted_product_ptl.includes(ctryApproverType.Nucleus) ? nucleus : 1;
+				if (latestActionIsDeletedOrDeclined || ((deleted_state || declined_state) && !effectiveLatestAction)) {
+					oApproverType.ValidationType = latestDeletedProductPtl.includes(ctryApproverType.Nucleus) ? nucleus : 1;
 				}
 			}
 			
@@ -1928,7 +1959,7 @@ module.exports = (srv) => {
 			
 	}
 
-	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals) {
+	async function buildProductInfoForCountry(tx, offer, product, aApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals, latestMEAAction) {
 		let commnonProductInfo = buildCommonProductInfo(offer, product);
 		let productValidation = {};
 		if (offer.APPROVAL_TYPE === 1 || offer.APPROVAL_TYPE === 2) {//Default
@@ -1959,7 +1990,7 @@ module.exports = (srv) => {
 			productValidation = await buildProductValidationForType12(tx, product, aApproverTypes)
         }
 		else if (offer.APPROVAL_TYPE === 19) {//Applicable for MEA
-			productValidation = buildProductValidationForType19(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals)
+			productValidation = buildProductValidationForType19(offer, product, commnonProductInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals, latestMEAAction)
 		}
 		else {//Not implemented yet, there will be approval type values for each case where logic is different
 			productValidation = buildProductValidationForType1(offer, product, commnonProductInfo, aApproverTypes)
@@ -1999,6 +2030,7 @@ module.exports = (srv) => {
 
 		const countryApprovers = await tx.run(SELECT.from(CountryApprovers).where({CountryCode: offer.COUNTRYCODE}));
 		const initialOffer = await tx.run(SELECT.one.from(PT_TMOFRS).where({OfferID: offer.OFFERID }));
+		const latestMEAAction = await tx.run(SELECT.one.from(MEAApprovalLatestAction).where({OfferID: offer.OFFERID}));
 		const offerLatestApprStatus = await tx.run(SELECT.from(OfferLatestApprovalStatus).where({OfferID: offer.OFFERID}));
 
 		const offerStatus = await SELECT.one.from("CatalogService.OfferStatus").where({
@@ -2049,7 +2081,7 @@ module.exports = (srv) => {
 
 
 			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
-			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals);
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals, latestMEAAction);
 			
 			//Get corresponding ProductPricing
 			const whereProductPricing = {
