@@ -9,3 +9,24 @@ Content-Type: application/json
         "f7dbd562-5c5b-4348-9d46-c15a3c14c21c"
     ]
 }
+
+
+PUT http://localhost:4004/v2/priceagreement/PriceAgreement_APPRST
+Authorization: Basic YXJ0aW9t
+Content-Type: application/json
+{
+                    "ID": "9c0261d1-640a-4d71-8287-53c266c49581",
+                    "createdAt": "/Date(1702640353302+0000)/",
+                    "createdBy": "EHQUT",
+                    "modifiedAt": "/Date(1702640353302+0000)/",
+                    "modifiedBy": "EHQUT",
+                    "CountryCode": "IT",
+                    "PriceAgreementID": "00215bed-472e-4ada-8ffc-3409e9a69cd5",
+                    "ApprovalStatus": "Processing",
+                    "OfferId": "IT-23-1539-1",
+                    "ProductPackID": 200415,
+                    "InstituteID": 202992,
+                    "EffectiveDate": "/Date(1681371197000+0000)/",
+                    "ExpiryDate": "/Date(4131302400000+0000)/"
+}
+

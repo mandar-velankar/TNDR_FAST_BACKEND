@@ -53,8 +53,8 @@ module.exports = class JobFactory {
                 return new PriceConditionsQualityControlNotificationMail(jobName,jobTime)
                 break;
             case this.jobNames.PriceAgreementExpiredMailJob:
-                    return new PriceAgreementExpiredMailJob(jobName,jobTime)
-                    break;
+                return new PriceAgreementExpiredMailJob(jobName,jobTime)
+                break;
             case this.jobNames.ProcessHematologyResultsRecordReminderMail:
                 return new ProcessHematologyResultsRecordReminderMail(jobName,jobTime)
                 break;

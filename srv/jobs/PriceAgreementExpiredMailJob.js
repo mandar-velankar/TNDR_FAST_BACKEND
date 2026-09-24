@@ -9,7 +9,9 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         super(jobName, jobTime);
     }
 
+
         //EHQUT-CR6
+
     async onTick() {
 
         console.log('Processing mails for Cancelled Price Agreements started ...');
@@ -63,7 +65,9 @@ class PriceAgreementExpiredMailJob extends BaseJob {
                 pa.Tender.User.UserName,
                 pa.Product.ProductPack.PRODUCTPACKNAME,
                 pa.PriceConditions.PriceConditionCode,
+
                 pa.Institute.InstituteName
+
           
         }).where({ ExpiryDate : expiryDate, CountryCode: 'ES' , Status: 'Cancelled', EmailNotificationSent: false }));
              
@@ -92,8 +96,10 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         const uniqueUsers = [...new Set(data.map(item => item.OfferId))];
         
          for (let user of uniqueUsers) {
+
             let dataFilteredByUser = data.filter(d => d.OfferId === user);
             
+
             if(dataFilteredByUser && dataFilteredByUser.length > 0){
                 outbox.push({
                     CountryCode: dataFilteredByUser[0].CountryCode,
@@ -120,6 +126,7 @@ class PriceAgreementExpiredMailJob extends BaseJob {
         return outbox;
       
     }
+ 
 
     findTemplate = (templates,templateid,pa) => templates.find(template => 
         template.CountryCode === 'ES' && 

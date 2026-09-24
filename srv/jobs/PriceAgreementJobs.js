@@ -67,7 +67,6 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
     async syncPriceAgreements(ids){
         const { CustomerPrices } = this.db.entities("com.bayer.SXTENDER.PriceAgreementData");
         const { PT_TMSKUPRDPCK} = this.db.entities("com.bayer.SXTENDER.MasterData");
-        
         if(ids.length === 0){
             throw `No price agreements found for synchronization`;
         }
@@ -134,14 +133,14 @@ module.exports = class ExtendPriceAgreements extends BaseJob {
         const whereInstituteId = ServiceHelper.buildFullWhere("InstituteID", "=", customerPrice.InstituteId);
         const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", customerPrice.CountryCode);
 
-        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where(whereInstituteId));
+        let institute = await tx.run(SELECT.one.from(PT_TMINST).where(whereCountry).where( {"InstituteType" : { "<>": 'Ship-To'} , "InstituteID" : {"in": customerPrice.InstituteId}} ));
         const body = await this.getPriceAgreementRequestBodyTemplate(institute); 
         if (!institute) {
             console.error(`No institute was found for InstituteID: ${customerPrice.InstituteId}`);
             return;
         }
 
-        if(customerPrice.CountryCode === 'ES' && institute.InstituteType === 'Ship-To') return Promise.resolve(); //Customer prices should not be synchronized for ship to parties
+        //if(customerPrice.CountryCode === 'ES' && institute.InstituteType === 'Ship-To') return Promise.resolve(); //Customer prices should not be synchronized for ship to parties
 
         const wherePriceAgreementId = ServiceHelper.buildFullWhere("Id", "=", customerPrice.PriceAgreementId);
         let priceAgreement = await tx.run(SELECT.one.from(PriceAgreements).where(wherePriceAgreementId));

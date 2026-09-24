@@ -746,6 +746,7 @@ entity Tenders_in_Regions {
 }
 //EHQUT-CR8
 //italy
+//CR8
 entity ConsumerPrices: cuid, managed {
 	CountryCode: String;
 	ProductPackId: String;

@@ -874,7 +874,6 @@ module.exports = async (srv) => {
             //EHQUT-CR2-New
             let instituteID = mainPriceConditions.map(item => item.InstituteId);
             let SoldToInstituteType = [];
-            let ShipToInstitute = [];
             if (instituteID.length > 0) {
                 const whereCountry = ServiceHelper.buildFullWhere("CountryCode", "=", 'ES');
                 let institute = await cds.run(SELECT.from(PT_TMINST).where(whereCountry).where({ InstituteID: { in: instituteID } }));
@@ -911,9 +910,9 @@ module.exports = async (srv) => {
         // const updateFOCConditionPromises = focPriceConditions.map((custPrice) => updateFOCcustPrices(custPrice));
         /*if(customerPrices[0].CountryCode === 'ES'){
             //CR2-New
-            let effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
+            effectiveDatearray = rappelPriceConditions.map((d) => { return d.EffectiveDate });
             effectiveDatearray = Array.from(new Set(effectiveDatearray));
-            let SoldToType,ShipToType;
+            
             if(SoldToInstituteType.length>0){
                 SoldToType = rappelPriceConditions.filter(d => d.InstituteId === SoldToInstituteType[0].InstituteID);
                 ShipToType = rappelPriceConditions.filter(d => d.InstituteId !== SoldToInstituteType[0].InstituteID);

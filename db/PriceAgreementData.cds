@@ -14,7 +14,7 @@ using {com.bayer.SXTENDER.MasterDataViews} from './MasterDataViews';
 using {com.bayer.SXTENDER.PriceAgreementDataViews} from './PriceAgreementDataViews';
 
 
-
+//EHQUT-CR6
 entity PriceAgreements: cuid, managed {
     ExpiryDate:  DateTime;
     EffectiveDate: DateTime;
@@ -123,6 +123,7 @@ entity CustomerPrices: cuid, managed {
     RefIdocNumber: String;
     Notified: Boolean default false;
     ProductPack: Association to MasterData.PT_TMPRDPCK on ProductPack.PRODUCTPACKID = ProductPackId;
+
 }
 
 entity SettlementDates: managed {
