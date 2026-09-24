@@ -170,6 +170,19 @@ entity PT_TENDGRPPUR {
         KeyForRestore : String(255);
 }
 
+entity MEAApprovalLatestAction {
+    key OfferID        : String(30) not null;
+        ProductCode    : Integer;
+        LotID          : Integer default 1;
+        Nucleus        : String(100);
+        ActionType     : String(50) not null;
+        ActionSequence : Int64 not null;
+        ApprovalRound  : Integer not null;
+        ProductState   : String(20);
+        ChangedAt      : Timestamp;
+        ChangedBy      : String(100);
+}
+
 entity PT_TMAPPRST {
         TenderID            : String(50);
     key OfferId             : String(30) not null;

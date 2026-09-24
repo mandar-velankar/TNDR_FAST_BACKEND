@@ -192,6 +192,8 @@ service CatalogService @(path : 'tender')@(requires : [
         * , Product : redirected to PT_TMOFPR, Tender : redirected to PT_TMTEND
     };
 
+    entity MEAApprovalLatestAction as projection on TransactionalData.MEAApprovalLatestAction;
+
     entity OfferView                                    as projection on TransactionalData.OfferView {
         * , Product : redirected to PT_TMOFPR, Tender : redirected to PT_TMTEND
     };
