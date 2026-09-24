@@ -4740,9 +4740,8 @@ module.exports = (srv) => {
 				return data;
 			}
 
-			const {
-				OfferId
-			} = data;
+			const OfferId = Array.isArray(data) ? data[0]?.OfferId : data.OfferId;
+			if (!OfferId) return data;
 			const offer = await SELECT.one.from(PT_TMOFRS)
 			.where({
 				OfferID: OfferId
@@ -4780,8 +4779,9 @@ module.exports = (srv) => {
 				promises.push(...offerProducts.map(pr => UPDATE(PT_TMOFPR).with({
 					IsProductAddedForPreviousApproval: false,
 					MEAApprovalLatestUpdatedField: "",
+					MEAApprovalLatestUpdatedFieldPreviousState: pr.MEAApprovalLatestUpdatedField || pr.MEAApprovalLatestUpdatedFieldPreviousState || null,
 					hasUpdatedSupplyPaymentPriceValues: false,
-				}).where({OfferID: OfferId, ProductCode: pr.ProductCode})))
+				}).where({OfferID: OfferId, ProductCode: pr.ProductCode, Active: pr.Active, LotID: pr.LotID})))
 
 				await Promise.all(promises);
 			}
