@@ -4779,7 +4779,7 @@ module.exports = (srv) => {
 				promises.push(...offerProducts.map(pr => UPDATE(PT_TMOFPR).with({
 					IsProductAddedForPreviousApproval: false,
 					MEAApprovalLatestUpdatedField: "",
-					MEAApprovalLatestUpdatedFieldPreviousState: pr.MEAApprovalLatestUpdatedField || pr.MEAApprovalLatestUpdatedFieldPreviousState || null,
+					MEAApprovalLatestUpdatedFieldPreviousState: "",
 					hasUpdatedSupplyPaymentPriceValues: false,
 				}).where({OfferID: OfferId, ProductCode: pr.ProductCode, Active: pr.Active, LotID: pr.LotID})))
 
