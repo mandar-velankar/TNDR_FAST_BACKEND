@@ -179,6 +179,7 @@ entity MEAApprovalLatestAction: managed {
         ActionSequence : Int64 not null;
         ApprovalRound  : Integer not null;
         ProductState   : String(20);
+        PreApprovedOfferPrice : Double;
 }
 
 entity PT_TMAPPRST {
