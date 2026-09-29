@@ -1629,6 +1629,14 @@ module.exports = (srv) => {
 		const everyProductLatestFieldEmpty = aOfferProduct.every(pr => !pr.MEA_APPROVAL_LATEST_UPDATED_FIELD);
 		const legacyLatestUpdatedField = offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? product.MEA_APPROVAL_LATEST_UPDATED_FIELD : product.MEA_APPROVAL_LATEST_UPDATED_FIELD_PREVIOUS_STATE || "";
 		const latestUpdatedField = effectiveLatestAction?.ActionType || legacyLatestUpdatedField;
+		const preApprovedOfferPrice = Number(effectiveLatestAction?.PreApprovedOfferPrice);
+		const hasPreApprovedOfferPrice = effectiveLatestAction?.PreApprovedOfferPrice !== null
+			&& effectiveLatestAction?.PreApprovedOfferPrice !== undefined
+			&& Number.isFinite(preApprovedOfferPrice);
+		const isOfferPriceDecrease = hasPreApprovedOfferPrice
+			&& ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, preApprovedOfferPrice);
+		const isOfferPriceIncrease = hasPreApprovedOfferPrice
+			&& ServiceHelper.isDoubleXBelowY(preApprovedOfferPrice, product.OFFER_PRICE);
 		const deleted_state= offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? initialOffer.PreviousApprovalHasDeletedProduct : initialOffer.ApprovalHasDeletedProduct_Previous_State;
 		const declined_state= offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? initialOffer.PreviousApprovalHasDeclinedProduct : initialOffer.ApprovalHasDeclinedProduct_Previous_State;
 		const deleted_product_ptl= offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? initialOffer.PreviousApprovalHas_Deleted_Products_PTL : initialOffer.ApprovalHas_Deleted_Products_PTL_Previous_State || "";
@@ -1781,7 +1789,7 @@ module.exports = (srv) => {
 			"PRICE_DEDUCTIONS_UPDATED": {
 				supply: 2,
 				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : meaPreviousApprovalsFlags?.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
-				nucleus: offer.TENDER_CHANNEL === "Direct" ? 2 : 3,
+				nucleus: isOfferPriceDecrease ? 3 : isOfferPriceIncrease ? 2 : offer.TENDER_CHANNEL === "Direct" ? 2 : 3,
 				creditManager: 1
 			},
 			"IS_NEW_PRODUCT": {
