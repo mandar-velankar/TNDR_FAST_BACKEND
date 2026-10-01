@@ -1494,8 +1494,13 @@ module.exports = async (srv) => {
 
 				
 				// Default
-				product.Custom_Boolean_1 = true;
-
+				// product.Custom_Boolean_1 = true;
+if (
+					tender.Classification === "Tender"  || tender.Classification === "Commercial Agreement" &&
+					institute.External_InstituteId === null
+				) {
+					product.Custom_Boolean_1 = true;
+				}
 				// Enable  Tender vs Tender working
 				if (
 					tender.Classification === "Tender" &&
