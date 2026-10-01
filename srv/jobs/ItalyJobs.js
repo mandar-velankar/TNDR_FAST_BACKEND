@@ -590,7 +590,7 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
 
 
             const { ItalyCustomers } = this.db.entities("com.bayer.SXTENDER.MasterData.SAP");
-            const { CountryProvinces, PT_TMINST , PaymentTerms } = this.db.entities("com.bayer.SXTENDER.MasterData");
+            const { CountryProvinces, PT_TMINST } = this.db.entities("com.bayer.SXTENDER.MasterData");
 
             let customerNumbers =  await tx.run(cds.parse.cql (`SELECT CustomerID from ${PT_TMINST.name} WHERE CountryCode = 'IT'`));
             customerNumbers = customerNumbers.map(item => this.addLeadingZeros(item.CustomerID, 10));
@@ -612,13 +612,13 @@ module.exports.ProcessCustomers = class ProcessCustomers extends BaseJob {
             'customer.E1KNA1M_KTOKD' : { "<>": '0002'}});
 
             const customers = await tx.run(query);
-           
             let nextInstituteID = await this.getLastInstituteID();
             
            
         //EFRCL- 305173- Italy-Again missing historical customers
             const instituteEntries = customers.map(cust => {
                 let InstType = cust.E1KNA1M_KTOKD;
+                console.log(cust.Description,"description");
                 if(InstType === '0001')
                  {
                     InstType ='Sold To'

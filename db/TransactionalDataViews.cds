@@ -644,8 +644,14 @@ entity BrandsInTender as select from TransactionalData.PT_TMTEND as tender{
     tender.Offer.Product.SKU.Product.HLEVEL4_NAME as BRANDNAME
 }
 where tender.Active = 1
-and tender.Offer.Active = 1
-and tender.Offer.Product.Active = 1;
+    and tender.Offer.Active = 1
+    and tender.Offer.Product.Active = 1
+group by 
+    tender.CountryCode,
+    tender.TenderID,
+    tender.Offer.Product.SKU.Product.HLEVEL4_CODE,
+    tender.Offer.Product.SKU.Product.HLEVEL4_NAME,
+    tender.Offer.OfferID;
 //EHQUT-397790-Italy-Search function is slow and system crashes
 //EHQUT-189207-Creation Date instead of BidDueDate on main page
 //EHQUT-197392-MEA - additional edit access to Tender Results and Delivery Tracking tabs

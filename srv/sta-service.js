@@ -1434,6 +1434,7 @@ module.exports = async (srv) => {
 			const product = Array.isArray(data) ? data?.[0] : data;
 
 			const tender = await SELECT.one.from(PT_TMTEND).where({TenderID: product?.TenderID});
+			const childInstituteAssortment = await SELECT.one.from(PT_TMINSHIER).where({InstituteID: tender?.InstituteID});
 			if (!tender || tender.CountryCode !== 'ES') return;
 
 			const institute = await SELECT.one.from(PT_TMINST).where({InstituteID: tender?.InstituteID, CountryCode: 'ES'});
@@ -1467,8 +1468,91 @@ module.exports = async (srv) => {
 					.join(",")}`;
 
 			product.Custom_String_2 = overlappingContracts.map(c => c.ContractType).join(",");
-			    product.Custom_Boolean_1 = overlappingContracts.length > 0 && tender.Classification === "Commercial Agreement" && !institute.External_InstituteId ? true : false;
-              console.log( product.Custom_Boolean_1);    
+			// Snigdha   
+					const bHasTenderContract =
+					classified &&
+					classified.length > 0 &&
+					Array.isArray(classified[0].contracts) &&
+					classified[0].contracts.some(function (contract) {
+						return contract.ContractType === "Tender";
+					});
+					const bHasCommercialAgreement =
+					classified &&
+					classified.length > 0 &&
+					Array.isArray(classified[0].contracts) &&
+					classified[0].contracts.some(function (contract) {
+						return contract.ContractType === "Commercial Agreement";
+					});
+					const bCustomerInTenderAssortment =
+					classified &&
+					classified.length > 0 &&
+					Array.isArray(classified[0].contracts) &&
+					classified[0].contracts.some(function (contract) {
+					return contract.ContractType === "Tender" &&
+					contract.CustomerType === "Assortment";
+					});
+
+				
+				// Default
+				// product.Custom_Boolean_1 = true;
+if (
+					tender.Classification === "Tender"  || tender.Classification === "Commercial Agreement" &&
+					institute.External_InstituteId === null
+				) {
+					product.Custom_Boolean_1 = true;
+				}
+				// Enable  Tender vs Tender working
+				if (
+					tender.Classification === "Tender" &&
+					bHasTenderContract &&
+					institute.External_InstituteId === null
+				) {
+					product.Custom_Boolean_1 = true;
+				}
+				// Disable Existing Tender -> New Commercial Agreement while changing not working
+				else if (
+					tender.Classification === "Commercial Agreement" &&
+					bHasTenderContract &&  institute.External_InstituteId === null
+				) {
+					product.Custom_Boolean_1 = false;
+				}
+
+
+				// Enable Commercial Agreement vs Commercial Agreement working   while changing not working
+				else if (
+					tender.Classification === "Commercial Agreement" &&
+					bHasCommercialAgreement &&
+					institute.External_InstituteId === null
+				) {
+					product.Custom_Boolean_1 = true;
+				}
+
+				// Enable - Assortment customer having Tender
+				else if (
+					tender.Classification === "Tender" &&
+					bHasTenderContract &&
+					institute.External_InstituteId
+				) {
+					product.Custom_Boolean_1 = true;
+				}
+				else if (
+					tender.Classification === "Commercial Agreement" &&
+					bHasTenderContract &&
+					institute.External_InstituteId
+				) {
+					product.Custom_Boolean_1 = false;
+				}
+				
+				//Disabling creating Comercial agreement for individual customer and that customer is in an Assortment which has Assortment Tender
+				else if (
+				tender.Classification === "Commercial Agreement" &&
+				institute.External_InstituteId &&
+				bCustomerInTenderAssortment
+				) {
+				product.Custom_Boolean_1 = false;
+			}
+
+			  console.log( product.Custom_Boolean_1);    
 		} catch (error) {
 			console.error('Error in OfferProductsDetailView After READ');
             return req.reject(403, error?.message||"Error in OfferProductsDetailView");
@@ -5612,7 +5696,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			aApproverTypes.splice(CDHApproverTypeIndex, 1);
 		}
 		} else if (product.DIVISION === 'Pharma') {
-			if(product.NET_PRICE < dFloorPrice || (Difference_In_Days > 30 && offer.CLASSIFICATION !=='Tender') ){
+			if(product.NET_PRICE > dFloorPrice || (Difference_In_Days > 30 && offer.CLASSIFICATION !=='Tender') ){
 			aApproverTypes.map(async function (oApproverType) {
 				switch (oApproverType.ApproverType) {
 					case "BU/RAM 1":
@@ -7636,7 +7720,7 @@ srv.after('READ', ['PriceConditionNLPriceView', 'PriceConditionNLDiscountView'],
 			ConfidentialPrice                   : req.data.ConfidentialPrice ? req.data.ConfidentialPrice : standardTenderPriceConditionView?.ConfidentialPrice,
 			Discount                            : standardTenderPriceConditionView?.Discount,
 			RoyalDecree                         : req.data.RoyalDecree ? req.data.RoyalDecree : standardTenderPriceConditionView?.RoyalDecree,
-			Tax                                 : standardTenderPriceConditionView?.Tax,
+			Tax                                 : req.data.Tax ? req.data.Tax : standardTenderPriceConditionView?.Tax,
 			Liquidation                         : req.data.Liquidation ? req.data.Liquidation : standardTenderPriceConditionView?.Liquidation,
 			RefundDate                          : req.data.RefundDate ? req.data.RefundDate : standardTenderPriceConditionView?.RefundDate,
 			PriceConditionCode                  : req.data.PriceConditionCode ? req.data.PriceConditionCode : standardTenderPriceConditionView?.PriceConditionCode,

@@ -21,6 +21,7 @@ using {com.bayer.SXTENDER.PriceAgreementData} from './PriceAgreementData';
 entity CandidatePrices as projection on PriceAgreementData.CandidatePrices;
 entity PT_TMOFRS { //Offers
         TenderID              : String(50) not null;
+        @comment    :   'This is offerID'
     key OfferID               : String(30) not null;
         CountryCode           : String not null;
         TenderOfferNo         : Integer;
@@ -178,6 +179,7 @@ entity MEAApprovalLatestAction: managed {
         ActionSequence : Int64 not null;
         ApprovalRound  : Integer not null;
         ProductState   : String(20);
+        PreApprovedOfferPrice : Double;
 }
 
 entity PT_TMAPPRST {
@@ -916,6 +918,21 @@ entity OutgoingMailBodyUploads : managed, cuid {
     MediaType: String(100);
 }
 
+entity OutgoingMailBodyUploads : managed, cuid {
+    CountryCode: String;
+    TenderID: String(50);
+    OfferID: String(30);
+    Sender: LargeString;
+    Recipients: LargeString;
+    Subject: LargeString;
+    Sent: Boolean default false;
+    Status: String(20);
+    mail: Association to OutgoingMails;
+    @Core.MediaType: MediaType
+    Content: LargeBinary;
+    MediaType: String(100);
+}
+
 entity CountrySpecificTenderInfo: managed {
     key TenderID             : String(50);
     key CountryCode          : String;
@@ -1076,3 +1093,4 @@ entity CCMPriceCondition: cuid, managed{
     ConditionType                       : String;
     IsYP11WithoutRD                     : Boolean default false;
 }
+

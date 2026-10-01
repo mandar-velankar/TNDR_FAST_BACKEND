@@ -40,6 +40,7 @@ module.exports = (srv) => {
 		PT_TMOFPR,
 		PT_TMOFRS,
 		MEAApprovalLatestAction,
+		MEAApprovalLatestAction,
 		PT_TMQUTO,
 		FreeGoodsOther, 
 		CandidatePrices, 
@@ -1626,7 +1627,28 @@ module.exports = (srv) => {
 		const effectiveLatestAction = latestActionForProduct && isUnapprovedNewProduct && latestActionForProduct.ActionType !== "IS_NEW_PRODUCT"
 			? {...latestActionForProduct, ActionType: "IS_NEW_PRODUCT"}
 			: latestActionForProduct;
+	function buildProductValidationForType19(offer, product, productInfo, aApproverTypes, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals, latestMEAAction) {//MEA
+		const isLatestActionForProduct = latestMEAAction
+			&& String(latestMEAAction.ProductCode) === String(product.ProductCode)
+			&& Number(latestMEAAction.LotID || 1) === Number(product.LotID || 1);
+		const latestActionForProduct = isLatestActionForProduct ? latestMEAAction : null;
+		const isUnapprovedNewProduct = product.IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL === true
+			|| product.IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL === 1
+			|| product.IS_PRODUCT_ADDED_FOR_PREVIOUS_APPROVAL === "true";
+		const effectiveLatestAction = latestActionForProduct && isUnapprovedNewProduct && latestActionForProduct.ActionType !== "IS_NEW_PRODUCT"
+			? {...latestActionForProduct, ActionType: "IS_NEW_PRODUCT"}
+			: latestActionForProduct;
 		const everyProductLatestFieldEmpty = aOfferProduct.every(pr => !pr.MEA_APPROVAL_LATEST_UPDATED_FIELD);
+		const legacyLatestUpdatedField = offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? product.MEA_APPROVAL_LATEST_UPDATED_FIELD : product.MEA_APPROVAL_LATEST_UPDATED_FIELD_PREVIOUS_STATE || "";
+		const latestUpdatedField = effectiveLatestAction?.ActionType || legacyLatestUpdatedField;
+		const preApprovedOfferPrice = Number(effectiveLatestAction?.PreApprovedOfferPrice);
+		const hasPreApprovedOfferPrice = effectiveLatestAction?.PreApprovedOfferPrice !== null
+			&& effectiveLatestAction?.PreApprovedOfferPrice !== undefined
+			&& Number.isFinite(preApprovedOfferPrice);
+		const isOfferPriceDecrease = hasPreApprovedOfferPrice
+			&& ServiceHelper.isDoubleXBelowY(product.OFFER_PRICE, preApprovedOfferPrice);
+		const isOfferPriceIncrease = hasPreApprovedOfferPrice
+			&& ServiceHelper.isDoubleXBelowY(preApprovedOfferPrice, product.OFFER_PRICE);
 		const legacyLatestUpdatedField = offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? product.MEA_APPROVAL_LATEST_UPDATED_FIELD : product.MEA_APPROVAL_LATEST_UPDATED_FIELD_PREVIOUS_STATE || "";
 		const latestUpdatedField = effectiveLatestAction?.ActionType || legacyLatestUpdatedField;
 		const deleted_state= offer.STATUS === "Offer Created" && offerLatestApprStatus[0].approvedStatus == 2 ? initialOffer.PreviousApprovalHasDeletedProduct : initialOffer.ApprovalHasDeletedProduct_Previous_State;
@@ -1636,6 +1658,7 @@ module.exports = (srv) => {
 		const maxSupplyUpdate = Math.max(...originalOfferProducts.map(pr => pr.SUPPLY_UPDATE));
 		const maxPaymentUpdate = Math.max(...originalOfferProducts.map(pr => pr.PAYMENT_UPDATE));
 		const maxPriceUpdate = Math.max(...originalOfferProducts.map(pr => pr.PRICE_UPDATE));
+		const isOfferReApproved = initialOffer.APPROVALS_SENT > 0 && (maxSupplyUpdate > 0 || maxPaymentUpdate > 0 || maxPriceUpdate > 0 || initialOffer.PreviousApprovalHasAddedProduct || deleted_state || declined_state || effectiveLatestAction);
 		const isOfferReApproved = initialOffer.APPROVALS_SENT > 0 && (maxSupplyUpdate > 0 || maxPaymentUpdate > 0 || maxPriceUpdate > 0 || initialOffer.PreviousApprovalHasAddedProduct || deleted_state || declined_state || effectiveLatestAction);
 		const hasNegativeMargin = ServiceHelper.isDoubleXBelowY(productInfo.GrossProfitEurSpot, 0);
 		const IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR = MEAOfferTotalAmountCheck(aOfferProduct, exchangeRate);
@@ -1781,7 +1804,7 @@ module.exports = (srv) => {
 			"PRICE_DEDUCTIONS_UPDATED": {
 				supply: 2,
 				regionalBusiness: offer.TENDER_CHANNEL === "Direct" ? 3 : meaPreviousApprovalsFlags?.REGIONAL_BUSINESS_APPROVED_IN_PREVIOUS_REQUEST === 1 ? 2 : IS_TOTAL_AMOUNT_MORE_THAN_1_MLN_EUR ? 2 : 1,
-				nucleus: offer.TENDER_CHANNEL === "Direct" ? 2 : 3,
+				nucleus: isOfferPriceDecrease ? 3 : isOfferPriceIncrease ? 2 : offer.TENDER_CHANNEL === "Direct" ? 2 : 3,
 				creditManager: 1
 			},
 			"IS_NEW_PRODUCT": {
@@ -1825,9 +1848,14 @@ module.exports = (srv) => {
 			nucleus = result.nucleus !== undefined ? result.nucleus : nucleus;
 			legal = result.legal !== undefined ? result.legal : legal;
 			controlling = result.controlling !== undefined ? result.controlling : controlling;
+			legal = result.legal !== undefined ? result.legal : legal;
+			controlling = result.controlling !== undefined ? result.controlling : controlling;
 		}
 
 
+		const latestActionIsDeletedOrDeclined = ["PRODUCT_DELETED", "PRODUCT_DECLINED"].includes(effectiveLatestAction?.ActionType);
+		const latestDeletedProductPtl = latestActionIsDeletedOrDeclined && effectiveLatestAction.Nucleus ? effectiveLatestAction.Nucleus : deleted_product_ptl;
+		if ((declined_state || deleted_state) && !effectiveLatestAction) {
 		const latestActionIsDeletedOrDeclined = ["PRODUCT_DELETED", "PRODUCT_DECLINED"].includes(effectiveLatestAction?.ActionType);
 		const latestDeletedProductPtl = latestActionIsDeletedOrDeclined && effectiveLatestAction.Nucleus ? effectiveLatestAction.Nucleus : deleted_product_ptl;
 		if ((declined_state || deleted_state) && !effectiveLatestAction) {
@@ -1880,6 +1908,8 @@ module.exports = (srv) => {
 					}
 				}
 
+				if (latestActionIsDeletedOrDeclined || ((deleted_state || declined_state) && !effectiveLatestAction)) {
+					oApproverType.ValidationType = latestDeletedProductPtl.includes(ctryApproverType.Nucleus) ? nucleus : 1;
 				if (latestActionIsDeletedOrDeclined || ((deleted_state || declined_state) && !effectiveLatestAction)) {
 					oApproverType.ValidationType = latestDeletedProductPtl.includes(ctryApproverType.Nucleus) ? nucleus : 1;
 				}
@@ -2031,6 +2061,7 @@ module.exports = (srv) => {
 		const countryApprovers = await tx.run(SELECT.from(CountryApprovers).where({CountryCode: offer.COUNTRYCODE}));
 		const initialOffer = await tx.run(SELECT.one.from(PT_TMOFRS).where({OfferID: offer.OFFERID }));
 		const latestMEAAction = await tx.run(SELECT.one.from(MEAApprovalLatestAction).where({OfferID: offer.OFFERID}));
+		const latestMEAAction = await tx.run(SELECT.one.from(MEAApprovalLatestAction).where({OfferID: offer.OFFERID}));
 		const offerLatestApprStatus = await tx.run(SELECT.from(OfferLatestApprovalStatus).where({OfferID: offer.OFFERID}));
 
 		const offerStatus = await SELECT.one.from("CatalogService.OfferStatus").where({
@@ -2081,6 +2112,7 @@ module.exports = (srv) => {
 
 
 			let aTempApproverTypes = JSON.parse(JSON.stringify(aApproverTypes)); //lose previous references to approverTypes
+			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals, latestMEAAction);
 			let productInfo = await buildProductInfoForCountry(tx, offer, offerProduct, aTempApproverTypes, institute, offerProductsTotalValue, offerProductPack, countryApprovers, instituteDistributorBrandProduct, aOfferProduct, offerLatestApprStatus, initialOffer, originalOfferProducts, exchangeRate, meaPreviousApprovalsFlags, notRecordedPendingApprovals, latestMEAAction);
 			
 			//Get corresponding ProductPricing
@@ -2835,7 +2867,77 @@ module.exports = (srv) => {
 			AttentionTo: quotation?.Custom_String_6,
             QuotationDate: quotation?.Custom_Date_3,
 			TenderChannel: offer.TENDER_CHANNEL,
-			COUNTRY_REGION: offer.Region
+			COUNTRY_REGION: offer.Region,
+			Tender_Custom_Integer_1: tender?.Custom_Integer_1,
+            Tender_Custom_Integer_2: tender?.Custom_Integer_2,
+            Tender_Custom_Integer_3: tender?.Custom_Integer_3,
+            Tender_Custom_Integer_4: tender?.Custom_Integer_4,
+            Tender_Custom_Integer_5: tender?.Custom_Integer_5,
+            Tender_Custom_Integer_6: tender?.Custom_Integer_6,
+            Tender_Custom_Integer_7: tender?.Custom_Integer_7,
+            Tender_Custom_Integer_8: tender?.Custom_Integer_8,
+            Tender_Custom_Integer_9: tender?.Custom_Integer_9,
+            Tender_Custom_Integer_10: tender?.Custom_Integer_10,
+            Tender_Custom_String_1: tender?.Custom_String_1,
+            Tender_Custom_String_2: tender?.Custom_String_2,
+            Tender_Custom_String_3: tender?.Custom_String_3,
+            Tender_Custom_String_4: tender?.Custom_String_4,
+            Tender_Custom_String_5: tender?.Custom_String_5,
+            Tender_Custom_String_6: tender?.Custom_String_6,
+            Tender_Custom_String_7: tender?.Custom_String_7,
+            Tender_Custom_String_8: tender?.Custom_String_8,
+            Tender_Custom_String_9: tender?.Custom_String_9,
+            Tender_Custom_String_10: tender?.Custom_String_10,
+            Tender_Custom_String_11: tender?.Custom_String_11,
+            Tender_Custom_String_12: tender?.Custom_String_12,
+            Tender_Custom_String_13: tender?.Custom_String_13,
+            Tender_Custom_String_14: tender?.Custom_String_14,
+            Tender_Custom_String_15: tender?.Custom_String_15,
+            Tender_Custom_String_16: tender?.Custom_String_16,
+            Tender_Custom_String_17: tender?.Custom_String_17,
+            Tender_Custom_String_18: tender?.Custom_String_18,
+            Tender_Custom_String_19: tender?.Custom_String_19,
+            Tender_Custom_String_20: tender?.Custom_String_20,
+            Tender_Custom_Double_1: tender?.Custom_Double_1,
+            Tender_Custom_Double_2: tender?.Custom_Double_2,
+            Tender_Custom_Double_3: tender?.Custom_Double_3,
+            Tender_Custom_Double_4: tender?.Custom_Double_4,
+            Tender_Custom_Double_5: tender?.Custom_Double_5,
+            Tender_Custom_Double_6: tender?.Custom_Double_6,
+            Tender_Custom_Double_7: tender?.Custom_Double_7,
+            Tender_Custom_Double_8: tender?.Custom_Double_8,
+            Tender_Custom_Double_9: tender?.Custom_Double_9,
+            Tender_Custom_Double_10: tender?.Custom_Double_10,
+            Tender_Custom_Date_1: tender?.Custom_Date_1,
+            Tender_Custom_Date_2: tender?.Custom_Date_2,
+            Tender_Custom_Date_3: tender?.Custom_Date_3,
+            Tender_Custom_Date_4: tender?.Custom_Date_4,
+            Tender_Custom_Date_5: tender?.Custom_Date_5,
+            Tender_Custom_Date_6: tender?.Custom_Date_6,
+            Tender_Custom_Date_7: tender?.Custom_Date_7,
+            Tender_Custom_Date_8: tender?.Custom_Date_8,
+            Tender_Custom_Date_9: tender?.Custom_Date_9,
+            Tender_Custom_Date_10: tender?.Custom_Date_10,
+            Tender_Custom_Boolean_1: tender?.Custom_Boolean_1,
+            Tender_Custom_Boolean_2: tender?.Custom_Boolean_2,
+            Tender_Custom_Boolean_3: tender?.Custom_Boolean_3,
+            Tender_Custom_Boolean_4: tender?.Custom_Boolean_4,
+            Tender_Custom_Boolean_5: tender?.Custom_Boolean_5,
+            Tender_Custom_Boolean_6: tender?.Custom_Boolean_6,
+            Tender_Custom_Boolean_7: tender?.Custom_Boolean_7,
+            Tender_Custom_Boolean_8: tender?.Custom_Boolean_8,
+            Tender_Custom_Boolean_9: tender?.Custom_Boolean_9,
+            Tender_Custom_Boolean_10: tender?.Custom_Boolean_10,
+            Tender_Custom_Datetime_1: tender?.Custom_Datetime_1,
+            Tender_Custom_Datetime_2: tender?.Custom_Datetime_2,
+            Tender_Custom_Datetime_3: tender?.Custom_Datetime_3,
+            Tender_Custom_Datetime_4: tender?.Custom_Datetime_4,
+            Tender_Custom_Datetime_5: tender?.Custom_Datetime_5,
+            Tender_Custom_Datetime_6: tender?.Custom_Datetime_6,
+            Tender_Custom_Datetime_7: tender?.Custom_Datetime_7,
+            Tender_Custom_Datetime_8: tender?.Custom_Datetime_8,
+            Tender_Custom_Datetime_9: tender?.Custom_Datetime_9,
+            Tender_Custom_Datetime_10: tender?.Custom_Datetime_10
 		};
 		return results;
 		
@@ -3135,13 +3237,30 @@ module.exports = (srv) => {
 				aApproverType[0].Hierarchy = aApproval[0].Hierarchy;
 			}
 
+			let required_action = approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? country.Region === "MEA" ? getRequiredAction(requiredAction) : approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredAction);
+			let approver_type_section = (requiredAction === 1) ? 2 : 1;
+
+			if (country.Region === "MEA") {
+				latest_approval_type = latestApproval
+					.filter(approval => approval.ApproverType === type.ApproverType)
+					.reduce((latest, current) => {
+						return !latest || new Date(current.Statustime) > new Date(latest.Statustime)
+						? current
+						: latest;
+					}, null);
+				if (latest_approval_type && latest_approval_type.ApproverTypeSection === 2) {
+					required_action = latest_approval_type.REQUIRED_ACTION;
+					approver_type_section = latest_approval_type.ApproverTypeSection;
+				}
+			}
+
 			aResults.push({
 				TenderID: offerValidation.TENDERID,
 				OfferId: offerValidation.OFFERID,
 				CountryCode: offerValidation.COUNTRYCODE,
 				ApprovalContent: getApprovalContent(approverType),
-				ApproverTypeSection: (requiredAction === 1) ? 2 : 1,
-				REQUIRED_ACTION: approvalForType[0] && approvalForType[0].REQUIRED_ACTION ? country.Region === "MEA" ? getRequiredAction(requiredAction) : approvalForType[0].REQUIRED_ACTION : getRequiredAction(requiredAction),
+				ApproverTypeSection: approver_type_section,
+				REQUIRED_ACTION: required_action,
 				ApprovalStatus: (approvalForType.length === 0) ? "Not Sent" : approvalForType[0].ApprovalStatus,
 				ApproverName: approverName,
 				ApproverEmailID: approverEmailID,
@@ -3484,7 +3603,7 @@ module.exports = (srv) => {
 			prd.GROSS_SALES_OFFER_CURRENCY_VAT = ServiceHelper.formatNumber(prd.GROSS_SALES_OFFER_CURRENCY_VAT, 2, 2);
 			prd.SAMPLES = ServiceHelper.formatNumber(prd.SAMPLES, 0, 0);
 			prd.FOC = ServiceHelper.formatNumber(prd.FOC, 0, 0);
-			prd.NET_PRICE = ServiceHelper.formatNumber(prd.NET_PRICE, 0, 0);
+			prd.NET_PRICE = ServiceHelper.formatNumber(prd.NET_PRICE, 2, 2);
 		});
 
 		offerValidation.AMOUNT_IN_NUMBERS = ServiceHelper.formatNumber(offerValidation.AMOUNT_IN_NUMBERS, 2, 2);
@@ -4742,6 +4861,8 @@ module.exports = (srv) => {
 
 			const OfferId = Array.isArray(data) ? data[0]?.OfferId : data.OfferId;
 			if (!OfferId) return data;
+			const OfferId = Array.isArray(data) ? data[0]?.OfferId : data.OfferId;
+			if (!OfferId) return data;
 			const offer = await SELECT.one.from(PT_TMOFRS)
 			.where({
 				OfferID: OfferId
@@ -4773,6 +4894,7 @@ module.exports = (srv) => {
 					ApprovalHasDeclinedProduct_Previous_State: false,
 					ApprovalHas_Deleted_DeclinedProduct_Previous_State: false,
 					ApprovalHasAddedProduct_Previous_State: false,
+					ApprovalHasAddedProduct_Previous_State: false,
 					ApprovalHas_Deleted_Products_PTL_Previous_State: ""
 				}).where({OfferID: OfferId}))
 
@@ -4780,7 +4902,9 @@ module.exports = (srv) => {
 					IsProductAddedForPreviousApproval: false,
 					MEAApprovalLatestUpdatedField: "",
 					MEAApprovalLatestUpdatedFieldPreviousState: "",
+					MEAApprovalLatestUpdatedFieldPreviousState: "",
 					hasUpdatedSupplyPaymentPriceValues: false,
+				}).where({OfferID: OfferId, ProductCode: pr.ProductCode, Active: pr.Active, LotID: pr.LotID})))
 				}).where({OfferID: OfferId, ProductCode: pr.ProductCode, Active: pr.Active, LotID: pr.LotID})))
 
 				await Promise.all(promises);
@@ -4791,3 +4915,4 @@ module.exports = (srv) => {
         }
 	});
 }
+
