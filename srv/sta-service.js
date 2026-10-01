@@ -1526,29 +1526,16 @@ if (
 				) {
 					product.Custom_Boolean_1 = true;
 				}
-				else if (
-					tender.Classification === "Commercial Agreement" &&
-					bCustomerInTenderAssortment &&
-					institute.External_InstituteId
-					) {
-					product.Custom_Boolean_1 = false;
-					}
 
 				// Enable - Assortment customer having Tender
 				else if (
-					tender.Classification === "Tender" &&
+					
 					bHasTenderContract &&
 					institute.External_InstituteId
 				) {
 					product.Custom_Boolean_1 = true;
 				}
-				else if (
-					tender.Classification === "Commercial Agreement" &&
-					bHasTenderContract &&
-					institute.External_InstituteId
-				) {
-					product.Custom_Boolean_1 = false;
-				}
+				
 				//Disabling creating Comercial agreement for individual customer and that customer is in an Assortment which has Assortment Tender
 				else if (
 				tender.Classification === "Commercial Agreement" &&
