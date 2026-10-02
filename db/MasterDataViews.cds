@@ -1053,6 +1053,81 @@ group by ID,
 	CustPartnrFuncsCount,
 	PartyRoleCode;
 
+//Italy Jobs specific views
+entity ItalyMaterialsAvailableView as
+    select from SAP.ItalyMaterials as m
+    left join MasterData.PT_TMPRDHIER as h
+        on m.HLEVEL6_CODE = h.HLEVEL6_CODE
+{
+    m.HLEVEL1_NAME,
+    m.HLEVEL4_NAME,
+    m.HLEVEL4_CODE,
+    m.HLEVEL6_NAME,
+    m.HLEVEL6_CODE
+}
+where
+    m.MAKTX <> 'Customer Service Holding Material'
+    and m.HLEVEL6_NAME not like 'zz%'
+    and m.HLEVEL1_NAME <> 'Animal Health'
+    and m.HLEVEL1_NAME <> 'Consumer Health'
+    and h.HLEVEL6_CODE is null;
+
+
+entity ItalyMaterialsWithoutProductPackView as
+    select from SAP.ItalyMaterials as m
+    left join MasterData.PT_TMPRDPCK as p
+        on p.PRODUCTPACKNAME = m.MAKTX
+    left join MasterData.PT_TMCTPRDPCK as cp
+        on cp.PRODUCTPACKID = p.PRODUCTPACKID
+        and cp.COUNTRYCODE = 'IT'
+{
+    m.MAKTX,
+    m.HLEVEL6_CODE
+}
+where
+    m.MAKTX <> 'Customer Service Holding Material'
+    and m.HLEVEL6_NAME not like 'zz%'
+    and m.HLEVEL1_NAME <> 'Animal Health'
+    and m.HLEVEL1_NAME <> 'Consumer Health'
+    and cp.PRODUCTPACKID is null
+group by
+    m.MAKTX,
+    m.HLEVEL6_CODE;
+
+entity ItalyNewProductPacksView as
+    select from SAP.ItalyMaterials as material
+    inner join MasterData.PT_TMPRDPCK as product
+        on material.MAKTX = product.PRODUCTPACKNAME
+    left join MasterData.PT_TMCTPRDPCK as cp
+        on product.PRODUCTPACKID = cp.PRODUCTPACKID
+        and cp.COUNTRYCODE = 'IT'
+{
+    max(material.COUNTRYOFORIG) as COUNTRYOFORIGIN,
+    product.PRODUCTPACKID as ProductPackID
+}
+where
+    cp.PRODUCTPACKID is null
+group by
+    product.PRODUCTPACKID;
+
+entity ItalyProductPackSKUView as
+    select from SAP.ItalyMaterials as material
+    inner join MasterData.PT_TMPRDPCK as product
+        on material.MAKTX = product.PRODUCTPACKNAME
+    inner join MasterData.PT_TMCTPRDPCK as countryProduct
+        on product.PRODUCTPACKID = countryProduct.PRODUCTPACKID
+    left join MasterData.PT_TMSKUPRDPCK as sku
+        on lpad(sku.SKUCode, 18, '0') = material.MATNR
+{
+    product.PRODUCTPACKID as ProductPackID,
+    material.MATNR
+}
+where
+    countryProduct.COUNTRYCODE = 'IT'
+    and sku.SKUCode is null
+group by
+    product.PRODUCTPACKID,
+    material.MATNR;
  
 entity ItalyProductPackView as
     select from MasterData.PT_TMPRDPCK as p
@@ -1063,22 +1138,6 @@ entity ItalyProductPackView as
 }
 where cp.COUNTRYCODE = 'IT';
 
-entity ItalyMaterialProductPackView as
-    select from SAP.ItalyMaterials as material
-        inner join MasterData.PT_TMPRDPCK as product
-            on material.MAKTX = product.PRODUCTPACKNAME
-        inner join MasterData.PT_TMCTPRDPCK as countryProduct
-            on product.PRODUCTPACKID = countryProduct.PRODUCTPACKID
-{
-    key product.PRODUCTPACKID as ProductPackID,
-    material.MATNR
-}
-where countryProduct.COUNTRYCODE = 'IT';
-
-/**
- * View used by Italy Product Pack Job
- * Returns ProductPackID and COGS for Italy materials
- */
 entity ItalyMaterialCOGSView as
     select from SAP.ItalyMaterials as material
         inner join MasterData.PT_TMPRDPCK as product
@@ -1091,28 +1150,19 @@ entity ItalyMaterialCOGSView as
 }
 where countryProduct.COUNTRYCODE = 'IT'
 group by product.PRODUCTPACKID;
-
-entity ItalyMaterialCountryOriginView as
-select from SAP.ItalyMaterials as material
-    inner join MasterData.PT_TMPRDPCK as product
-        on material.MAKTX = product.PRODUCTPACKNAME
-{
-    key product.PRODUCTPACKID as ProductPackID,
-    max(material.COUNTRYOFORIG) as COUNTRYOFORIGIN
-}
-group by
-    product.PRODUCTPACKID;
 	
-	entity ItalyCustomerProvinceView as
+entity ItalyCustomersWithoutInstallationView as
     select from SAP.ItalyCustomers as customer
-        inner join MasterData.CountryProvinces as province
-            on customer.E1KNA1M.REGIO = province.Name
+    inner join MasterData.CountryProvinces as province
+        on customer.E1KNA1M.REGIO = province.Name
+    left join MasterData.PT_TMINST as installation
+        on lpad(installation.CustomerID, 10, '0') = customer.E1KNA1M.KUNNR
+        and installation.CountryCode = 'IT'
 {
-    key customer.E1KNA1M.KUNNR      as KUNNR,
-    customer.E1KNA1M,
-    customer.E1KNVVM,
-    province.RegionID
+    customer.*
 }
-where customer.E1KNA1M.LAND1 = 'IT'
-  and province.CountryCode = 'IT'
-  and customer.E1KNA1M.KTOKD <> '0002';
+where
+    customer.E1KNA1M.LAND1 = 'IT'
+    and province.CountryCode = 'IT'
+    and customer.E1KNA1M.KTOKD <> '0002'
+    and installation.CustomerID is null;
